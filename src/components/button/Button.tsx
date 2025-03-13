@@ -1,11 +1,25 @@
-import React from 'react'
+import React, { ReactNode } from "react";
 
-const Button = ({children}) => {
-  return (
-    <button>
-        {children}
-    </button>
-  )
+interface ButtonProps {
+  className?: string;
+  bgColor?: string;
+  children: ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 }
 
-export default Button
+const Button: React.FC<ButtonProps> = ({
+  className,
+  bgColor,
+  children,
+  ...rest
+}) => {
+  return (
+    <button className={`${className} ${bgColor}`} {...rest}>
+      {children}
+    </button>
+  );
+};
+
+export default Button;
