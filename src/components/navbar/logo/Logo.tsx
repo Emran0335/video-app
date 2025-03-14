@@ -15,6 +15,7 @@ const Logo: React.FC<LogoProps> = ({ className }) => {
         src={logoImg}
         alt="logo image"
         className="w-10 h-10 mr-2 inline-block"
+        priority
       />
       <h1 className="text-2xl text-gray-400 uppercase">Streaming</h1>
     </div>

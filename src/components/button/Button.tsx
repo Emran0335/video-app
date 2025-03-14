@@ -3,6 +3,7 @@ import React, { ReactNode } from "react";
 interface ButtonProps {
   className?: string;
   bgColor?: string;
+  textColor?:string;
   children: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
@@ -13,10 +14,16 @@ const Button: React.FC<ButtonProps> = ({
   className,
   bgColor,
   children,
-  ...rest
+  type="button",
+  textColor="text-white",
+  ...props
 }) => {
   return (
-    <button className={`${className} ${bgColor}`} {...rest}>
+    <button
+      className={`px-4 py-1 ${className} ${textColor} ${bgColor}`}
+      {...props}
+      type={type}
+    >
       {children}
     </button>
   );
