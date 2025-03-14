@@ -9,7 +9,7 @@ const Navbar = () => {
   const authStatus = false;
   const userData = null;
   return (
-    <nav className="flex justify-between items-center p-4">
+    <nav className="flex justify-between items-center p-4 border border-x-0 border-t-0 border-gray-700">
       <Link href="/">
         <Logo />
       </Link>
@@ -30,7 +30,7 @@ const Navbar = () => {
       )}
       {authStatus && userData && (
         <Link href="/channel/userData/username">
-          <Image src={userData} alt="user data is getting"></Image>
+          <Image src={userData} alt="user data is getting" />
         </Link>
       )}
     </nav>
