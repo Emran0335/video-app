@@ -31,11 +31,11 @@ export default function RootLayout({
       >
         <div className="h-screen w-screen bg-black text-white flex flex-col opacity-95">
           <Navbar />
-          <div className="w-full h-full overflow-auto flex">
-            <div>
+          <div className="w-full h-full overflow-auto">
+            <div className="flex">
               <Sidebar />
+              {children}
             </div>
-            <main>{children}</main>
           </div>
         </div>
       </body>

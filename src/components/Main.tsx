@@ -5,7 +5,7 @@ interface MainProps {
 }
 
 const Main = ({ children }: MainProps) => {
-  return <main>{children}</main>;
+  return <main className="p-4 flex-1">{children}</main>;
 };
 
 export default Main;

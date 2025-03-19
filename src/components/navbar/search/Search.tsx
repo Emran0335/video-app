@@ -7,7 +7,7 @@ const Search = () => {
   return (
     <form className="flex items-center w-full max-w-lg">
       <div className="relative flex-grow">
-        <Input placeholder="Search" className="rounded-l-3xl" />
+        <Input placeholder="Search" className="rounded-l-3xl px-8"  />
         <GoSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-200" />
       </div>
       <Button
