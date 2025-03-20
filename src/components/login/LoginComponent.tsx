@@ -6,7 +6,7 @@ import Button from "../button/Button";
 
 const LoginComponent = () => {
   return (
-    <div className="h-screen w-full bg-[#121212] text-white flex-1 flex flex-col items-center justify-center">
+    <div className="w-full bg-[#121212] text-white flex-1 flex flex-col items-center justify-center">
       <div className="mx-auto max-w-sm border px-4 p-8 w-full border-gray-600 rounded-lg shadow-lg">
         <div className="mx-auto inline-block w-full">
           <Link href="/">

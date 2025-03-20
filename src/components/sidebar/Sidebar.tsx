@@ -39,7 +39,7 @@ const Sidebar = () => {
     },
   ];
   return (
-    <div className="pt-4 flex bg-black text-gray-400 h-screen flex-col border border-y-0 border-l-0 border-gray-700 transition-all duration-100 ease-in-out">
+    <div className="pt-4 flex bg-black text-gray-400 h-[92vh] flex-col border border-y-0 border-l-0 border-gray-700 transition-all duration-100 ease-in-out">
       <ul className="grow px-2 py-1 flex flex-col gap-12">
         {NavElements.map((navItem, index) => (
           <li key={index}>
