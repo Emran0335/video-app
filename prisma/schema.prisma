@@ -14,33 +14,88 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique @db.VarChar(255)
-  email        String   @unique @db.VarChar(255)
-  password     String   @db.VarChar(255)
-  fullName     String   @db.VarChar(255)
-  avatar       String   @db.VarChar(255)
-  refreshToken String?  @db.VarChar(255)
-  coverImage   String?  @db.VarChar(255)
-  description  String   @default("") @db.VarChar(255)
-  watchHistory Video[]  @relation("UserWatchHistory") // Many-to-many relationship
-  videos       Video[]  @relation("UserVideos") // One-to-many relationship (owned videos)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  username      String         @unique @db.VarChar(255)
+  email         String         @unique @db.VarChar(255)
+  password      String         @db.VarChar(255)
+  fullName      String         @db.VarChar(255)
+  avatar        String?        @db.VarChar(255)
+  refreshToken  String?        @db.VarChar(255)
+  coverImage    String?        @db.VarChar(255)
+  description   String         @default("") @db.VarChar(255)
+  watchHistory  Video[]        @relation("UserWatchHistory") // Many-to-many relationship
+  videos        Video[]        @relation("UserVideos") // One-to-many relationship (owned videos)
+  comments      Comment[]      @relation("UserComments") // One-to-many relationship (owned comments)
+  subscriptions Subscription[] @relation("Subscriber") // One-to-many relationship (subscriptions by the user)
+  channels      Subscription[] @relation("Channel") // One-to-many relationship (subscriptions to the user's channel)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  Tweet         Tweet[]
+  Like          Like[]
 }
 
 model Video {
-  id          Int      @id @default(autoincrement())
-  videoFile   String   @db.VarChar(255) // Cloudinary URL
-  thumbnail   String   @db.VarChar(255) // Cloudinary URL
-  title       String   @db.VarChar(255)
-  description String   @db.Text
+  id          Int       @id @default(autoincrement())
+  videoFile   String    @db.VarChar(255) // Cloudinary URL
+  thumbnail   String    @db.VarChar(255) // Cloudinary URL
+  title       String    @db.VarChar(255)
+  description String    @db.Text
   duration    Float
-  views       Int      @default(0)
-  isPublished Boolean  @default(true)
+  views       Int       @default(0)
+  isPublished Boolean   @default(true)
   ownerId     Int
-  owner       User     @relation("UserVideos", fields: [ownerId], references: [id]) // Many-to-one relationship
-  watchedBy   User[]   @relation("UserWatchHistory") // Many-to-many relationship
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  owner       User      @relation("UserVideos", fields: [ownerId], references: [id]) // Many-to-one relationship
+  watchedBy   User[]    @relation("UserWatchHistory") // Many-to-many relationship
+  comments    Comment[] @relation("VideoComments") // One-to-many relationship (comments on the video)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Like        Like[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  videoId   Int
+  video     Video    @relation("VideoComments", fields: [videoId], references: [id]) // Many-to-one relationship
+  ownerId   Int
+  owner     User     @relation("UserComments", fields: [ownerId], references: [id]) // Many-to-one relationship
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Like      Like[]
+}
+
+model Tweet {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  ownerId   Int
+  owner     User     @relation(fields: [ownerId], references: [id]) // Many-to-one relationship
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int?
+  Like      Like[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  videoId   Int?
+  commentId Int?
+  tweetId   Int?
+  likedById Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Video     Video?   @relation(fields: [videoId], references: [id])
+  Comment   Comment? @relation(fields: [commentId], references: [id])
+  Tweet     Tweet?   @relation(fields: [tweetId], references: [id])
+}
+
+model Subscription {
+  id           Int      @id @default(autoincrement())
+  subscriberId Int
+  subscriber   User     @relation("Subscriber", fields: [subscriberId], references: [id])
+  channelId    Int
+  channel      User     @relation("Channel", fields: [channelId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
