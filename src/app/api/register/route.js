@@ -1,7 +1,19 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prismaClient.js";
+import { upload } from "@/middlewares/multer.js";
 
-export async function POST(request: Request) {
+const imageFile = upload.fields([
+  {
+    name: "avatar",
+    maxCount: 1,
+  },
+  {
+    name: "coverImage",
+    maxCount: 1,
+  },
+]);
+
+export async function POST(imageFile, request) {
   try {
     const { username, fullName, email, password } = await request.json();
 
