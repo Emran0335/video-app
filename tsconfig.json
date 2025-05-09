@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/middlewares/multer.js", "src/middlewares/authMiddleware.js", "src/app/api/register/route.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/middlewares/multer.ts", "src/middlewares/authMiddleware.ts", "src/app/api/register/route.ts"],
   "exclude": ["node_modules"]
 }
