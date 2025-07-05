@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 
 // ROUTES IMPORTS
 
@@ -15,8 +16,22 @@ app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+app.use(
+  cors({
+    // origin: [] here I have to work a lot later
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  })
+);
+app.use(
+  express.json({
+    limit: "16kb",
+  })
+);
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "200mb" }));
+app.use(express.static("public"));
+app.use(cookieParser());
 
 // ROUTES
 
