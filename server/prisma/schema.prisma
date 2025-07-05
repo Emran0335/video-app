@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId             Int            @id @default(autoincrement())
+  username           String
+  email              String         @unique
+  password           String         @unique
+  fullName           String
+  avatar             String?
+  coverImage         String?
+  description        String
+  watchHistory       Video[]        @relation("history")
+  Tweet              Tweet[]
+  Comment            Comment[]
+  Like               Like[]
+  Playlist           Playlist[]
+  subscribedChannels Subscription[] @relation("Subscriber") // User as subscriber
+  subscribers        Subscription[] @relation("Channel") // User as channel owner
+}
+
+model Video {
+  id          Int       @id @default(autoincrement())
+  videoFile   String
+  thumbnail   String
+  title       String
+  description String
+  duration    Int
+  views       Int
+  isPublised  Boolean   @default(true)
+  owner       Int
+  playlistId  Int
+  userId      User      @relation("history", fields: [owner], references: [userId])
+  Comment     Comment[]
+  Like        Like[]
+  Playlist    Playlist? @relation(fields: [playlistId], references: [id])
+}
+
+model Tweet {
+  id      Int    @id @default(autoincrement())
+  content String
+  owner   Int
+  ownerId User   @relation(fields: [owner], references: [userId])
+  Like    Like[]
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+  video   Int
+  owner   Int
+  videoId Video  @relation(fields: [video], references: [id])
+  ownerId User   @relation(fields: [owner], references: [userId])
+  Like    Like[]
+}
+
+model Like {
+  id        Int     @id @default(autoincrement())
+  comment   Int // relation with comment
+  video     Int // relation with Video
+  tweet     Int // relation with Tweet
+  likedBy   Int // relation with User
+  commentId Comment @relation(fields: [comment], references: [id])
+  videoId   Video   @relation(fields: [video], references: [id])
+  tweetId   Tweet   @relation(fields: [tweet], references: [id])
+  likedById User    @relation(fields: [likedBy], references: [userId])
+}
+
+model Playlist {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  owner       Int // relation with User
+  videos      Video[]
+  ownerId     User    @relation(fields: [owner], references: [userId])
+}
+
+model Subscription {
+  id         Int @id @default(autoincrement())
+  subscriber Int // relation with User
+  channel    Int // relation with User
+
+  // User who subscribes (subscriber)
+  subscriberId User @relation("Subscriber", fields: [subscriber], references: [userId])
+
+  // Channel being subscribed to (channel owner)
+  channelId User @relation("Channel", fields: [channel], references: [userId])
+
+  // Unique constraint to prevent duplicate subscriptions
+  @@unique([subscriber, channel])
+}
