@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
 interface User {
@@ -59,7 +59,7 @@ export const verifyJWT = asyncHandler({
           if (!user) {
             throw new ApiError(401, "Invalid Access Token");
           }
-          
+
           req.user = user;
           next();
         }

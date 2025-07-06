@@ -1,11 +1,11 @@
 // utils/tokens.ts
-import jwt, { JwtPayload, Secret } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 interface TokenPayload {
   userId: number;
-  email?: string;
-  username?: string;
-  fullName?: string;
+  email: string;
+  username: string;
+  fullName: string;
 }
 
 export const generateAccessToken = (user: TokenPayload) => {

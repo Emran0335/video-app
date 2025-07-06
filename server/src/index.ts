@@ -7,7 +7,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 
 // ROUTES IMPORTS
-import userRoutes from './routes/userRoutes'
+import userRoutes from "./routes/userRoutes";
 
 // CONFIGURATIONS
 dotenv.config();
@@ -38,7 +38,7 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("This is home route.");
 });
-app.use("/register", userRoutes)
+app.use("/", userRoutes);
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;

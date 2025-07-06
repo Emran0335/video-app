@@ -12,14 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerUser = void 0;
-const prisma_1 = __importDefault(require("../utils/prisma"));
+exports.loginUser = exports.registerUser = void 0;
+const client_1 = require("@prisma/client");
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const cloudinary_1 = require("../utils/cloudinary");
 const fs_1 = __importDefault(require("fs"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const tokens_1 = require("../utils/tokens");
+const isPasswordCorrect_1 = require("../utils/isPasswordCorrect");
+const prisma = new client_1.PrismaClient();
 // to delete files from the local file system
 function unlinkPath(avatarLocalPath, coverImageLocalPath) {
     if (avatarLocalPath)
@@ -28,9 +31,9 @@ function unlinkPath(avatarLocalPath, coverImageLocalPath) {
         fs_1.default.unlinkSync(coverImageLocalPath);
 }
 // for the creation of token
-const generateAcessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, val = 0) {
+const generateAcessAndRefreshTokens = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield prisma_1.default.user.findUnique({
+        const user = yield prisma.user.findUnique({
             where: {
                 userId: userId,
             },
@@ -40,7 +43,7 @@ const generateAcessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0,
         }
         const accessToken = (0, tokens_1.generateAccessToken)(user);
         const refreshToken = (0, tokens_1.generateRefreshToken)(user);
-        const userWithRefreshToken = yield prisma_1.default.user.update({
+        const userWithRefreshToken = yield prisma.user.update({
             where: {
                 userId: userId,
             },
@@ -51,7 +54,8 @@ const generateAcessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0,
         if (userWithRefreshToken) {
             return { accessToken, refreshToken };
         }
-        return accessToken;
+        // Always return an object for consistent destructuring
+        return { accessToken, refreshToken };
     }
     catch (error) {
         throw new ApiError_1.ApiError(500, "Something went wrong while generating token");
@@ -84,7 +88,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
                 unlinkPath(avatarLocalPath, coverImageLocalPath);
                 throw new ApiError_1.ApiError(400, "All fields are required");
             }
-            const existedUser = yield prisma_1.default.user.findFirst({
+            const existedUser = yield prisma.user.findFirst({
                 where: {
                     OR: [{ username: username }, { email: email }],
                 },
@@ -97,13 +101,15 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
             if (!avatar) {
                 throw new ApiError_1.ApiError(400, "Avatar file not retrieved from cloudinary!");
             }
-            const createdUser = yield prisma_1.default.user.create({
+            // Hash password BEFORE creating user
+            const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+            const createdUser = yield prisma.user.create({
                 data: {
                     fullName: fullName,
                     avatar: avatar.url,
                     coverImage: coverImage === null || coverImage === void 0 ? void 0 : coverImage.url,
                     email: email,
-                    password: password,
+                    password: hashedPassword,
                     username: username,
                 },
                 select: {
@@ -128,3 +134,62 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.registerUser = registerUser;
+const loginUser = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const { email, username, password } = req.body;
+            if (!username && !email) {
+                throw new ApiError_1.ApiError(500, "Username and email is required");
+            }
+            const user = yield prisma.user.findFirst({
+                where: {
+                    OR: [{ username: username }, { email: email }],
+                },
+            });
+            if (!user) {
+                throw new ApiError_1.ApiError(404, "User does not exist!");
+            }
+            const isPasswordValid = yield (0, isPasswordCorrect_1.isPasswordCorrect)(password, user.password);
+            if (!isPasswordValid) {
+                throw new ApiError_1.ApiError(401, "Invalid user credentials!");
+            }
+            const { accessToken, refreshToken } = yield generateAcessAndRefreshTokens(user.userId);
+            const loggedUser = yield prisma.user.findUnique({
+                where: {
+                    userId: user.userId,
+                },
+                select: {
+                    avatar: true,
+                    coverImage: true,
+                    userId: true,
+                    username: true,
+                    email: true,
+                    password: true,
+                    fullName: true,
+                    description: true,
+                    refreshToken: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+            const options = {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            };
+            res
+                .status(200)
+                .cookie("accessToken", accessToken, options)
+                .cookie("refreshToken", refreshToken, options)
+                .json(new ApiResponse_1.ApiResponse(200, {
+                user: loggedUser,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+            }, "User logged in successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while logging user!");
+        }
+    }),
+});
+exports.loginUser = loginUser;

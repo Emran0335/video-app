@@ -1,12 +1,16 @@
-import prisma from "../utils/prisma";
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import fs from "fs";
-import jwt from "jsonwebtoken";  
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
+import { isPasswordCorrect } from "../utils/isPasswordCorrect";
+
+const prisma = new PrismaClient();
 
 // to delete files from the local file system
 function unlinkPath(avatarLocalPath: any, coverImageLocalPath: any) {
@@ -15,7 +19,7 @@ function unlinkPath(avatarLocalPath: any, coverImageLocalPath: any) {
 }
 
 // for the creation of token
-const generateAcessAndRefreshTokens = async (userId: number, val = 0) => {
+const generateAcessAndRefreshTokens = async (userId: number) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -40,7 +44,8 @@ const generateAcessAndRefreshTokens = async (userId: number, val = 0) => {
     if (userWithRefreshToken) {
       return { accessToken, refreshToken };
     }
-    return accessToken;
+    // Always return an object for consistent destructuring
+    return { accessToken, refreshToken };
   } catch (error) {
     throw new ApiError(500, "Something went wrong while generating token");
   }
@@ -100,13 +105,16 @@ const registerUser = asyncHandler({
         throw new ApiError(400, "Avatar file not retrieved from cloudinary!");
       }
 
+      // Hash password BEFORE creating user
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       const createdUser = await prisma.user.create({
         data: {
           fullName: fullName,
           avatar: avatar.url,
           coverImage: coverImage?.url,
           email: email,
-          password: password,
+          password: hashedPassword,
           username: username,
         },
         select: {
@@ -135,4 +143,80 @@ const registerUser = asyncHandler({
   },
 });
 
-export { registerUser };
+interface CookieOptions {
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: boolean | "none" | "lax" | "strict" | undefined;
+}
+const loginUser = asyncHandler({
+  requestHandler: async (req: Request, res: Response) => {
+    try {
+      const { email, username, password } = req.body;
+      if (!username && !email) {
+        throw new ApiError(500, "Username and email is required");
+      }
+
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [{ username: username }, { email: email }],
+        },
+      });
+
+      if (!user) {
+        throw new ApiError(404, "User does not exist!");
+      }
+
+      const isPasswordValid = await isPasswordCorrect(password, user.password);
+
+      if (!isPasswordValid) {
+        throw new ApiError(401, "Invalid user credentials!");
+      }
+      const { accessToken, refreshToken } = await generateAcessAndRefreshTokens(
+        user.userId
+      );
+
+      const loggedUser = await prisma.user.findUnique({
+        where: {
+          userId: user.userId,
+        },
+        select: {
+          avatar: true,
+          coverImage: true,
+          userId: true,
+          username: true,
+          email: true,
+          password: true,
+          fullName: true,
+          description: true,
+          refreshToken: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      const options: CookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      };
+      res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+          new ApiResponse(
+            200,
+            {
+              user: loggedUser,
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+            },
+            "User logged in successfully"
+          )
+        );
+    } catch (error: any) {
+      throw new ApiError(401, error?.message || "Error while logging user!");
+    }
+  },
+});
+
+export { registerUser, loginUser };
