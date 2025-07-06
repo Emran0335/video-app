@@ -1,14 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
+interface User {
+  username: string;
+  email: string;
+  fullName: string;
+  avatar: string | null;
+  coverImage: string | null;
+}
 // Extend Express Request interface to include 'user'
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: User;
     }
   }
 }
@@ -52,8 +59,8 @@ export const verifyJWT = asyncHandler({
           if (!user) {
             throw new ApiError(401, "Invalid Access Token");
           }
+          
           req.user = user;
-
           next();
         }
       );
@@ -62,5 +69,3 @@ export const verifyJWT = asyncHandler({
     }
   },
 });
-
-export { asyncHandler };

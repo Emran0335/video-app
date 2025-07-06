@@ -11,6 +11,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 // ROUTES IMPORTS
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 // CONFIGURATIONS
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -35,6 +36,7 @@ app.use((0, cookie_parser_1.default)());
 app.get("/", (req, res) => {
     res.send("This is home route.");
 });
+app.use("/register", userRoutes_1.default);
 // SERVER
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {

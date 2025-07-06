@@ -21,7 +21,10 @@ model User {
   fullName           String
   avatar             String?
   coverImage         String?
-  description        String
+  description        String?         @default("")
+  refreshToken       String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
   watchHistory       Video[]        @relation("history")
   Tweet              Tweet[]
   Comment            Comment[]
@@ -41,7 +44,9 @@ model Video {
   views       Int
   isPublised  Boolean   @default(true)
   owner       Int
-  playlistId  Int
+  playlistId  Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   userId      User      @relation("history", fields: [owner], references: [userId])
   Comment     Comment[]
   Like        Like[]
@@ -49,46 +54,56 @@ model Video {
 }
 
 model Tweet {
-  id      Int    @id @default(autoincrement())
-  content String
-  owner   Int
-  ownerId User   @relation(fields: [owner], references: [userId])
-  Like    Like[]
+  id        Int      @id @default(autoincrement())
+  content   String
+  owner     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ownerId   User     @relation(fields: [owner], references: [userId])
+  Like      Like[]
 }
 
 model Comment {
-  id      Int    @id @default(autoincrement())
-  content String
-  video   Int
-  owner   Int
-  videoId Video  @relation(fields: [video], references: [id])
-  ownerId User   @relation(fields: [owner], references: [userId])
-  Like    Like[]
+  id        Int      @id @default(autoincrement())
+  content   String
+  video     Int
+  owner     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  videoId   Video    @relation(fields: [video], references: [id])
+  ownerId   User     @relation(fields: [owner], references: [userId])
+  Like      Like[]
 }
 
 model Like {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   comment   Int // relation with comment
   video     Int // relation with Video
   tweet     Int // relation with Tweet
   likedBy   Int // relation with User
-  commentId Comment @relation(fields: [comment], references: [id])
-  videoId   Video   @relation(fields: [video], references: [id])
-  tweetId   Tweet   @relation(fields: [tweet], references: [id])
-  likedById User    @relation(fields: [likedBy], references: [userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  commentId Comment  @relation(fields: [comment], references: [id])
+  videoId   Video    @relation(fields: [video], references: [id])
+  tweetId   Tweet    @relation(fields: [tweet], references: [id])
+  likedById User     @relation(fields: [likedBy], references: [userId])
 }
 
 model Playlist {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   owner       Int // relation with User
   videos      Video[]
-  ownerId     User    @relation(fields: [owner], references: [userId])
+  ownerId     User     @relation(fields: [owner], references: [userId])
 }
 
 model Subscription {
-  id         Int @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   subscriber Int // relation with User
   channel    Int // relation with User
 

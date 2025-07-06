@@ -24,15 +24,10 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
         try {
             const token = ((_a = req.cookies) === null || _a === void 0 ? void 0 : _a.accessToken) ||
                 ((_b = req.header("Authorization")) === null || _b === void 0 ? void 0 : _b.replace("Bearer ", ""));
-            if (!token) {
-                throw new ApiError_1.ApiError(401, "Unauthorized request");
-            }
-            jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET || "", (error, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
-                if (error) {
-                    if (error.name === "TokenExpiredError") {
-                        return next(new ApiError_1.ApiError(401, "TokenExpiredError"));
-                    }
-                    return next(new ApiError_1.ApiError(401, "Invalid access token"));
+            if (token) {
+                const decodedToken = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET || "");
+                if (!decodedToken) {
+                    next();
                 }
                 const user = yield prisma.user.findUnique({
                     where: {
@@ -49,11 +44,13 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
                     },
                 });
                 if (!user) {
-                    throw new ApiError_1.ApiError(401, "Invalid Access Token");
+                    next();
                 }
-                req.user = user;
-                next();
-            }));
+                else {
+                    req.user = user;
+                }
+            }
+            next();
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Invalid access token");
