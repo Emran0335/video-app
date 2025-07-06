@@ -5,17 +5,19 @@ import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
 interface User {
+  userId: number;
   username: string;
   email: string;
   fullName: string;
   avatar: string | null;
   coverImage: string | null;
+  description: string | null;
 }
 // Extend Express Request interface to include 'user'
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: User | undefined;
     }
   }
 }
@@ -44,6 +46,7 @@ export const verifyJWT = asyncHandler({
             userId: decodedToken?.id,
           },
           select: {
+            userId: true,
             username: true,
             coverImage: true,
             avatar: true,

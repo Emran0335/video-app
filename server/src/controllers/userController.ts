@@ -219,4 +219,86 @@ const loginUser = asyncHandler({
   },
 });
 
-export { registerUser, loginUser };
+const changeCurrentPassword = asyncHandler({
+  requestHandler: async (req: Request, res: Response) => {
+    try {
+      const { password, newPassword } = req.body;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          userId: req.user?.userId,
+        },
+      });
+      const isOldPasswordCorrect = await isPasswordCorrect(
+        password,
+        user?.password as string
+      );
+      if (!isOldPasswordCorrect) {
+        throw new ApiError(400, "Invalid Old Password");
+      }
+
+      // Hash password BEFORE creating user
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await prisma.user.update({
+        where: {
+          userId: user?.userId,
+        },
+        data: {
+          password: hashedPassword,
+        },
+      });
+
+      res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Password changed successfully"));
+    } catch (error: any) {
+      throw new ApiError(
+        401,
+        error?.message || "Error while changing password!"
+      );
+    }
+  },
+});
+
+const updateAccountDetails = asyncHandler({
+  requestHandler: async (req: Request, res: Response) => {
+    try {
+      const { fullName, email, username, description } = req.body;
+
+      if (!fullName && !email && !username && !description) {
+        throw new ApiError(400, "All fields are required");
+      }
+      const user = await prisma.user.update({
+        where: {
+          userId: Number(req.user?.userId),
+        },
+        data: {
+          fullName: fullName || req.user?.fullName,
+          email: email || req.user?.email,
+          username: username || req.user?.username,
+          description: description || req.user?.description,
+        },
+        select: {
+          userId: true,
+          username: true,
+          fullName: true,
+          email: true,
+          description: true,
+          coverImage: true,
+          avatar: true,
+        },
+      });
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(200, user, "Account details updated successfully")
+        );
+    } catch (error) {
+      throw new ApiError(400, "Error while updating account details");
+    }
+  },
+});
+
+export { registerUser, loginUser, changeCurrentPassword, updateAccountDetails };

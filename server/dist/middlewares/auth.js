@@ -36,9 +36,10 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
                 }
                 const user = yield prisma.user.findUnique({
                     where: {
-                        userId: decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.id,
+                        userId: Number(decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.id),
                     },
                     select: {
+                        userId: true,
                         username: true,
                         coverImage: true,
                         avatar: true,

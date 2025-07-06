@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.registerUser = void 0;
+exports.updateAccountDetails = exports.changeCurrentPassword = exports.loginUser = exports.registerUser = void 0;
 const client_1 = require("@prisma/client");
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
@@ -193,3 +193,75 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.loginUser = loginUser;
+const changeCurrentPassword = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const { password, newPassword } = req.body;
+            const user = yield prisma.user.findUnique({
+                where: {
+                    userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId,
+                },
+            });
+            const isOldPasswordCorrect = yield (0, isPasswordCorrect_1.isPasswordCorrect)(password, user === null || user === void 0 ? void 0 : user.password);
+            if (!isOldPasswordCorrect) {
+                throw new ApiError_1.ApiError(400, "Invalid Old Password");
+            }
+            // Hash password BEFORE creating user
+            const hashedPassword = yield bcrypt_1.default.hash(newPassword, 10);
+            yield prisma.user.update({
+                where: {
+                    userId: user === null || user === void 0 ? void 0 : user.userId,
+                },
+                data: {
+                    password: hashedPassword,
+                },
+            });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, {}, "Password changed successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while changing password!");
+        }
+    }),
+});
+exports.changeCurrentPassword = changeCurrentPassword;
+const updateAccountDetails = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b, _c, _d, _e;
+        try {
+            const { fullName, email, username, description } = req.body;
+            if (!fullName && !email && !username && !description) {
+                throw new ApiError_1.ApiError(400, "All fields are required");
+            }
+            const user = yield prisma.user.update({
+                where: {
+                    userId: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
+                },
+                data: {
+                    fullName: fullName || ((_b = req.user) === null || _b === void 0 ? void 0 : _b.fullName),
+                    email: email || ((_c = req.user) === null || _c === void 0 ? void 0 : _c.email),
+                    username: username || ((_d = req.user) === null || _d === void 0 ? void 0 : _d.username),
+                    description: description || ((_e = req.user) === null || _e === void 0 ? void 0 : _e.description),
+                },
+                select: {
+                    userId: true,
+                    username: true,
+                    fullName: true,
+                    email: true,
+                    description: true,
+                    coverImage: true,
+                    avatar: true,
+                },
+            });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, user, "Account details updated successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(400, "Error while updating account details");
+        }
+    }),
+});
+exports.updateAccountDetails = updateAccountDetails;
