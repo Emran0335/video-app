@@ -5,6 +5,9 @@ import {
   loginUser,
   changeCurrentPassword,
   updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
+  getUserChannelProfile,
 } from "../controllers/userController";
 import { verifyJWT } from "../middlewares/auth";
 
@@ -28,5 +31,13 @@ router.post(
 router.post("/login", loginUser);
 router.post("/change-password", verifyJWT, changeCurrentPassword);
 router.patch("/update-account", verifyJWT, updateAccountDetails);
+router.patch("/avatar", verifyJWT, upload.single("avatar"), updateUserAvatar);
+router.patch(
+  "/cover-image",
+  verifyJWT,
+  upload.single("coverImage"),
+  updateUserCoverImage
+);
+router.get("/:username", verifyJWT, getUserChannelProfile);
 
 export default router;

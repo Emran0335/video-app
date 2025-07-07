@@ -18,4 +18,7 @@ router.post("/register", multer_1.upload.fields([
 router.post("/login", userController_1.loginUser);
 router.post("/change-password", auth_1.verifyJWT, userController_1.changeCurrentPassword);
 router.patch("/update-account", auth_1.verifyJWT, userController_1.updateAccountDetails);
+router.patch("/avatar", auth_1.verifyJWT, multer_1.upload.single("avatar"), userController_1.updateUserAvatar);
+router.patch("/cover-image", auth_1.verifyJWT, multer_1.upload.single("coverImage"), userController_1.updateUserCoverImage);
+router.get("/:username", auth_1.verifyJWT, userController_1.getUserChannelProfile);
 exports.default = router;

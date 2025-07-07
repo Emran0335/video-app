@@ -1,16 +1,12 @@
-import { PrismaClient } from "@prisma/client";
-import { Request, Response } from "express";
+import { prisma, isPasswordCorrect } from "../utils/passwordRelated";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
-import { uploadOnCloudinary } from "../utils/cloudinary";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary";
 import fs from "fs";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
-import { isPasswordCorrect } from "../utils/isPasswordCorrect";
-
-const prisma = new PrismaClient();
 
 // to delete files from the local file system
 function unlinkPath(avatarLocalPath: any, coverImageLocalPath: any) {
@@ -52,7 +48,7 @@ const generateAcessAndRefreshTokens = async (userId: number) => {
 };
 
 const registerUser = asyncHandler({
-  requestHandler: async (req: Request, res: Response) => {
+  requestHandler: async (req, res) => {
     try {
       const { fullName, email, username, password } = req.body;
 
@@ -149,7 +145,7 @@ interface CookieOptions {
   sameSite: boolean | "none" | "lax" | "strict" | undefined;
 }
 const loginUser = asyncHandler({
-  requestHandler: async (req: Request, res: Response) => {
+  requestHandler: async (req, res) => {
     try {
       const { email, username, password } = req.body;
       if (!username && !email) {
@@ -220,7 +216,7 @@ const loginUser = asyncHandler({
 });
 
 const changeCurrentPassword = asyncHandler({
-  requestHandler: async (req: Request, res: Response) => {
+  requestHandler: async (req, res) => {
     try {
       const { password, newPassword } = req.body;
 
@@ -233,21 +229,12 @@ const changeCurrentPassword = asyncHandler({
         password,
         user?.password as string
       );
+
       if (!isOldPasswordCorrect) {
         throw new ApiError(400, "Invalid Old Password");
       }
 
-      // Hash password BEFORE creating user
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-      await prisma.user.update({
-        where: {
-          userId: user?.userId,
-        },
-        data: {
-          password: hashedPassword,
-        },
-      });
+      await prisma.user.isPasswordChanged(user, newPassword);
 
       res
         .status(200)
@@ -262,7 +249,7 @@ const changeCurrentPassword = asyncHandler({
 });
 
 const updateAccountDetails = asyncHandler({
-  requestHandler: async (req: Request, res: Response) => {
+  requestHandler: async (req, res) => {
     try {
       const { fullName, email, username, description } = req.body;
 
@@ -301,4 +288,199 @@ const updateAccountDetails = asyncHandler({
   },
 });
 
-export { registerUser, loginUser, changeCurrentPassword, updateAccountDetails };
+const updateUserAvatar = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      const avatarLocalPath = req.file?.path;
+
+      if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is missing!");
+      }
+      const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+      if (!avatar?.secure_url) {
+        throw new ApiError(400, "Error while uploading on cloudinary");
+      }
+
+      const avatarUrl = req.user?.avatar;
+      const regex = /\/([^/]+)\.[^.]+$/;
+      const match = avatarUrl?.match(regex);
+
+      if (!match) {
+        throw new ApiError(400, "Couldn't find public Id of old avatar!");
+      }
+      const publicId = match[1];
+      await deleteFromCloudinary(publicId);
+
+      const userWithNewAvatar = await prisma.user.update({
+        where: {
+          userId: req.user?.userId,
+        },
+        data: {
+          avatar: avatar.secure_url,
+        },
+      });
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            userWithNewAvatar,
+            "Avatar is updated successfully"
+          )
+        );
+    } catch (error) {
+      throw new ApiError(400, "Error while updating user's avatar");
+    }
+  },
+});
+
+const updateUserCoverImage = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      const coverImageLocalPath = req.file?.path;
+
+      if (!coverImageLocalPath) {
+        throw new ApiError(400, "CoverImage file is missing!");
+      }
+      const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+      if (!coverImage?.secure_url) {
+        throw new ApiError(400, "Error while uploading on cloudinary");
+      }
+
+      const coverImageUrl = req.user?.coverImage;
+      const regex = /\/([^/]+)\.[^.]+$/;
+      const match = coverImageUrl?.match(regex);
+
+      if (!match) {
+        throw new ApiError(400, "Couldn't find public Id of old coverImage!");
+      }
+      const publicId = match[1];
+      await deleteFromCloudinary(publicId);
+
+      const userWithNewCoverImage = await prisma.user.update({
+        where: {
+          userId: req.user?.userId,
+        },
+        data: {
+          avatar: coverImage.secure_url,
+        },
+      });
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            userWithNewCoverImage,
+            "CoverImage is updated successfully"
+          )
+        );
+    } catch (error) {
+      throw new ApiError(400, "Error while updating user's coverImage");
+    }
+  },
+});
+
+const getUserChannelProfile = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      const { username } = req.params;
+      const currentLoggedInUser = req.user?.userId;
+
+      if (!username.trim()) {
+        throw new ApiError(400, "Username is missing!");
+      }
+      const channel = await prisma.user.findUnique({
+        where: {
+          username: username?.toLowerCase(),
+        },
+        select: {
+          userId: true,
+        },
+      });
+
+      if (!channel) {
+        throw new ApiError(404, "Channel nof found!");
+      }
+
+      const [subcribers, subscribedTo] = await Promise.all([
+        // subcribers of this channel(other users who subcribe this channel)
+        prisma.subscription.count({
+          where: {
+            channelId: channel.userId,
+          },
+        }),
+        //
+        prisma.subscription.count({
+          where: {
+            subscriberId: channel.userId,
+          },
+        }),
+      ]);
+      // check if currentLoggedInUser is a subscriber to this channel
+      const isSubscribed = currentLoggedInUser
+        ? Boolean(
+            await prisma.subscription.findFirst({
+              where: {
+                channelId: channel.userId,
+                subscriberId: currentLoggedInUser,
+              },
+            })
+          )
+        : false;
+
+      // fetch channel profile with all fields
+      const channelProfile = await prisma.user.findUnique({
+        where: {
+          userId: channel.userId,
+        },
+        select: {
+          userId: true,
+          fullName: true,
+          username: true,
+          avatar: true,
+          coverImage: true,
+          email: true,
+          description: true,
+          createdAt: true,
+        },
+      });
+
+      const profileData = {
+        ...channelProfile,
+        userId: channelProfile?.userId,
+        subscribersCount: subcribers,
+        channelsSubscribedToCount: subscribedTo,
+        isSubscribed,
+      };
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            profileData,
+            "Channel profile fetched successfully"
+          )
+        );
+    } catch (error: any) {
+      throw new ApiError(
+        error.statusCode || 500,
+        error.message || "Error fetching channel profile"
+      );
+    }
+  },
+});
+
+export {
+  registerUser,
+  loginUser,
+  changeCurrentPassword,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
+  getUserChannelProfile,
+};

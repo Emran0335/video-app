@@ -36,10 +36,11 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
                     select: {
                         userId: true,
                         username: true,
+                        email: true,
+                        password: true,
                         coverImage: true,
                         avatar: true,
                         fullName: true,
-                        email: true,
                         description: true,
                         watchHistory: true,
                     },

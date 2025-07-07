@@ -12,8 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateAccountDetails = exports.changeCurrentPassword = exports.loginUser = exports.registerUser = void 0;
-const client_1 = require("@prisma/client");
+exports.getUserChannelProfile = exports.updateUserCoverImage = exports.updateUserAvatar = exports.updateAccountDetails = exports.changeCurrentPassword = exports.loginUser = exports.registerUser = void 0;
+const passwordRelated_1 = require("../utils/passwordRelated");
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
@@ -21,8 +21,6 @@ const cloudinary_1 = require("../utils/cloudinary");
 const fs_1 = __importDefault(require("fs"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const tokens_1 = require("../utils/tokens");
-const isPasswordCorrect_1 = require("../utils/isPasswordCorrect");
-const prisma = new client_1.PrismaClient();
 // to delete files from the local file system
 function unlinkPath(avatarLocalPath, coverImageLocalPath) {
     if (avatarLocalPath)
@@ -33,7 +31,7 @@ function unlinkPath(avatarLocalPath, coverImageLocalPath) {
 // for the creation of token
 const generateAcessAndRefreshTokens = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield prisma.user.findUnique({
+        const user = yield passwordRelated_1.prisma.user.findUnique({
             where: {
                 userId: userId,
             },
@@ -43,7 +41,7 @@ const generateAcessAndRefreshTokens = (userId) => __awaiter(void 0, void 0, void
         }
         const accessToken = (0, tokens_1.generateAccessToken)(user);
         const refreshToken = (0, tokens_1.generateRefreshToken)(user);
-        const userWithRefreshToken = yield prisma.user.update({
+        const userWithRefreshToken = yield passwordRelated_1.prisma.user.update({
             where: {
                 userId: userId,
             },
@@ -88,7 +86,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
                 unlinkPath(avatarLocalPath, coverImageLocalPath);
                 throw new ApiError_1.ApiError(400, "All fields are required");
             }
-            const existedUser = yield prisma.user.findFirst({
+            const existedUser = yield passwordRelated_1.prisma.user.findFirst({
                 where: {
                     OR: [{ username: username }, { email: email }],
                 },
@@ -103,7 +101,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
             }
             // Hash password BEFORE creating user
             const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-            const createdUser = yield prisma.user.create({
+            const createdUser = yield passwordRelated_1.prisma.user.create({
                 data: {
                     fullName: fullName,
                     avatar: avatar.url,
@@ -141,7 +139,7 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
             if (!username && !email) {
                 throw new ApiError_1.ApiError(500, "Username and email is required");
             }
-            const user = yield prisma.user.findFirst({
+            const user = yield passwordRelated_1.prisma.user.findFirst({
                 where: {
                     OR: [{ username: username }, { email: email }],
                 },
@@ -149,12 +147,12 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
             if (!user) {
                 throw new ApiError_1.ApiError(404, "User does not exist!");
             }
-            const isPasswordValid = yield (0, isPasswordCorrect_1.isPasswordCorrect)(password, user.password);
+            const isPasswordValid = yield (0, passwordRelated_1.isPasswordCorrect)(password, user.password);
             if (!isPasswordValid) {
                 throw new ApiError_1.ApiError(401, "Invalid user credentials!");
             }
             const { accessToken, refreshToken } = yield generateAcessAndRefreshTokens(user.userId);
-            const loggedUser = yield prisma.user.findUnique({
+            const loggedUser = yield passwordRelated_1.prisma.user.findUnique({
                 where: {
                     userId: user.userId,
                 },
@@ -198,25 +196,16 @@ const changeCurrentPassword = (0, asyncHandler_1.asyncHandler)({
         var _a;
         try {
             const { password, newPassword } = req.body;
-            const user = yield prisma.user.findUnique({
+            const user = yield passwordRelated_1.prisma.user.findUnique({
                 where: {
                     userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId,
                 },
             });
-            const isOldPasswordCorrect = yield (0, isPasswordCorrect_1.isPasswordCorrect)(password, user === null || user === void 0 ? void 0 : user.password);
+            const isOldPasswordCorrect = yield (0, passwordRelated_1.isPasswordCorrect)(password, user === null || user === void 0 ? void 0 : user.password);
             if (!isOldPasswordCorrect) {
                 throw new ApiError_1.ApiError(400, "Invalid Old Password");
             }
-            // Hash password BEFORE creating user
-            const hashedPassword = yield bcrypt_1.default.hash(newPassword, 10);
-            yield prisma.user.update({
-                where: {
-                    userId: user === null || user === void 0 ? void 0 : user.userId,
-                },
-                data: {
-                    password: hashedPassword,
-                },
-            });
+            yield passwordRelated_1.prisma.user.isPasswordChanged(user, newPassword);
             res
                 .status(200)
                 .json(new ApiResponse_1.ApiResponse(200, {}, "Password changed successfully"));
@@ -235,7 +224,7 @@ const updateAccountDetails = (0, asyncHandler_1.asyncHandler)({
             if (!fullName && !email && !username && !description) {
                 throw new ApiError_1.ApiError(400, "All fields are required");
             }
-            const user = yield prisma.user.update({
+            const user = yield passwordRelated_1.prisma.user.update({
                 where: {
                     userId: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
@@ -265,3 +254,149 @@ const updateAccountDetails = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.updateAccountDetails = updateAccountDetails;
+const updateUserAvatar = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b, _c;
+        try {
+            const avatarLocalPath = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
+            if (!avatarLocalPath) {
+                throw new ApiError_1.ApiError(400, "Avatar file is missing!");
+            }
+            const avatar = yield (0, cloudinary_1.uploadOnCloudinary)(avatarLocalPath);
+            if (!(avatar === null || avatar === void 0 ? void 0 : avatar.secure_url)) {
+                throw new ApiError_1.ApiError(400, "Error while uploading on cloudinary");
+            }
+            const avatarUrl = (_b = req.user) === null || _b === void 0 ? void 0 : _b.avatar;
+            const regex = /\/([^/]+)\.[^.]+$/;
+            const match = avatarUrl === null || avatarUrl === void 0 ? void 0 : avatarUrl.match(regex);
+            if (!match) {
+                throw new ApiError_1.ApiError(400, "Couldn't find public Id of old avatar!");
+            }
+            const publicId = match[1];
+            yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
+            const userWithNewAvatar = yield passwordRelated_1.prisma.user.update({
+                where: {
+                    userId: (_c = req.user) === null || _c === void 0 ? void 0 : _c.userId,
+                },
+                data: {
+                    avatar: avatar.secure_url,
+                },
+            });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, userWithNewAvatar, "Avatar is updated successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(400, "Error while updating user's avatar");
+        }
+    }),
+});
+exports.updateUserAvatar = updateUserAvatar;
+const updateUserCoverImage = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b, _c;
+        try {
+            const coverImageLocalPath = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
+            if (!coverImageLocalPath) {
+                throw new ApiError_1.ApiError(400, "CoverImage file is missing!");
+            }
+            const coverImage = yield (0, cloudinary_1.uploadOnCloudinary)(coverImageLocalPath);
+            if (!(coverImage === null || coverImage === void 0 ? void 0 : coverImage.secure_url)) {
+                throw new ApiError_1.ApiError(400, "Error while uploading on cloudinary");
+            }
+            const coverImageUrl = (_b = req.user) === null || _b === void 0 ? void 0 : _b.coverImage;
+            const regex = /\/([^/]+)\.[^.]+$/;
+            const match = coverImageUrl === null || coverImageUrl === void 0 ? void 0 : coverImageUrl.match(regex);
+            if (!match) {
+                throw new ApiError_1.ApiError(400, "Couldn't find public Id of old coverImage!");
+            }
+            const publicId = match[1];
+            yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
+            const userWithNewCoverImage = yield passwordRelated_1.prisma.user.update({
+                where: {
+                    userId: (_c = req.user) === null || _c === void 0 ? void 0 : _c.userId,
+                },
+                data: {
+                    avatar: coverImage.secure_url,
+                },
+            });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, userWithNewCoverImage, "CoverImage is updated successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(400, "Error while updating user's coverImage");
+        }
+    }),
+});
+exports.updateUserCoverImage = updateUserCoverImage;
+const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const { username } = req.params;
+            const currentLoggedInUser = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+            if (!username.trim()) {
+                throw new ApiError_1.ApiError(400, "Username is missing!");
+            }
+            const channel = yield passwordRelated_1.prisma.user.findUnique({
+                where: {
+                    username: username === null || username === void 0 ? void 0 : username.toLowerCase(),
+                },
+                select: {
+                    userId: true,
+                },
+            });
+            if (!channel) {
+                throw new ApiError_1.ApiError(404, "Channel nof found!");
+            }
+            const [subcribers, subscribedTo] = yield Promise.all([
+                // subcribers of this channel(other users who subcribe this channel)
+                passwordRelated_1.prisma.subscription.count({
+                    where: {
+                        channelId: channel.userId,
+                    },
+                }),
+                //
+                passwordRelated_1.prisma.subscription.count({
+                    where: {
+                        subscriberId: channel.userId,
+                    },
+                }),
+            ]);
+            // check if currentLoggedInUser is a subscriber to this channel
+            const isSubscribed = currentLoggedInUser
+                ? Boolean(yield passwordRelated_1.prisma.subscription.findFirst({
+                    where: {
+                        channelId: channel.userId,
+                        subscriberId: currentLoggedInUser,
+                    },
+                }))
+                : false;
+            // fetch channel profile with all fields
+            const channelProfile = yield passwordRelated_1.prisma.user.findUnique({
+                where: {
+                    userId: channel.userId,
+                },
+                select: {
+                    userId: true,
+                    fullName: true,
+                    username: true,
+                    avatar: true,
+                    coverImage: true,
+                    email: true,
+                    description: true,
+                    createdAt: true,
+                },
+            });
+            const profileData = Object.assign(Object.assign({}, channelProfile), { userId: channelProfile === null || channelProfile === void 0 ? void 0 : channelProfile.userId, subscribersCount: subcribers, channelsSubscribedToCount: subscribedTo, isSubscribed });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, profileData, "Channel profile fetched successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error fetching channel profile");
+        }
+    }),
+});
+exports.getUserChannelProfile = getUserChannelProfile;

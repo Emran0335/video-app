@@ -86,11 +86,14 @@ CREATE TABLE "Subscription" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "subscriber" INTEGER NOT NULL,
-    "channel" INTEGER NOT NULL,
+    "subscriberId" INTEGER NOT NULL,
+    "channelId" INTEGER NOT NULL,
 
     CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
@@ -99,7 +102,7 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "User_password_key" ON "User"("password");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Subscription_subscriber_channel_key" ON "Subscription"("subscriber", "channel");
+CREATE UNIQUE INDEX "Subscription_subscriberId_channelId_key" ON "Subscription"("subscriberId", "channelId");
 
 -- AddForeignKey
 ALTER TABLE "Video" ADD CONSTRAINT "Video_owner_fkey" FOREIGN KEY ("owner") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -132,7 +135,7 @@ ALTER TABLE "Like" ADD CONSTRAINT "Like_likedBy_fkey" FOREIGN KEY ("likedBy") RE
 ALTER TABLE "Playlist" ADD CONSTRAINT "Playlist_owner_fkey" FOREIGN KEY ("owner") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_subscriber_fkey" FOREIGN KEY ("subscriber") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_subscriberId_fkey" FOREIGN KEY ("subscriberId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_channel_fkey" FOREIGN KEY ("channel") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_channelId_fkey" FOREIGN KEY ("channelId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -7,11 +7,12 @@ import { PrismaClient } from "@prisma/client";
 interface User {
   userId: number;
   username: string;
+  password: string;
   email: string;
   fullName: string;
   avatar: string | null;
   coverImage: string | null;
-  description: string | null
+  description: string | null;
 }
 // Extend Express Request interface to include 'user'
 declare global {
@@ -51,6 +52,7 @@ export const verifyJWT = asyncHandler({
             select: {
               userId: true,
               username: true,
+              password: true,
               coverImage: true,
               avatar: true,
               fullName: true,

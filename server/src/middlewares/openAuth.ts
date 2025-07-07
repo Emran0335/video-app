@@ -8,6 +8,7 @@ interface User {
   userId: number;
   username: string;
   email: string;
+  password: string;
   fullName: string;
   avatar: string | null;
   coverImage: string | null;
@@ -48,10 +49,11 @@ export const verifyJWT = asyncHandler({
           select: {
             userId: true,
             username: true,
+            email: true,
+            password: true,
             coverImage: true,
             avatar: true,
             fullName: true,
-            email: true,
             description: true,
             watchHistory: true,
           },
