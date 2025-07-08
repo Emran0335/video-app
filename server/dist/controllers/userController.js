@@ -12,13 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserChannelProfile = exports.updateUserCoverImage = exports.updateUserAvatar = exports.updateAccountDetails = exports.changeCurrentPassword = exports.loginUser = exports.registerUser = void 0;
+exports.getWatchHistory = exports.getUserChannelProfile = exports.updateUserCoverImage = exports.updateUserAvatar = exports.updateAccountDetails = exports.getCurrentLoggedInUser = exports.changeCurrentPassword = exports.refreshAccessToken = exports.logoutUser = exports.loginUser = exports.registerUser = void 0;
 const passwordRelated_1 = require("../utils/passwordRelated");
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const cloudinary_1 = require("../utils/cloudinary");
 const fs_1 = __importDefault(require("fs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const tokens_1 = require("../utils/tokens");
 // to delete files from the local file system
@@ -29,7 +30,7 @@ function unlinkPath(avatarLocalPath, coverImageLocalPath) {
         fs_1.default.unlinkSync(coverImageLocalPath);
 }
 // for the creation of token
-const generateAcessAndRefreshTokens = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+const generateAcessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, val = 0) {
     try {
         const user = yield passwordRelated_1.prisma.user.findUnique({
             where: {
@@ -40,20 +41,23 @@ const generateAcessAndRefreshTokens = (userId) => __awaiter(void 0, void 0, void
             throw new ApiError_1.ApiError("User is not found");
         }
         const accessToken = (0, tokens_1.generateAccessToken)(user);
-        const refreshToken = (0, tokens_1.generateRefreshToken)(user);
-        const userWithRefreshToken = yield passwordRelated_1.prisma.user.update({
-            where: {
-                userId: userId,
-            },
-            data: {
-                refreshToken: refreshToken,
-            },
-        });
-        if (userWithRefreshToken) {
-            return { accessToken, refreshToken };
+        let refreshToken;
+        if (val === 0) {
+            refreshToken = (0, tokens_1.generateRefreshToken)(user);
+            const userWithRefreshToken = yield passwordRelated_1.prisma.user.update({
+                where: {
+                    userId: userId,
+                },
+                data: {
+                    refreshToken: refreshToken,
+                },
+            });
+            return {
+                accessToken,
+                refreshToken,
+            };
         }
-        // Always return an object for consistent destructuring
-        return { accessToken, refreshToken };
+        return { accessToken };
     }
     catch (error) {
         throw new ApiError_1.ApiError(500, "Something went wrong while generating token");
@@ -191,6 +195,71 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.loginUser = loginUser;
+const logoutUser = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            yield passwordRelated_1.prisma.user.update({
+                where: {
+                    userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId,
+                },
+                data: {
+                    refreshToken: null,
+                },
+            });
+            const options = {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            };
+            res
+                .clearCookie("accessToken", options)
+                .clearCookie("refreshToken", options)
+                .json(new ApiResponse_1.ApiResponse(200, {}, "User logged out successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(500, (error === null || error === void 0 ? void 0 : error.message) || "Error while logging out");
+        }
+    }),
+});
+exports.logoutUser = logoutUser;
+const refreshAccessToken = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const inComingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+            if (!inComingRefreshToken) {
+                throw new ApiError_1.ApiError(401, "Anauthorized request!");
+            }
+            const decodedToken = jsonwebtoken_1.default.verify(inComingRefreshToken, process.env.REFRESH_TOKEN_SECRET || "");
+            // decodedToken { id: '1', iat: 1751957369, exp: 1752821369 }
+            const user = yield passwordRelated_1.prisma.user.findUnique({
+                where: {
+                    userId: Number(decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.id),
+                },
+            });
+            if (!user) {
+                throw new ApiError_1.ApiError(401, "Invalid refresh token!");
+            }
+            if (inComingRefreshToken !== (user === null || user === void 0 ? void 0 : user.refreshToken)) {
+                throw new ApiError_1.ApiError(401, "Refresh token expired or used!");
+            }
+            const options = {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            };
+            const { accessToken } = yield generateAcessAndRefreshTokens(user === null || user === void 0 ? void 0 : user.userId, 1);
+            res
+                .status(200)
+                .cookie("accessToken", accessToken, options)
+                .json(new ApiResponse_1.ApiResponse(200, { accessToken }, "Access token refreshed"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Invalid refresh token!");
+        }
+    }),
+});
+exports.refreshAccessToken = refreshAccessToken;
 const changeCurrentPassword = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
@@ -216,6 +285,17 @@ const changeCurrentPassword = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.changeCurrentPassword = changeCurrentPassword;
+const getCurrentLoggedInUser = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        if (!req.user) {
+            throw new ApiError_1.ApiError(400, "Current logged-in user not found!");
+        }
+        res
+            .status(200)
+            .json(new ApiResponse_1.ApiResponse(200, req.user, "Current logged-in user fetched successfully"));
+    }),
+});
+exports.getCurrentLoggedInUser = getCurrentLoggedInUser;
 const updateAccountDetails = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e;
@@ -336,6 +416,9 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
         try {
             const { username } = req.params;
             const currentLoggedInUser = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+            if (!currentLoggedInUser) {
+                throw new ApiError_1.ApiError(404, "No CurrentLoggedInuser is found");
+            }
             if (!username.trim()) {
                 throw new ApiError_1.ApiError(400, "Username is missing!");
             }
@@ -348,7 +431,7 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
                 },
             });
             if (!channel) {
-                throw new ApiError_1.ApiError(404, "Channel nof found!");
+                throw new ApiError_1.ApiError(404, "Channel not found!");
             }
             const [subcribers, subscribedTo] = yield Promise.all([
                 // subcribers of this channel(other users who subcribe this channel)
@@ -400,3 +483,74 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.getUserChannelProfile = getUserChannelProfile;
+const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            //const {page = 1, limit = 10} = req.query;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+            // get user's watchHistory videoIds array
+            const user = yield passwordRelated_1.prisma.user.findUnique({
+                where: {
+                    userId: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
+                },
+                select: {
+                    watchHistory: true,
+                },
+            });
+            if (!user) {
+                throw new ApiError_1.ApiError(404, "User and his watchHistory not found!");
+            }
+            // Array of videoIds
+            const videoIds = user.watchHistory.map((videoId) => videoId.id);
+            // get paginated watch history videos with owner's(user) details
+            const watchHistoryWithOwner = yield passwordRelated_1.prisma.video.findMany({
+                where: {
+                    id: { in: videoIds },
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    duration: true,
+                    description: true,
+                    videoFile: true,
+                    thumbnail: true,
+                    views: true,
+                    isPublised: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    owner: {
+                        select: {
+                            fullName: true,
+                            username: true,
+                            avatar: true,
+                        },
+                    },
+                },
+                orderBy: { updatedAt: "desc" },
+                skip,
+                take: limit,
+            });
+            // get total videos for pagination metadata
+            const totalCount = yield passwordRelated_1.prisma.video.count({
+                where: {
+                    id: { in: videoIds },
+                    isPublised: true,
+                },
+            });
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, {
+                watchHistoryWithOwner,
+                totalCount,
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit),
+                hasNextPage: skip + limit < totalCount,
+            }));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error fetching watch history");
+        }
+    }),
+});
+exports.getWatchHistory = getWatchHistory;

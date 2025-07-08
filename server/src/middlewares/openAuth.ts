@@ -2,13 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import {prisma} from "../utils/passwordRelated"
 
 interface User {
   userId: number;
   username: string;
   email: string;
-  password: string;
   fullName: string;
   avatar: string | null;
   coverImage: string | null;
@@ -23,15 +22,16 @@ declare global {
   }
 }
 
-const prisma = new PrismaClient();
 
-export const verifyJWT = asyncHandler({
+export const openAuth = asyncHandler({
   requestHandler: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token =
         req.cookies?.accessToken ||
         req.header("Authorization")?.replace("Bearer ", "");
-
+      if (token === null) {
+        throw new ApiError(400, "No token found!");
+      }
       if (token) {
         const decodedToken: any = jwt.verify(
           token,
@@ -41,21 +41,19 @@ export const verifyJWT = asyncHandler({
         if (!decodedToken) {
           next();
         }
-
+        // decodedToken { id: '1', iat: 1751957369, exp: 1752821369 }
         const user = await prisma.user.findUnique({
           where: {
-            userId: decodedToken?.id,
+            userId: Number(decodedToken?.id),
           },
           select: {
             userId: true,
             username: true,
             email: true,
-            password: true,
-            coverImage: true,
-            avatar: true,
             fullName: true,
+            avatar: true,
+            coverImage: true,
             description: true,
-            watchHistory: true,
           },
         });
 

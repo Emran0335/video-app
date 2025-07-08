@@ -2,12 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../utils/passwordRelated";
 
 interface User {
   userId: number;
   username: string;
-  password: string;
   email: string;
   fullName: string;
   avatar: string | null;
@@ -23,28 +22,29 @@ declare global {
   }
 }
 
-const prisma = new PrismaClient();
-
 export const verifyJWT = asyncHandler({
   requestHandler: async (req: Request, res: Response, next: NextFunction) => {
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
     try {
       const token =
         req.cookies?.accessToken ||
         req.header("Authorization")?.replace("Bearer ", "");
+
       if (!token) {
         throw new ApiError(401, "Unauthorized request");
       }
 
       jwt.verify(
         token,
-        process.env.ACCESS_TOKEN_SECRET || "",
-        async (error: any, decodedToken: any) => {
-          if (error) {
-            if (error.name === "TokenExpiredError") {
+        accessTokenSecret,
+        async (err: any, decodedToken: any) => {
+          if (err) {
+            if (err.name === "TokenExpiredError") {
               return next(new ApiError(401, "TokenExpiredError"));
             }
             return next(new ApiError(401, "Invalid access token"));
           }
+          // decodedToken { id: '1', iat: 1751957369, exp: 1752821369 }
           const user = await prisma.user.findUnique({
             where: {
               userId: Number(decodedToken?.id),
@@ -52,15 +52,14 @@ export const verifyJWT = asyncHandler({
             select: {
               userId: true,
               username: true,
-              password: true,
-              coverImage: true,
-              avatar: true,
-              fullName: true,
               email: true,
+              fullName: true,
+              avatar: true,
+              coverImage: true,
               description: true,
-              watchHistory: true,
             },
           });
+
           if (!user) {
             throw new ApiError(401, "Invalid Access Token");
           }

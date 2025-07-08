@@ -36,7 +36,7 @@ app.use((0, cookie_parser_1.default)());
 app.get("/", (req, res) => {
     res.send("This is home route.");
 });
-app.use("/", userRoutes_1.default);
+app.use("/user", userRoutes_1.default);
 // SERVER
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {

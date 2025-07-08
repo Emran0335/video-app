@@ -8,8 +8,13 @@ import {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
+  logoutUser,
+  refreshAccessToken,
+  getCurrentLoggedInUser,
+  getWatchHistory,
 } from "../controllers/userController";
 import { verifyJWT } from "../middlewares/auth";
+import { openAuth } from "../middlewares/openAuth";
 
 const router = Router();
 
@@ -29,7 +34,10 @@ router.post(
 );
 
 router.post("/login", loginUser);
+router.post("/logout", verifyJWT, logoutUser);
+router.patch("/refresh-token", refreshAccessToken);
 router.post("/change-password", verifyJWT, changeCurrentPassword);
+router.get("/current-user", verifyJWT, getCurrentLoggedInUser);
 router.patch("/update-account", verifyJWT, updateAccountDetails);
 router.patch("/avatar", verifyJWT, upload.single("avatar"), updateUserAvatar);
 router.patch(
@@ -38,6 +46,7 @@ router.patch(
   upload.single("coverImage"),
   updateUserCoverImage
 );
-router.get("/:username", verifyJWT, getUserChannelProfile);
+router.get("/channel/:username", openAuth, getUserChannelProfile);
+router.get("/history", verifyJWT, getWatchHistory);
 
 export default router;

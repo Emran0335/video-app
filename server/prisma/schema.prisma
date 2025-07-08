@@ -21,7 +21,7 @@ model User {
   fullName           String
   avatar             String?
   coverImage         String?
-  description        String?         @default("")
+  description        String?        @default("")
   refreshToken       String?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
@@ -43,11 +43,10 @@ model Video {
   duration    Int
   views       Int
   isPublised  Boolean   @default(true)
-  owner       Int
   playlistId  Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  userId      User      @relation("history", fields: [owner], references: [userId])
+  owner       User[]    @relation("history")
   Comment     Comment[]
   Like        Like[]
   Playlist    Playlist? @relation(fields: [playlistId], references: [id])
@@ -101,9 +100,9 @@ model Playlist {
 }
 
 model Subscription {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   subscriberId Int // relation with User
   channelId    Int // relation with User
 

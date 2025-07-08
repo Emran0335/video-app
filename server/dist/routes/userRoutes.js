@@ -4,6 +4,7 @@ const express_1 = require("express");
 const multer_1 = require("../middlewares/multer");
 const userController_1 = require("../controllers/userController");
 const auth_1 = require("../middlewares/auth");
+const openAuth_1 = require("../middlewares/openAuth");
 const router = (0, express_1.Router)();
 router.post("/register", multer_1.upload.fields([
     {
@@ -16,9 +17,13 @@ router.post("/register", multer_1.upload.fields([
     },
 ]), userController_1.registerUser);
 router.post("/login", userController_1.loginUser);
+router.post("/logout", auth_1.verifyJWT, userController_1.logoutUser);
+router.patch("/refresh-token", userController_1.refreshAccessToken);
 router.post("/change-password", auth_1.verifyJWT, userController_1.changeCurrentPassword);
+router.get("/current-user", auth_1.verifyJWT, userController_1.getCurrentLoggedInUser);
 router.patch("/update-account", auth_1.verifyJWT, userController_1.updateAccountDetails);
 router.patch("/avatar", auth_1.verifyJWT, multer_1.upload.single("avatar"), userController_1.updateUserAvatar);
 router.patch("/cover-image", auth_1.verifyJWT, multer_1.upload.single("coverImage"), userController_1.updateUserCoverImage);
-router.get("/:username", auth_1.verifyJWT, userController_1.getUserChannelProfile);
+router.get("/channel/:username", openAuth_1.openAuth, userController_1.getUserChannelProfile);
+router.get("/history", auth_1.verifyJWT, userController_1.getWatchHistory);
 exports.default = router;

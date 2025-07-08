@@ -8,6 +8,12 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
 
+interface CookieOptions {
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: boolean | "none" | "lax" | "strict" | undefined;
+}
+
 // to delete files from the local file system
 function unlinkPath(avatarLocalPath: any, coverImageLocalPath: any) {
   if (avatarLocalPath) fs.unlinkSync(avatarLocalPath);
@@ -15,7 +21,7 @@ function unlinkPath(avatarLocalPath: any, coverImageLocalPath: any) {
 }
 
 // for the creation of token
-const generateAcessAndRefreshTokens = async (userId: number) => {
+const generateAcessAndRefreshTokens = async (userId: number, val = 0) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -25,23 +31,29 @@ const generateAcessAndRefreshTokens = async (userId: number) => {
     if (!user) {
       throw new ApiError("User is not found");
     }
+
     const accessToken = generateAccessToken(user);
 
-    const refreshToken = generateRefreshToken(user);
+    let refreshToken;
+    if (val === 0) {
+      refreshToken = generateRefreshToken(user);
 
-    const userWithRefreshToken = await prisma.user.update({
-      where: {
-        userId: userId,
-      },
-      data: {
-        refreshToken: refreshToken,
-      },
-    });
-    if (userWithRefreshToken) {
-      return { accessToken, refreshToken };
+      const userWithRefreshToken = await prisma.user.update({
+        where: {
+          userId: userId,
+        },
+        data: {
+          refreshToken: refreshToken,
+        },
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+      };
     }
-    // Always return an object for consistent destructuring
-    return { accessToken, refreshToken };
+
+    return { accessToken };
   } catch (error) {
     throw new ApiError(500, "Something went wrong while generating token");
   }
@@ -139,11 +151,6 @@ const registerUser = asyncHandler({
   },
 });
 
-interface CookieOptions {
-  httpOnly: boolean;
-  secure: boolean;
-  sameSite: boolean | "none" | "lax" | "strict" | undefined;
-}
 const loginUser = asyncHandler({
   requestHandler: async (req, res) => {
     try {
@@ -215,6 +222,82 @@ const loginUser = asyncHandler({
   },
 });
 
+const logoutUser = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      await prisma.user.update({
+        where: {
+          userId: req.user?.userId,
+        },
+        data: {
+          refreshToken: null,
+        },
+      });
+
+      const options: CookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      };
+      res
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged out successfully"));
+    } catch (error: any) {
+      throw new ApiError(500, error?.message || "Error while logging out");
+    }
+  },
+});
+
+const refreshAccessToken = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      const inComingRefreshToken =
+        req.cookies.refreshToken || req.body.refreshToken;
+
+      if (!inComingRefreshToken) {
+        throw new ApiError(401, "Anauthorized request!");
+      }
+
+      const decodedToken: any = jwt.verify(
+        inComingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET || ""
+      );
+      // decodedToken { id: '1', iat: 1751957369, exp: 1752821369 }
+      const user = await prisma.user.findUnique({
+        where: {
+          userId: Number(decodedToken?.id),
+        },
+      });
+
+      if (!user) {
+        throw new ApiError(401, "Invalid refresh token!");
+      }
+      if (inComingRefreshToken !== user?.refreshToken) {
+        throw new ApiError(401, "Refresh token expired or used!");
+      }
+
+      const options: CookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      };
+
+      const { accessToken } = await generateAcessAndRefreshTokens(
+        user?.userId,
+        1
+      );
+
+      res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .json(new ApiResponse(200, { accessToken }, "Access token refreshed"));
+    } catch (error: any) {
+      throw new ApiError(401, error?.message || "Invalid refresh token!");
+    }
+  },
+});
+
 const changeCurrentPassword = asyncHandler({
   requestHandler: async (req, res) => {
     try {
@@ -245,6 +328,23 @@ const changeCurrentPassword = asyncHandler({
         error?.message || "Error while changing password!"
       );
     }
+  },
+});
+
+const getCurrentLoggedInUser = asyncHandler({
+  requestHandler: async (req, res) => {
+    if (!req.user) {
+      throw new ApiError(400, "Current logged-in user not found!");
+    }
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          req.user,
+          "Current logged-in user fetched successfully"
+        )
+      );
   },
 });
 
@@ -390,6 +490,10 @@ const getUserChannelProfile = asyncHandler({
       const { username } = req.params;
       const currentLoggedInUser = req.user?.userId;
 
+      if (!currentLoggedInUser) {
+        throw new ApiError(404, "No CurrentLoggedInuser is found");
+      }
+
       if (!username.trim()) {
         throw new ApiError(400, "Username is missing!");
       }
@@ -403,7 +507,7 @@ const getUserChannelProfile = asyncHandler({
       });
 
       if (!channel) {
-        throw new ApiError(404, "Channel nof found!");
+        throw new ApiError(404, "Channel not found!");
       }
 
       const [subcribers, subscribedTo] = await Promise.all([
@@ -475,12 +579,96 @@ const getUserChannelProfile = asyncHandler({
   },
 });
 
+const getWatchHistory = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      //const {page = 1, limit = 10} = req.query;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+
+      // get user's watchHistory videoIds array
+      const user = await prisma.user.findUnique({
+        where: {
+          userId: Number(req.user?.userId),
+        },
+        select: {
+          watchHistory: true,
+        },
+      });
+
+      if (!user) {
+        throw new ApiError(404, "User and his watchHistory not found!");
+      }
+
+      // Array of videoIds
+      const videoIds = user.watchHistory.map((videoId) => videoId.id);
+
+      // get paginated watch history videos with owner's(user) details
+      const watchHistoryWithOwner = await prisma.video.findMany({
+        where: {
+          id: { in: videoIds },
+        },
+        select: {
+          id: true,
+          title: true,
+          duration: true,
+          description: true,
+          videoFile: true,
+          thumbnail: true,
+          views: true,
+          isPublised: true,
+          createdAt: true,
+          updatedAt: true,
+          owner: {
+            select: {
+              fullName: true,
+              username: true,
+              avatar: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+        skip,
+        take: limit,
+      });
+
+      // get total videos for pagination metadata
+      const totalCount = await prisma.video.count({
+        where: {
+          id: { in: videoIds },
+          isPublised: true,
+        },
+      });
+
+      res.status(200).json(
+        new ApiResponse(200, {
+          watchHistoryWithOwner,
+          totalCount,
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / limit),
+          hasNextPage: skip + limit < totalCount,
+        })
+      );
+    } catch (error: any) {
+      throw new ApiError(
+        error.statusCode || 500,
+        error.message || "Error fetching watch history"
+      );
+    }
+  },
+});
+
 export {
   registerUser,
   loginUser,
+  logoutUser,
+  refreshAccessToken,
   changeCurrentPassword,
+  getCurrentLoggedInUser,
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
+  getWatchHistory,
 };

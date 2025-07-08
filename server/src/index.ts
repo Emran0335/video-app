@@ -38,7 +38,7 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("This is home route.");
 });
-app.use("/", userRoutes);
+app.use("/user", userRoutes);
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;
