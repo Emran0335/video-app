@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserVideos = exports.getAllVideos = exports.publishAVideo = void 0;
+exports.updateVideo = exports.getVideoById = exports.getUserVideos = exports.getAllVideos = exports.publishAVideo = void 0;
 const fs_1 = __importDefault(require("fs"));
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
@@ -110,6 +110,7 @@ const getAllVideos = (0, asyncHandler_1.asyncHandler)({
                             avatar: true,
                             fullName: true,
                             username: true,
+                            subscribers: true,
                         },
                     },
                 },
@@ -138,40 +139,33 @@ exports.getAllVideos = getAllVideos;
 const getUserVideos = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const { page = 1, limit = 10, sortType = "desc" } = req.query;
-            const { userId } = req.params;
-            if (!userId) {
-                throw new ApiError_1.ApiError(400, "Inavlid userId");
-            }
+            const userId = req.params.userId;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const sortType = req.query.sortType === "asc" ? "asc" : "desc";
+            const skip = (page - 1) * limit;
             const videos = yield passwordRelated_1.prisma.video.findMany({
                 where: {
                     AND: [{ ownerId: Number(userId) }, { isPublised: true }],
                 },
-                select: {
-                    title: true,
-                    description: true,
-                    videoFile: true,
-                    thumbnail: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    ownerId: true,
-                    isPublised: true,
-                    duration: true,
-                    views: true,
+                orderBy: {
+                    createdAt: sortType, // Sort by creation date
                 },
+                skip,
+                take: limit,
                 include: {
                     owner: {
                         select: {
-                            fullName: true,
-                            username: true,
                             avatar: true,
+                            username: true,
+                            fullName: true,
                         },
                     },
                 },
             });
-            if (!videos) {
-                throw new ApiError_1.ApiError(400, "Error whilie fetching user's vidoes");
-            }
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, videos, "User vidoes fetched successfully!"));
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while user's videos");
@@ -179,3 +173,104 @@ const getUserVideos = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.getUserVideos = getUserVideos;
+const getVideoById = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const { videoId } = req.params;
+            if (!videoId) {
+                throw new ApiError_1.ApiError(400, "Invalid videoId");
+            }
+            const video = yield passwordRelated_1.prisma.video.findUnique({
+                where: {
+                    id: Number(videoId),
+                },
+                include: {
+                    Like: {
+                        select: {
+                            likedBy: true,
+                        },
+                    },
+                    owner: {
+                        select: {
+                            userId: true,
+                            fullName: true,
+                            username: true,
+                            avatar: true,
+                            subscribers: true,
+                            subscribedChannels: true,
+                        },
+                    },
+                    Comment: true,
+                },
+            });
+            if (!video) {
+                throw new ApiError_1.ApiError(404, "Video not found");
+            }
+            const likesCount = video.Like.length;
+            const isLiked = video.Like.some((like) => like.likedBy);
+            const subscriberCount = video.owner.subscribers.length;
+            const isSubscribed = video.owner.subscribers.some((sub) => { var _a; return sub.id === Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId); });
+            const result = Object.assign(Object.assign({}, video), { likesCount: likesCount, isLiked: isLiked, owner: Object.assign(Object.assign({}, video.owner), { id: video.owner.userId, subscriberCount: subscriberCount, isSubscribed: isSubscribed }) });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, result, "User's video fetched successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while user's video");
+        }
+    }),
+});
+exports.getVideoById = getVideoById;
+const updateVideo = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b;
+        try {
+            const { title, description } = req.body;
+            const { videoId } = req.params;
+            const thumbnailLocalPath = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
+            if (!thumbnailLocalPath) {
+                throw new ApiError_1.ApiError(400, "thumbnailLocalPath file is missing!");
+            }
+            const video = yield passwordRelated_1.prisma.video.findUnique({
+                where: {
+                    id: Number(videoId),
+                },
+            });
+            if (((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId) !== (video === null || video === void 0 ? void 0 : video.ownerId)) {
+                unlinkPath(thumbnailLocalPath);
+                throw new ApiError_1.ApiError(401, "You do not have the permission to perform this action");
+            }
+            const thumbnail = yield (0, cloudinary_1.uploadOnCloudinary)(thumbnailLocalPath);
+            if (!thumbnail) {
+                throw new ApiError_1.ApiError(400, "Error while uploading thumbnail on cloudinary");
+            }
+            else {
+                const thumbnailUrl = video === null || video === void 0 ? void 0 : video.thumbnail;
+                const regex = /\/([^/]+)\.[^.]+$/;
+                const match = thumbnailUrl === null || thumbnailUrl === void 0 ? void 0 : thumbnailUrl.match(regex);
+                if (!match) {
+                    throw new ApiError_1.ApiError(400, "Couldn't find public Id of old avatar!");
+                }
+                const publicId = match[1];
+                yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
+            }
+            const updatedVideo = yield passwordRelated_1.prisma.video.update({
+                where: {
+                    id: Number(videoId),
+                },
+                data: {
+                    title,
+                    description,
+                    thumbnail: thumbnail.secure_url,
+                },
+            });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, updatedVideo, "Video is updated successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(400, "Error while updating user's video");
+        }
+    }),
+});
+exports.updateVideo = updateVideo;

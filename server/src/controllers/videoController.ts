@@ -6,7 +6,11 @@ import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary";
 import { prisma } from "../utils/passwordRelated";
 
 // to delete files from the local file system
-function unlinkPath(videoLocalPath: any, thumbnailLocalPath: any) {
+
+function unlinkPath(
+  videoLocalPath?: string,
+  thumbnailLocalPath?: string
+): void {
   if (videoLocalPath) fs.unlinkSync(videoLocalPath);
   if (thumbnailLocalPath) fs.unlinkSync(thumbnailLocalPath);
 }
@@ -122,6 +126,7 @@ const getAllVideos = asyncHandler({
               avatar: true,
               fullName: true,
               username: true,
+              subscribers: true,
             },
           },
         },
@@ -153,43 +158,37 @@ const getAllVideos = asyncHandler({
 const getUserVideos = asyncHandler({
   requestHandler: async (req, res) => {
     try {
-      const { page = 1, limit = 10, sortType = "desc" } = req.query;
-      const { userId } = req.params;
+      const userId = req.params.userId;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortType = req.query.sortType === "asc" ? "asc" : "desc";
 
-      if (!userId) {
-        throw new ApiError(400, "Inavlid userId");
-      }
+      const skip = (page - 1) * limit;
 
       const videos = await prisma.video.findMany({
         where: {
           AND: [{ ownerId: Number(userId) }, { isPublised: true }],
         },
-        select: {
-          title: true,
-          description: true,
-          videoFile: true,
-          thumbnail: true,
-          createdAt: true,
-          updatedAt: true,
-          ownerId: true,
-          isPublised: true,
-          duration: true,
-          views: true,
+        orderBy: {
+          createdAt: sortType, // Sort by creation date
         },
+        skip,
+        take: limit,
         include: {
           owner: {
             select: {
-              fullName: true,
-              username: true,
               avatar: true,
+              username: true,
+              fullName: true,
             },
           },
         },
       });
-
-      if (!videos) {
-        throw new ApiError(400, "Error whilie fetching user's vidoes");
-      }
+      res
+        .status(200)
+        .json(
+          new ApiResponse(200, videos, "User vidoes fetched successfully!")
+        );
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -199,4 +198,144 @@ const getUserVideos = asyncHandler({
   },
 });
 
-export { publishAVideo, getAllVideos, getUserVideos };
+const getVideoById = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      const { videoId } = req.params;
+
+      if (!videoId) {
+        throw new ApiError(400, "Invalid videoId");
+      }
+
+      const video = await prisma.video.findUnique({
+        where: {
+          id: Number(videoId),
+        },
+        include: {
+          Like: {
+            select: {
+              likedBy: true,
+            },
+          },
+          owner: {
+            select: {
+              userId: true,
+              fullName: true,
+              username: true,
+              avatar: true,
+              subscribers: true,
+              subscribedChannels: true,
+            },
+          },
+          Comment: true,
+        },
+      });
+
+      if (!video) {
+        throw new ApiError(404, "Video not found");
+      }
+
+      const likesCount = video.Like.length;
+      const isLiked = video.Like.some((like) => like.likedBy);
+      const subscriberCount = video.owner.subscribers.length;
+      const isSubscribed = video.owner.subscribers.some(
+        (sub) => sub.id === Number(req.user?.userId)
+      );
+
+      const result = {
+        ...video,
+        likesCount: likesCount,
+        isLiked: isLiked,
+        owner: {
+          ...video.owner,
+          id: video.owner.userId,
+          subscriberCount: subscriberCount,
+          isSubscribed: isSubscribed,
+        },
+      };
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(200, result, "User's video fetched successfully")
+        );
+    } catch (error: any) {
+      throw new ApiError(
+        error.statusCode || 500,
+        error.message || "Error while user's video"
+      );
+    }
+  },
+});
+
+const updateVideo = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      const { title, description } = req.body;
+      const { videoId } = req.params;
+      const thumbnailLocalPath = req.file?.path;
+
+      if (!thumbnailLocalPath) {
+        throw new ApiError(400, "thumbnailLocalPath file is missing!");
+      }
+
+      const video = await prisma.video.findUnique({
+        where: {
+          id: Number(videoId),
+        },
+      });
+
+      if (req.user?.userId !== video?.ownerId) {
+        unlinkPath(thumbnailLocalPath);
+        throw new ApiError(
+          401,
+          "You do not have the permission to perform this action"
+        );
+      }
+      const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+      if (!thumbnail) {
+        throw new ApiError(
+          400,
+          "Error while uploading thumbnail on cloudinary"
+        );
+      } else {
+        const thumbnailUrl = video?.thumbnail;
+        const regex = /\/([^/]+)\.[^.]+$/;
+        const match = thumbnailUrl?.match(regex);
+
+        if (!match) {
+          throw new ApiError(400, "Couldn't find public Id of old avatar!");
+        }
+        const publicId = match[1];
+        await deleteFromCloudinary(publicId);
+      }
+
+      const updatedVideo = await prisma.video.update({
+        where: {
+          id: Number(videoId),
+        },
+        data: {
+          title,
+          description,
+          thumbnail: thumbnail.secure_url,
+        },
+      });
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(200, updatedVideo, "Video is updated successfully")
+        );
+    } catch (error) {
+      throw new ApiError(400, "Error while updating user's video");
+    }
+  },
+});
+
+export {
+  publishAVideo,
+  getAllVideos,
+  getUserVideos,
+  getVideoById,
+  updateVideo,
+};
