@@ -8,9 +8,10 @@ import cookieParser from "cookie-parser";
 
 // ROUTES IMPORTS
 import userRoutes from "./routes/userRoutes";
+import videoRoutes from "./routes/videoRoutes";
 
 // CONFIGURATIONS
-dotenv.config();
+dotenv.config({ quiet: true });
 const app = express();
 app.use(express.json());
 app.use(helmet());
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
   res.send("This is home route.");
 });
 app.use("/user", userRoutes);
+app.use("/videos", videoRoutes);
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;

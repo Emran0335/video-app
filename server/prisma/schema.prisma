@@ -25,13 +25,13 @@ model User {
   refreshToken       String?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
-  watchHistory       Video[]        @relation("history")
+  watchHistory       Video[]
   Tweet              Tweet[]
   Comment            Comment[]
   Like               Like[]
-  Playlist           Playlist[]
   subscribedChannels Subscription[] @relation("Subscriber") // User as subscriber
   subscribers        Subscription[] @relation("Channel") // User as channel owner
+  Playlist           Playlist[]
 }
 
 model Video {
@@ -41,15 +41,15 @@ model Video {
   title       String
   description String
   duration    Int
-  views       Int
+  ownerId     Int
+  views       Int       @default(0)
   isPublised  Boolean   @default(true)
-  playlistId  Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  owner       User[]    @relation("history")
+  owner       User      @relation(fields: [ownerId], references: [userId])
   Comment     Comment[]
   Like        Like[]
-  Playlist    Playlist? @relation(fields: [playlistId], references: [id])
+  Playlist    Playlist[]
 }
 
 model Tweet {
@@ -94,9 +94,9 @@ model Playlist {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  owner       Int // relation with User
+  ownerId     Int // relation with User
   videos      Video[]
-  ownerId     User     @relation(fields: [owner], references: [userId])
+  owner       User     @relation(fields: [ownerId], references: [userId])
 }
 
 model Subscription {

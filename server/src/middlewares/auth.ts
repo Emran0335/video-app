@@ -57,6 +57,7 @@ export const verifyJWT = asyncHandler({
               avatar: true,
               coverImage: true,
               description: true,
+              watchHistory: true,
             },
           });
 

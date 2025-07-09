@@ -54,6 +54,7 @@ export const openAuth = asyncHandler({
             avatar: true,
             coverImage: true,
             description: true,
+            watchHistory:true
           },
         });
 

@@ -12,8 +12,9 @@ const morgan_1 = __importDefault(require("morgan"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 // ROUTES IMPORTS
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const videoRoutes_1 = __importDefault(require("./routes/videoRoutes"));
 // CONFIGURATIONS
-dotenv_1.default.config();
+dotenv_1.default.config({ quiet: true });
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, helmet_1.default)());
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
     res.send("This is home route.");
 });
 app.use("/user", userRoutes_1.default);
+app.use("/videos", videoRoutes_1.default);
 // SERVER
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {

@@ -64,10 +64,10 @@ const registerUser = asyncHandler({
     try {
       const { fullName, email, username, password } = req.body;
 
-      let avatarLocalPath: string | undefined;
+      let avatarLocalPath;
       if (Array.isArray(req.files)) {
         const avatarFile = req.files.find(
-          (file: any) => file.fieldname === "avatar"
+          (file) => file.fieldname === "avatar"
         );
         avatarLocalPath = avatarFile?.path;
       } else if (
@@ -78,10 +78,10 @@ const registerUser = asyncHandler({
         avatarLocalPath = (req.files as any).avatar[0]?.path;
       }
 
-      let coverImageLocalPath: string | undefined;
+      let coverImageLocalPath;
       if (req.files && Array.isArray(req.files)) {
         const coverImageFile = req.files.find(
-          (file: any) => file.fieldname === "coverImage"
+          (file) => file.fieldname === "coverImage"
         );
         coverImageLocalPath = coverImageFile?.path;
       } else {
@@ -642,13 +642,17 @@ const getWatchHistory = asyncHandler({
       });
 
       res.status(200).json(
-        new ApiResponse(200, {
-          watchHistoryWithOwner,
-          totalCount,
-          currentPage: page,
-          totalPages: Math.ceil(totalCount / limit),
-          hasNextPage: skip + limit < totalCount,
-        })
+        new ApiResponse(
+          200,
+          {
+            watchHistoryWithOwner,
+            totalCount,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            hasNextPage: skip + limit < totalCount,
+          },
+          "Video watch history of the user fetched successfully"
+        )
       );
     } catch (error: any) {
       throw new ApiError(

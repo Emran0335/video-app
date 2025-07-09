@@ -47,6 +47,7 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
                         avatar: true,
                         coverImage: true,
                         description: true,
+                        watchHistory: true,
                     },
                 });
                 if (!user) {

@@ -546,7 +546,7 @@ const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
                 currentPage: page,
                 totalPages: Math.ceil(totalCount / limit),
                 hasNextPage: skip + limit < totalCount,
-            }));
+            }, "Video watch history of the user fetched successfully"));
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error fetching watch history");
