@@ -30,7 +30,7 @@ function unlinkPath(avatarLocalPath, coverImageLocalPath) {
         fs_1.default.unlinkSync(coverImageLocalPath);
 }
 // for the creation of token
-const generateAcessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, val = 0) {
+const generateAccessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, val = 0) {
     try {
         const user = yield hashedPassword_1.prisma.user.findUnique({
             where: {
@@ -155,7 +155,7 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
             if (!isPasswordValid) {
                 throw new ApiError_1.ApiError(401, "Invalid user credentials!");
             }
-            const { accessToken, refreshToken } = yield generateAcessAndRefreshTokens(user.userId);
+            const { accessToken, refreshToken } = yield generateAccessAndRefreshTokens(user.userId);
             const loggedUser = yield hashedPassword_1.prisma.user.findUnique({
                 where: {
                     userId: user.userId,
@@ -248,7 +248,7 @@ const refreshAccessToken = (0, asyncHandler_1.asyncHandler)({
                 secure: true,
                 sameSite: "none",
             };
-            const { accessToken } = yield generateAcessAndRefreshTokens(user === null || user === void 0 ? void 0 : user.userId, 1);
+            const { accessToken } = yield generateAccessAndRefreshTokens(user === null || user === void 0 ? void 0 : user.userId, 1);
             res
                 .status(200)
                 .cookie("accessToken", accessToken, options)
