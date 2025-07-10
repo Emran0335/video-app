@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
-import { prisma } from "../utils/passwordRelated";
+import { prisma } from "../utils/hashedPassword";
 
 interface User {
   userId: number;

@@ -11,13 +11,13 @@ export const isPasswordCorrect = async (
 export const prisma = new PrismaClient().$extends({
   model: {
     user: {
-      async isPasswordChanged(
+      async hashPasswordAgain(
         data: any,
         newPassword: string,
         skipValidation = false
       ) {
         if (!skipValidation) {
-          let hashedPassword = newPassword;
+          let hashedPassword;
           if (data) {
             hashedPassword = await bcrypt.hash(newPassword, 10);
           }

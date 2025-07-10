@@ -18,7 +18,7 @@ const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const cloudinary_1 = require("../utils/cloudinary");
-const passwordRelated_1 = require("../utils/passwordRelated");
+const hashedPassword_1 = require("../utils/hashedPassword");
 // to delete files from the local file system
 function unlinkPath(videoLocalPath, thumbnailLocalPath) {
     if (videoLocalPath)
@@ -64,7 +64,7 @@ const publishAVideo = (0, asyncHandler_1.asyncHandler)({
             if (!videoFile || !thumbnail) {
                 throw new ApiError_1.ApiError(400, "Video or thumbnail is missing from cloudinary!");
             }
-            const video = yield passwordRelated_1.prisma.video.create({
+            const video = yield hashedPassword_1.prisma.video.create({
                 data: {
                     videoFile: videoFile === null || videoFile === void 0 ? void 0 : videoFile.secure_url,
                     thumbnail: thumbnail === null || thumbnail === void 0 ? void 0 : thumbnail.secure_url,
@@ -95,7 +95,7 @@ const getAllVideos = (0, asyncHandler_1.asyncHandler)({
             const skip = (Number(page) - 1) * Number(limit);
             const sortField = sortBy;
             const sortOrder = sortType === "asc" ? "asc" : "desc";
-            const videos = yield passwordRelated_1.prisma.video.findMany({
+            const videos = yield hashedPassword_1.prisma.video.findMany({
                 where: Object.assign({ isPublised: true }, (query && {
                     OR: [
                         { title: { contains: query, mode: "insensitive" } },
@@ -144,7 +144,7 @@ const getUserVideos = (0, asyncHandler_1.asyncHandler)({
             const limit = parseInt(req.query.limit) || 10;
             const sortType = req.query.sortType === "asc" ? "asc" : "desc";
             const skip = (page - 1) * limit;
-            const videos = yield passwordRelated_1.prisma.video.findMany({
+            const videos = yield hashedPassword_1.prisma.video.findMany({
                 where: {
                     AND: [{ ownerId: Number(userId) }, { isPublised: true }],
                 },
@@ -180,7 +180,7 @@ const getVideoById = (0, asyncHandler_1.asyncHandler)({
             if (!videoId) {
                 throw new ApiError_1.ApiError(400, "Invalid videoId");
             }
-            const video = yield passwordRelated_1.prisma.video.findUnique({
+            const video = yield hashedPassword_1.prisma.video.findUnique({
                 where: {
                     id: Number(videoId),
                 },
@@ -231,7 +231,7 @@ const updateVideo = (0, asyncHandler_1.asyncHandler)({
             if (!thumbnailLocalPath) {
                 throw new ApiError_1.ApiError(400, "thumbnailLocalPath file is missing!");
             }
-            const video = yield passwordRelated_1.prisma.video.findUnique({
+            const video = yield hashedPassword_1.prisma.video.findUnique({
                 where: {
                     id: Number(videoId),
                 },
@@ -249,19 +249,19 @@ const updateVideo = (0, asyncHandler_1.asyncHandler)({
                 const regex = /\/([^/]+)\.[^.]+$/;
                 const match = thumbnailUrl === null || thumbnailUrl === void 0 ? void 0 : thumbnailUrl.match(regex);
                 if (!match) {
-                    throw new ApiError_1.ApiError(400, "Couldn't find public Id of old avatar!");
+                    throw new ApiError_1.ApiError(400, "Couldn't find public Id of old thumbnail!");
                 }
                 const publicId = match[1];
                 yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
             }
-            const updatedVideo = yield passwordRelated_1.prisma.video.update({
+            const updatedVideo = yield hashedPassword_1.prisma.video.update({
                 where: {
                     id: Number(videoId),
                 },
                 data: {
-                    title,
-                    description,
-                    thumbnail: thumbnail.secure_url,
+                    title: title || (video === null || video === void 0 ? void 0 : video.title),
+                    description: description || (video === null || video === void 0 ? void 0 : video.description),
+                    thumbnail: thumbnail.secure_url || (video === null || video === void 0 ? void 0 : video.thumbnail),
                 },
             });
             res
@@ -274,3 +274,52 @@ const updateVideo = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.updateVideo = updateVideo;
+const deleteVideo = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const { videoId } = req.params;
+            if (!videoId) {
+                throw new ApiError_1.ApiError(404, "Video ID not found!");
+            }
+            const video = yield hashedPassword_1.prisma.video.findUnique({
+                where: {
+                    id: Number(videoId),
+                },
+            });
+            if (!video) {
+                throw new ApiError_1.ApiError(404, "Video not found!");
+            }
+            if ((video === null || video === void 0 ? void 0 : video.ownerId) !== ((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId)) {
+                throw new ApiError_1.ApiError(401, "Not have permission to delete video!");
+            }
+            yield hashedPassword_1.prisma.video.delete({
+                where: {
+                    id: Number(videoId),
+                },
+            });
+            // delete videoFile and thumbail
+            const thumbailUrl = video === null || video === void 0 ? void 0 : video.thumbnail;
+            const videoFileUrl = video === null || video === void 0 ? void 0 : video.videoFile;
+            const regex = /\/([^/]+)\.[^.]+$/;
+            // let's delete thumbnail
+            let match = thumbailUrl.match(regex);
+            if (!match) {
+                throw new ApiError_1.ApiError(400, "Couldn't find thumbnail");
+            }
+            let publicId = match[1];
+            const deleteThumbnail = yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
+            // let's delete videoFile
+            match = videoFileUrl.match(regex);
+            if (!match) {
+                throw new ApiError_1.ApiError(400, "Couldn't find videoFile");
+            }
+            publicId = match[1];
+            const deleteVideoFile = yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
+            if (deleteThumbnail.result !== "ok" && deleteVideoFile.result !== "ok") {
+                throw new ApiError_1.ApiError(500, "Error while deleting thumbnail and videoFile from cloudinary");
+            }
+        }
+        catch (error) { }
+    }),
+});

@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getWatchHistory = exports.getUserChannelProfile = exports.updateUserCoverImage = exports.updateUserAvatar = exports.updateAccountDetails = exports.getCurrentLoggedInUser = exports.changeCurrentPassword = exports.refreshAccessToken = exports.logoutUser = exports.loginUser = exports.registerUser = void 0;
-const passwordRelated_1 = require("../utils/passwordRelated");
+const hashedPassword_1 = require("../utils/hashedPassword");
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
@@ -32,7 +32,7 @@ function unlinkPath(avatarLocalPath, coverImageLocalPath) {
 // for the creation of token
 const generateAcessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, val = 0) {
     try {
-        const user = yield passwordRelated_1.prisma.user.findUnique({
+        const user = yield hashedPassword_1.prisma.user.findUnique({
             where: {
                 userId: userId,
             },
@@ -44,7 +44,7 @@ const generateAcessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0,
         let refreshToken;
         if (val === 0) {
             refreshToken = (0, tokens_1.generateRefreshToken)(user);
-            const userWithRefreshToken = yield passwordRelated_1.prisma.user.update({
+            const userWithRefreshToken = yield hashedPassword_1.prisma.user.update({
                 where: {
                     userId: userId,
                 },
@@ -90,7 +90,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
                 unlinkPath(avatarLocalPath, coverImageLocalPath);
                 throw new ApiError_1.ApiError(400, "All fields are required");
             }
-            const existedUser = yield passwordRelated_1.prisma.user.findFirst({
+            const existedUser = yield hashedPassword_1.prisma.user.findFirst({
                 where: {
                     OR: [{ username: username }, { email: email }],
                 },
@@ -105,7 +105,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
             }
             // Hash password BEFORE creating user
             const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-            const createdUser = yield passwordRelated_1.prisma.user.create({
+            const createdUser = yield hashedPassword_1.prisma.user.create({
                 data: {
                     fullName: fullName,
                     avatar: avatar.url,
@@ -143,7 +143,7 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
             if (!username && !email) {
                 throw new ApiError_1.ApiError(500, "Username and email is required");
             }
-            const user = yield passwordRelated_1.prisma.user.findFirst({
+            const user = yield hashedPassword_1.prisma.user.findFirst({
                 where: {
                     OR: [{ username: username }, { email: email }],
                 },
@@ -151,12 +151,12 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
             if (!user) {
                 throw new ApiError_1.ApiError(404, "User does not exist!");
             }
-            const isPasswordValid = yield (0, passwordRelated_1.isPasswordCorrect)(password, user.password);
+            const isPasswordValid = yield (0, hashedPassword_1.isPasswordCorrect)(password, user.password);
             if (!isPasswordValid) {
                 throw new ApiError_1.ApiError(401, "Invalid user credentials!");
             }
             const { accessToken, refreshToken } = yield generateAcessAndRefreshTokens(user.userId);
-            const loggedUser = yield passwordRelated_1.prisma.user.findUnique({
+            const loggedUser = yield hashedPassword_1.prisma.user.findUnique({
                 where: {
                     userId: user.userId,
                 },
@@ -199,7 +199,7 @@ const logoutUser = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
-            yield passwordRelated_1.prisma.user.update({
+            yield hashedPassword_1.prisma.user.update({
                 where: {
                     userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId,
                 },
@@ -232,7 +232,7 @@ const refreshAccessToken = (0, asyncHandler_1.asyncHandler)({
             }
             const decodedToken = jsonwebtoken_1.default.verify(inComingRefreshToken, process.env.REFRESH_TOKEN_SECRET || "");
             // decodedToken { id: '1', iat: 1751957369, exp: 1752821369 }
-            const user = yield passwordRelated_1.prisma.user.findUnique({
+            const user = yield hashedPassword_1.prisma.user.findUnique({
                 where: {
                     userId: Number(decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.id),
                 },
@@ -265,16 +265,17 @@ const changeCurrentPassword = (0, asyncHandler_1.asyncHandler)({
         var _a;
         try {
             const { password, newPassword } = req.body;
-            const user = yield passwordRelated_1.prisma.user.findUnique({
+            const user = yield hashedPassword_1.prisma.user.findUnique({
                 where: {
                     userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId,
                 },
             });
-            const isOldPasswordCorrect = yield (0, passwordRelated_1.isPasswordCorrect)(password, user === null || user === void 0 ? void 0 : user.password);
+            const isOldPasswordCorrect = yield (0, hashedPassword_1.isPasswordCorrect)(password, user === null || user === void 0 ? void 0 : user.password);
             if (!isOldPasswordCorrect) {
                 throw new ApiError_1.ApiError(400, "Invalid Old Password");
             }
-            yield passwordRelated_1.prisma.user.isPasswordChanged(user, newPassword);
+            // for password to hash again
+            yield hashedPassword_1.prisma.user.hashPasswordAgain(user, newPassword);
             res
                 .status(200)
                 .json(new ApiResponse_1.ApiResponse(200, {}, "Password changed successfully"));
@@ -304,7 +305,7 @@ const updateAccountDetails = (0, asyncHandler_1.asyncHandler)({
             if (!fullName && !email && !username && !description) {
                 throw new ApiError_1.ApiError(400, "All fields are required");
             }
-            const user = yield passwordRelated_1.prisma.user.update({
+            const user = yield hashedPassword_1.prisma.user.update({
                 where: {
                     userId: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
@@ -354,7 +355,7 @@ const updateUserAvatar = (0, asyncHandler_1.asyncHandler)({
             }
             const publicId = match[1];
             yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
-            const userWithNewAvatar = yield passwordRelated_1.prisma.user.update({
+            const userWithNewAvatar = yield hashedPassword_1.prisma.user.update({
                 where: {
                     userId: (_c = req.user) === null || _c === void 0 ? void 0 : _c.userId,
                 },
@@ -392,7 +393,7 @@ const updateUserCoverImage = (0, asyncHandler_1.asyncHandler)({
             }
             const publicId = match[1];
             yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
-            const userWithNewCoverImage = yield passwordRelated_1.prisma.user.update({
+            const userWithNewCoverImage = yield hashedPassword_1.prisma.user.update({
                 where: {
                     userId: (_c = req.user) === null || _c === void 0 ? void 0 : _c.userId,
                 },
@@ -422,7 +423,7 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
             if (!username.trim()) {
                 throw new ApiError_1.ApiError(400, "Username is missing!");
             }
-            const channel = yield passwordRelated_1.prisma.user.findUnique({
+            const channel = yield hashedPassword_1.prisma.user.findUnique({
                 where: {
                     username: username === null || username === void 0 ? void 0 : username.toLowerCase(),
                 },
@@ -435,13 +436,13 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
             }
             const [subcribers, subscribedTo] = yield Promise.all([
                 // subcribers of this channel(other users who subcribe this channel)
-                passwordRelated_1.prisma.subscription.count({
+                hashedPassword_1.prisma.subscription.count({
                     where: {
                         channelId: channel.userId,
                     },
                 }),
                 //
-                passwordRelated_1.prisma.subscription.count({
+                hashedPassword_1.prisma.subscription.count({
                     where: {
                         subscriberId: channel.userId,
                     },
@@ -449,7 +450,7 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
             ]);
             // check if currentLoggedInUser is a subscriber to this channel
             const isSubscribed = currentLoggedInUser
-                ? Boolean(yield passwordRelated_1.prisma.subscription.findFirst({
+                ? Boolean(yield hashedPassword_1.prisma.subscription.findFirst({
                     where: {
                         channelId: channel.userId,
                         subscriberId: currentLoggedInUser,
@@ -457,7 +458,7 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
                 }))
                 : false;
             // fetch channel profile with all fields
-            const channelProfile = yield passwordRelated_1.prisma.user.findUnique({
+            const channelProfile = yield hashedPassword_1.prisma.user.findUnique({
                 where: {
                     userId: channel.userId,
                 },
@@ -492,7 +493,7 @@ const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
             const limit = parseInt(req.query.limit) || 10;
             const skip = (page - 1) * limit;
             // get user's watchHistory videoIds array
-            const user = yield passwordRelated_1.prisma.user.findUnique({
+            const user = yield hashedPassword_1.prisma.user.findUnique({
                 where: {
                     userId: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
@@ -506,7 +507,7 @@ const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
             // Array of videoIds
             const videoIds = user.watchHistory.map((videoId) => videoId.id);
             // get paginated watch history videos with owner's(user) details
-            const watchHistoryWithOwner = yield passwordRelated_1.prisma.video.findMany({
+            const watchHistoryWithOwner = yield hashedPassword_1.prisma.video.findMany({
                 where: {
                     id: { in: videoIds },
                 },
@@ -534,7 +535,7 @@ const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
                 take: limit,
             });
             // get total videos for pagination metadata
-            const totalCount = yield passwordRelated_1.prisma.video.count({
+            const totalCount = yield hashedPassword_1.prisma.video.count({
                 where: {
                     id: { in: videoIds },
                     isPublised: true,

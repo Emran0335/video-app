@@ -1,4 +1,4 @@
-import { prisma, isPasswordCorrect } from "../utils/passwordRelated";
+import { prisma, isPasswordCorrect } from "../utils/hashedPassword";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -21,7 +21,7 @@ function unlinkPath(avatarLocalPath: any, coverImageLocalPath: any) {
 }
 
 // for the creation of token
-const generateAcessAndRefreshTokens = async (userId: number, val = 0) => {
+const generateAccessAndRefreshTokens = async (userId: number, val = 0) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -174,7 +174,7 @@ const loginUser = asyncHandler({
       if (!isPasswordValid) {
         throw new ApiError(401, "Invalid user credentials!");
       }
-      const { accessToken, refreshToken } = await generateAcessAndRefreshTokens(
+      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
         user.userId
       );
 
@@ -283,7 +283,7 @@ const refreshAccessToken = asyncHandler({
         sameSite: "none",
       };
 
-      const { accessToken } = await generateAcessAndRefreshTokens(
+      const { accessToken } = await generateAccessAndRefreshTokens(
         user?.userId,
         1
       );
@@ -317,7 +317,8 @@ const changeCurrentPassword = asyncHandler({
         throw new ApiError(400, "Invalid Old Password");
       }
 
-      await prisma.user.isPasswordChanged(user, newPassword);
+      // for password to hash again
+      await prisma.user.hashPasswordAgain(user, newPassword);
 
       res
         .status(200)

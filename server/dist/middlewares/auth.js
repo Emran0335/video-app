@@ -16,7 +16,7 @@ exports.verifyJWT = void 0;
 const ApiError_1 = require("../utils/ApiError");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const passwordRelated_1 = require("../utils/passwordRelated");
+const hashedPassword_1 = require("../utils/hashedPassword");
 exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
@@ -35,7 +35,7 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
                     return next(new ApiError_1.ApiError(401, "Invalid access token"));
                 }
                 // decodedToken { id: '1', iat: 1751957369, exp: 1752821369 }
-                const user = yield passwordRelated_1.prisma.user.findUnique({
+                const user = yield hashedPassword_1.prisma.user.findUnique({
                     where: {
                         userId: Number(decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.id),
                     },

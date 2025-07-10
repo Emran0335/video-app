@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary";
-import { prisma } from "../utils/passwordRelated";
+import { prisma } from "../utils/hashedPassword";
 
 // to delete files from the local file system
 
@@ -304,7 +304,7 @@ const updateVideo = asyncHandler({
         const match = thumbnailUrl?.match(regex);
 
         if (!match) {
-          throw new ApiError(400, "Couldn't find public Id of old avatar!");
+          throw new ApiError(400, "Couldn't find public Id of old thumbnail!");
         }
         const publicId = match[1];
         await deleteFromCloudinary(publicId);
@@ -315,9 +315,9 @@ const updateVideo = asyncHandler({
           id: Number(videoId),
         },
         data: {
-          title,
-          description,
-          thumbnail: thumbnail.secure_url,
+          title: title || video?.title,
+          description: description || video?.description,
+          thumbnail: thumbnail.secure_url || video?.thumbnail,
         },
       });
 
@@ -332,6 +332,68 @@ const updateVideo = asyncHandler({
   },
 });
 
+const deleteVideo = asyncHandler({
+  requestHandler: async (req, res) => {
+    try {
+      const { videoId } = req.params;
+
+      if (!videoId) {
+        throw new ApiError(404, "Video ID not found!");
+      }
+
+      const video = await prisma.video.findUnique({
+        where: {
+          id: Number(videoId),
+        },
+      });
+
+      if (!video) {
+        throw new ApiError(404, "Video not found!");
+      }
+
+      if (video?.ownerId !== req.user?.userId) {
+        throw new ApiError(401, "Not have permission to delete video!");
+      }
+
+      await prisma.video.delete({
+        where: {
+          id: Number(videoId),
+        },
+      });
+
+      // delete videoFile and thumbail
+      const thumbailUrl = video?.thumbnail;
+      const videoFileUrl = video?.videoFile;
+
+      const regex = /\/([^/]+)\.[^.]+$/;
+
+      // let's delete thumbnail
+      let match = thumbailUrl.match(regex);
+      if (!match) {
+        throw new ApiError(400, "Couldn't find thumbnail");
+      }
+      let publicId = match[1];
+
+      const deleteThumbnail = await deleteFromCloudinary(publicId);
+
+      // let's delete videoFile
+      match = videoFileUrl.match(regex);
+      if (!match) {
+        throw new ApiError(400, "Couldn't find videoFile");
+      }
+      publicId = match[1];
+
+      const deleteVideoFile = await deleteFromCloudinary(publicId);
+
+      if (deleteThumbnail.result !== "ok" && deleteVideoFile.result !== "ok") {
+        throw new ApiError(
+          500,
+          "Error while deleting thumbnail and videoFile from cloudinary"
+        );
+      }
+    } catch (error) {}
+  },
+});
 export {
   publishAVideo,
   getAllVideos,
