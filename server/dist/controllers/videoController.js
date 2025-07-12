@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateVideo = exports.getVideoById = exports.getUserVideos = exports.getAllVideos = exports.publishAVideo = void 0;
+exports.getSubscribedVideos = exports.togglePublishStatus = exports.deleteVideo = exports.updateVideo = exports.getVideoById = exports.getUserVideos = exports.getAllVideos = exports.publishAVideo = void 0;
 const fs_1 = __importDefault(require("fs"));
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
@@ -71,7 +71,7 @@ const publishAVideo = (0, asyncHandler_1.asyncHandler)({
                     title: title,
                     duration: videoFile === null || videoFile === void 0 ? void 0 : videoFile.width,
                     description: description || "",
-                    isPublised: true,
+                    isPublished: true,
                     ownerId: Number((_c = req.user) === null || _c === void 0 ? void 0 : _c.userId),
                 },
             });
@@ -96,7 +96,7 @@ const getAllVideos = (0, asyncHandler_1.asyncHandler)({
             const sortField = sortBy;
             const sortOrder = sortType === "asc" ? "asc" : "desc";
             const videos = yield hashedPassword_1.prisma.video.findMany({
-                where: Object.assign({ isPublised: true }, (query && {
+                where: Object.assign({ isPublished: true }, (query && {
                     OR: [
                         { title: { contains: query, mode: "insensitive" } },
                         {
@@ -107,6 +107,7 @@ const getAllVideos = (0, asyncHandler_1.asyncHandler)({
                 include: {
                     owner: {
                         select: {
+                            userId: true,
                             avatar: true,
                             fullName: true,
                             username: true,
@@ -146,7 +147,7 @@ const getUserVideos = (0, asyncHandler_1.asyncHandler)({
             const skip = (page - 1) * limit;
             const videos = yield hashedPassword_1.prisma.video.findMany({
                 where: {
-                    AND: [{ ownerId: Number(userId) }, { isPublised: true }],
+                    AND: [{ ownerId: Number(userId) }, { isPublished: true }],
                 },
                 orderBy: {
                     createdAt: sortType, // Sort by creation date
@@ -156,6 +157,7 @@ const getUserVideos = (0, asyncHandler_1.asyncHandler)({
                 include: {
                     owner: {
                         select: {
+                            userId: true,
                             avatar: true,
                             username: true,
                             fullName: true,
@@ -319,7 +321,102 @@ const deleteVideo = (0, asyncHandler_1.asyncHandler)({
             if (deleteThumbnail.result !== "ok" && deleteVideoFile.result !== "ok") {
                 throw new ApiError_1.ApiError(500, "Error while deleting thumbnail and videoFile from cloudinary");
             }
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, {}, "Video deleted successfully"));
         }
-        catch (error) { }
+        catch (error) {
+            throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while deleting video");
+        }
     }),
 });
+exports.deleteVideo = deleteVideo;
+const togglePublishStatus = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const { videoId } = req.params;
+            if (!videoId) {
+                throw new ApiError_1.ApiError(400, "Invalid video ID!");
+            }
+            const video = yield hashedPassword_1.prisma.video.findUnique({
+                where: {
+                    id: Number(videoId),
+                },
+            });
+            if (!video) {
+                throw new ApiError_1.ApiError(404, "Video not found!");
+            }
+            if ((video === null || video === void 0 ? void 0 : video.ownerId) !== ((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId)) {
+                throw new ApiError_1.ApiError(401, "Not have the permission to toggle publishStatus!");
+            }
+            const updateVideo = yield hashedPassword_1.prisma.video.update({
+                where: {
+                    id: Number(videoId),
+                },
+                data: {
+                    isPublished: !video.isPublished,
+                },
+            });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, updateVideo, "Published status toggled successfully!"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while deleting video");
+        }
+    }),
+});
+exports.togglePublishStatus = togglePublishStatus;
+const getSubscribedVideos = (0, asyncHandler_1.asyncHandler)({
+    requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const { page = 1, limit = 10, sortType = "desc" } = req.query;
+            // Step 1: Get all subscribed channel IDs
+            const subscriptions = yield hashedPassword_1.prisma.subscription.findMany({
+                where: {
+                    subscriberId: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
+                },
+                select: {
+                    channelId: true,
+                },
+            });
+            const channelIds = subscriptions.map((sub) => sub.channelId);
+            if (channelIds.length === 0) {
+                throw new ApiError_1.ApiError(200, "No subscribed channels found");
+            }
+            // Step 2: Get videos from those channels
+            const videos = yield hashedPassword_1.prisma.video.findMany({
+                where: {
+                    ownerId: {
+                        in: channelIds,
+                    },
+                    isPublished: true,
+                },
+                orderBy: {
+                    createdAt: sortType === "asc" ? "asc" : "desc",
+                },
+                skip: (Number(page) - 1) * Number(limit),
+                take: Number(limit),
+                include: {
+                    owner: {
+                        select: {
+                            userId: true,
+                            username: true,
+                            fullName: true,
+                            avatar: true,
+                        },
+                    },
+                },
+            });
+            res
+                .status(200)
+                .json(new ApiResponse_1.ApiResponse(200, videos, "Subscribed videos fetched successfully"));
+        }
+        catch (error) {
+            throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while deleting video");
+        }
+    }),
+});
+exports.getSubscribedVideos = getSubscribedVideos;

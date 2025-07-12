@@ -25,7 +25,7 @@ CREATE TABLE "Video" (
     "duration" INTEGER NOT NULL,
     "ownerId" INTEGER NOT NULL,
     "views" INTEGER NOT NULL DEFAULT 0,
-    "isPublised" BOOLEAN NOT NULL DEFAULT true,
+    "isPublished" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

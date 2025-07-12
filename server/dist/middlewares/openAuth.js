@@ -44,7 +44,9 @@ exports.openAuth = (0, asyncHandler_1.asyncHandler)({
                         avatar: true,
                         coverImage: true,
                         description: true,
-                        watchHistory: true
+                        watchHistory: true,
+                        createdAt: true,
+                        updatedAt: true,
                     },
                 });
                 if (!user) {

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
-import {prisma} from "../utils/hashedPassword"
+import { prisma } from "../utils/hashedPassword";
 
 interface User {
   userId: number;
@@ -21,7 +21,6 @@ declare global {
     }
   }
 }
-
 
 export const openAuth = asyncHandler({
   requestHandler: async (req: Request, res: Response, next: NextFunction) => {
@@ -54,7 +53,9 @@ export const openAuth = asyncHandler({
             avatar: true,
             coverImage: true,
             description: true,
-            watchHistory:true
+            watchHistory: true,
+            createdAt: true,
+            updatedAt: true,
           },
         });
 

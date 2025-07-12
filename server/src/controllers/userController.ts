@@ -618,7 +618,7 @@ const getWatchHistory = asyncHandler({
           videoFile: true,
           thumbnail: true,
           views: true,
-          isPublised: true,
+          isPublished: true,
           createdAt: true,
           updatedAt: true,
           owner: {
@@ -638,7 +638,7 @@ const getWatchHistory = asyncHandler({
       const totalCount = await prisma.video.count({
         where: {
           id: { in: videoIds },
-          isPublised: true,
+          isPublished: true,
         },
       });
 

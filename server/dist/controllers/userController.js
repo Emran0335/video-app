@@ -519,7 +519,7 @@ const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
                     videoFile: true,
                     thumbnail: true,
                     views: true,
-                    isPublised: true,
+                    isPublished: true,
                     createdAt: true,
                     updatedAt: true,
                     owner: {
@@ -538,7 +538,7 @@ const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
             const totalCount = yield hashedPassword_1.prisma.video.count({
                 where: {
                     id: { in: videoIds },
-                    isPublised: true,
+                    isPublished: true,
                 },
             });
             res.status(200).json(new ApiResponse_1.ApiResponse(200, {

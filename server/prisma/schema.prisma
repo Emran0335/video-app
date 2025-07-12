@@ -43,7 +43,7 @@ model Video {
   duration    Int
   ownerId     Int
   views       Int        @default(0)
-  isPublised  Boolean    @default(true)
+  isPublished  Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   owner       User       @relation(fields: [ownerId], references: [userId])

@@ -48,6 +48,8 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
                         coverImage: true,
                         description: true,
                         watchHistory: true,
+                        createdAt: true,
+                        updatedAt: true,
                     },
                 });
                 if (!user) {
