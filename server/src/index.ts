@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 // ROUTES IMPORTS
 import userRoutes from "./routes/userRoutes";
 import videoRoutes from "./routes/videoRoutes";
+import tweetRoutes from "./routes/tweetRoutes";
 
 // CONFIGURATIONS
 dotenv.config({ quiet: true });
@@ -41,6 +42,7 @@ app.get("/", (req, res) => {
 });
 app.use("/user", userRoutes);
 app.use("/videos", videoRoutes);
+app.use("/tweet", tweetRoutes);
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;

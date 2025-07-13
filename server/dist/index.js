@@ -13,6 +13,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 // ROUTES IMPORTS
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const videoRoutes_1 = __importDefault(require("./routes/videoRoutes"));
+const tweetRoutes_1 = __importDefault(require("./routes/tweetRoutes"));
 // CONFIGURATIONS
 dotenv_1.default.config({ quiet: true });
 const app = (0, express_1.default)();
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
 });
 app.use("/user", userRoutes_1.default);
 app.use("/videos", videoRoutes_1.default);
+app.use("/tweet", tweetRoutes_1.default);
 // SERVER
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {

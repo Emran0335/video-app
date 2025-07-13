@@ -43,7 +43,7 @@ model Video {
   duration    Int
   ownerId     Int
   views       Int        @default(0)
-  isPublished  Boolean    @default(true)
+  isPublished Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   owner       User       @relation(fields: [ownerId], references: [userId])
@@ -55,10 +55,10 @@ model Video {
 model Tweet {
   id        Int      @id @default(autoincrement())
   content   String
-  owner     Int
+  ownerId   Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  ownerId   User     @relation(fields: [owner], references: [userId])
+  owner     User     @relation(fields: [ownerId], references: [userId])
   Like      Like[]
 }
 
