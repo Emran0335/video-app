@@ -42,7 +42,7 @@ app.get("/", (req, res) => {
 });
 app.use("/user", userRoutes);
 app.use("/videos", videoRoutes);
-app.use("/tweet", tweetRoutes);
+app.use("/tweets", tweetRoutes);
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;

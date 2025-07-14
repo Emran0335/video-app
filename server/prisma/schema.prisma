@@ -76,14 +76,14 @@ model Comment {
 
 model Like {
   id        Int      @id @default(autoincrement())
-  comment   Int // relation with comment
   video     Int // relation with Video
+  comment   Int // relation with comment
   tweet     Int // relation with Tweet
   likedBy   Int // relation with User
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  commentId Comment  @relation(fields: [comment], references: [id])
   videoId   Video    @relation(fields: [video], references: [id])
+  commentId Comment  @relation(fields: [comment], references: [id])
   tweetId   Tweet    @relation(fields: [tweet], references: [id])
   likedById User     @relation(fields: [likedBy], references: [userId])
 }
