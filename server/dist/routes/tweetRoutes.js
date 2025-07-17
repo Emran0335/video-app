@@ -7,4 +7,7 @@ const openAuth_1 = require("../middlewares/openAuth");
 const router = (0, express_1.Router)();
 router.post("/", auth_1.verifyJWT, tweetController_1.createTweet);
 router.get("/", openAuth_1.openAuth, tweetController_1.getAllTweets);
+router.get("/user/:userId", openAuth_1.openAuth, tweetController_1.getUserTweets);
+router.patch("/:tweetId", auth_1.verifyJWT, tweetController_1.updateTweet);
+router.delete("/:tweetId", auth_1.verifyJWT, tweetController_1.deleteTweet);
 exports.default = router;
