@@ -15,6 +15,7 @@ const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const videoRoutes_1 = __importDefault(require("./routes/videoRoutes"));
 const tweetRoutes_1 = __importDefault(require("./routes/tweetRoutes"));
 const commentRoutes_1 = __importDefault(require("./routes/commentRoutes"));
+const likeRoutes_1 = __importDefault(require("./routes/likeRoutes"));
 // CONFIGURATIONS
 dotenv_1.default.config({ quiet: true });
 const app = (0, express_1.default)();
@@ -43,6 +44,7 @@ app.use("/users", userRoutes_1.default);
 app.use("/videos", videoRoutes_1.default);
 app.use("/tweets", tweetRoutes_1.default);
 app.use("/comments", commentRoutes_1.default);
+app.use("/likes", likeRoutes_1.default);
 // SERVER
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {

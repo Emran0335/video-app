@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../middlewares/auth");
+const likeController_1 = require("../controllers/likeController");
+const router = (0, express_1.Router)();
+router.get("/videos", auth_1.verifyJWT, likeController_1.getLikedVideos);
+router.post("/toggle/v/:videoId", auth_1.verifyJWT, likeController_1.toggleVideoLike);
+router.post("/toggle/c/:commentId", auth_1.verifyJWT, likeController_1.toggleCommentLike);
+router.post("/toggle/t/:tweetId", auth_1.verifyJWT, likeController_1.toggleTweetLike);
+exports.default = router;

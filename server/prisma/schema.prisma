@@ -76,16 +76,16 @@ model Comment {
 
 model Like {
   id        Int      @id @default(autoincrement())
-  video     Int // relation with Video
-  comment   Int // relation with comment
-  tweet     Int // relation with Tweet
-  likedBy   Int // relation with User
+  video     Int? // relation with Video
+  comment   Int? // relation with comment
+  tweet     Int? // relation with Tweet
+  likedBy   Int? // relation with User
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  videoId   Video    @relation(fields: [video], references: [id])
-  commentId Comment  @relation(fields: [comment], references: [id])
-  tweetId   Tweet    @relation(fields: [tweet], references: [id])
-  likedById User     @relation(fields: [likedBy], references: [userId])
+  videoId   Video?    @relation(fields: [video], references: [id])
+  commentId Comment? @relation(fields: [comment], references: [id])
+  tweetId   Tweet?   @relation(fields: [tweet], references: [id])
+  likedById User?     @relation(fields: [likedBy], references: [userId])
 }
 
 model Playlist {
