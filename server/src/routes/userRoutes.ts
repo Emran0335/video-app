@@ -19,7 +19,7 @@ import { openAuth } from "../middlewares/openAuth";
 const router = Router();
 
 router.post(
-  "/register",
+  "/user/register",
   upload.fields([
     {
       name: "avatar",
@@ -33,20 +33,20 @@ router.post(
   registerUser
 );
 
-router.post("/login", loginUser);
-router.post("/logout", verifyJWT, logoutUser);
-router.patch("/refresh-token", refreshAccessToken);
-router.post("/change-password", verifyJWT, changeCurrentPassword);
-router.get("/current-user", verifyJWT, getCurrentLoggedInUser);
-router.patch("/update-account", verifyJWT, updateAccountDetails);
-router.patch("/avatar", verifyJWT, upload.single("avatar"), updateUserAvatar);
+router.post("/user/login", loginUser);
+router.post("/user/logout", verifyJWT, logoutUser);
+router.patch("/user/refresh-token", refreshAccessToken);
+router.post("/user/change-password", verifyJWT, changeCurrentPassword);
+router.get("/user/current-user", verifyJWT, getCurrentLoggedInUser);
+router.patch("/user/update-account", verifyJWT, updateAccountDetails);
+router.patch("/user/avatar", verifyJWT, upload.single("avatar"), updateUserAvatar);
 router.patch(
-  "/cover-image",
+  "/user/cover-image",
   verifyJWT,
   upload.single("coverImage"),
   updateUserCoverImage
 );
-router.get("/channel/:username", openAuth, getUserChannelProfile);
-router.get("/history", verifyJWT, getWatchHistory);
+router.get("/user/channel/:username", openAuth, getUserChannelProfile);
+router.get("/user/history", verifyJWT, getWatchHistory);
 
 export default router;

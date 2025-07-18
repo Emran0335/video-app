@@ -11,10 +11,10 @@ import { openAuth } from "../middlewares/openAuth";
 
 const router = Router();
 
-router.post("/", verifyJWT, createTweet);
+router.post("/tweet/", verifyJWT, createTweet);
 router.get("/", openAuth, getAllTweets);
-router.get("/user/:userId", openAuth, getUserTweets);
-router.patch("/:tweetId", verifyJWT, updateTweet);
-router.delete("/:tweetId", verifyJWT, deleteTweet);
+router.get("/tweet/user/:userId", openAuth, getUserTweets);
+router.patch("/tweet/:tweetId", verifyJWT, updateTweet);
+router.delete("/tweet/:tweetId", verifyJWT, deleteTweet);
 
 export default router;

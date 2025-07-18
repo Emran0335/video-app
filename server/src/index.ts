@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes";
 import videoRoutes from "./routes/videoRoutes";
 import tweetRoutes from "./routes/tweetRoutes";
+import commentRoutes from "./routes/commentRoutes";
 
 // CONFIGURATIONS
 dotenv.config({ quiet: true });
@@ -40,9 +41,10 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("This is home route.");
 });
-app.use("/user", userRoutes);
+app.use("/users", userRoutes);
 app.use("/videos", videoRoutes);
 app.use("/tweets", tweetRoutes);
+app.use("/comments", commentRoutes);
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;

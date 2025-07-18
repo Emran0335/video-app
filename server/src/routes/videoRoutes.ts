@@ -17,10 +17,10 @@ const router = Router();
 
 router.get("/", getAllVideos);
 router.get("/video/:userId", getUserVideos);
-router.get("/:videoId", openAuth, getVideoById);
+router.get("/video/:videoId", openAuth, getVideoById);
 
 router.post(
-  "/",
+  "/video",
   upload.fields([
     {
       name: "videoFile",
@@ -35,9 +35,9 @@ router.post(
   publishAVideo
 );
 
-router.patch("/:videoId", verifyJWT, upload.single("thumbnail"), updateVideo);
-router.delete("/:videoId", verifyJWT, deleteVideo);
-router.patch("/toggle/:videoId", verifyJWT, togglePublishStatus);
+router.patch("/video/:videoId", verifyJWT, upload.single("thumbnail"), updateVideo);
+router.delete("/video/:videoId", verifyJWT, deleteVideo);
+router.patch("/video/toggle/:videoId", verifyJWT, togglePublishStatus);
 router.get("/video/subscriptions",verifyJWT, getSubscribedVideos);
 
 export default router;
