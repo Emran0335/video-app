@@ -12,6 +12,7 @@ import videoRoutes from "./routes/videoRoutes";
 import tweetRoutes from "./routes/tweetRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import likeRoutes from "./routes/likeRoutes";
+import playlistRoutes from "./routes/playlistRoutes";
 
 // CONFIGURATIONS
 dotenv.config({ quiet: true });
@@ -47,6 +48,7 @@ app.use("/videos", videoRoutes);
 app.use("/tweets", tweetRoutes);
 app.use("/comments", commentRoutes);
 app.use("/likes", likeRoutes);
+app.use("/playlists", playlistRoutes);
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;

@@ -49,7 +49,7 @@ model Video {
   owner       User       @relation(fields: [ownerId], references: [userId])
   Comment     Comment[]
   Like        Like[]
-  Playlist    Playlist[]
+  Playlist    Playlist[] @relation("VideoToPlaylist")
 }
 
 model Tweet {
@@ -95,7 +95,7 @@ model Playlist {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   ownerId     Int // relation with User
-  videos      Video[]
+  videos      Video[] @relation("VideoToPlaylist")
   owner       User     @relation(fields: [ownerId], references: [userId])
 }
 

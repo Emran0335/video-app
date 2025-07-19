@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../middlewares/auth");
+const openAuth_1 = require("../middlewares/openAuth");
+const playlistController_1 = require("../controllers/playlistController");
+const router = (0, express_1.Router)();
+router.get("/:playlistId", openAuth_1.openAuth, playlistController_1.getPlaylistById);
+router.get("/user/:userId", openAuth_1.openAuth, playlistController_1.getUserPlaylists);
+router.get("/user/p/:videoID", auth_1.verifyJWT, playlistController_1.getVideoPlaylist);
+router.post("/", auth_1.verifyJWT, playlistController_1.createPlaylist);
+router.patch("/add/:videoId/:playlistId", auth_1.verifyJWT, playlistController_1.addVideoToPlaylist);
+router.patch("/remove/:videoId/:playlistId", auth_1.verifyJWT, playlistController_1.removeVideoFromPlaylist);
+router.patch("/:playlistId", auth_1.verifyJWT, auth_1.verifyJWT, playlistController_1.updatePlaylist);
+router.delete("/:playlistId", auth_1.verifyJWT, playlistController_1.deletePlaylist);
+exports.default = router;
