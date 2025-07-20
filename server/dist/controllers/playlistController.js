@@ -50,63 +50,59 @@ const addVideoToPlaylist = (0, asyncHandler_1.asyncHandler)({
         var _a;
         try {
             const { playlistId, videoId } = req.params;
-            if (!playlistId) {
-                throw new ApiError_1.ApiError(400, "Invalid playlist ID");
+            const playlistIdNum = Number(playlistId);
+            const videoIdNum = Number(videoId);
+            const userId = Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId);
+            // Validate numeric IDs
+            if (isNaN(playlistIdNum) || isNaN(videoIdNum)) {
+                throw new ApiError_1.ApiError(400, "Invalid playlist or video ID");
             }
-            if (!videoId) {
-                throw new ApiError_1.ApiError(400, "Invalid video ID");
-            }
+            // Check playlist existence
             const playlist = yield hashedPassword_1.prisma.playlist.findUnique({
-                where: {
-                    id: Number(playlistId),
-                },
+                where: { id: playlistIdNum },
                 include: {
                     videos: {
-                        select: {
-                            title: true,
-                            description: true,
-                            videoFile: true,
-                            thumbnail: true,
-                            ownerId: true,
-                            duration: true,
-                            views: true,
-                            id: true,
-                            createdAt: true,
-                            updatedAt: true,
-                            Playlist: true,
-                        },
+                        select: { id: true },
                     },
                 },
             });
             if (!playlist) {
-                throw new ApiError_1.ApiError(500, "Playlist not found!");
+                throw new ApiError_1.ApiError(400, "Playlist not found");
             }
+            // Check video existence
             const video = yield hashedPassword_1.prisma.video.findUnique({
-                where: {
-                    id: Number(videoId),
-                },
+                where: { id: videoIdNum },
             });
             if (!video) {
-                throw new ApiError_1.ApiError(500, "Video not found");
+                throw new ApiError_1.ApiError(400, "Video not found");
             }
-            if (playlist.ownerId !== Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId)) {
-                throw new ApiError_1.ApiError(401, "No permission to add video to the playlist");
+            // Permission check
+            if (playlist.ownerId !== userId) {
+                throw new ApiError_1.ApiError(401, "You do not have the permission to add a video to this playlist");
             }
-            if (playlist.videos.some((video) => video.id === Number(videoId))) {
+            // Check if video is already in the playlist
+            const isAlreadyAdded = playlist.videos.some((v) => v.id === videoIdNum);
+            if (isAlreadyAdded) {
                 throw new ApiError_1.ApiError(400, "Video already in the playlist");
             }
-            const addToPlaylist = yield hashedPassword_1.prisma.playlist.update({
-                where: {
-                    id: playlist.id,
+            // Add video to playlist
+            const updatedPlaylist = yield hashedPassword_1.prisma.playlist.update({
+                where: { id: playlistIdNum },
+                data: {
+                    videos: {
+                        connect: { id: videoIdNum },
+                    },
                 },
-                data: Object.assign(Object.assign({}, playlist.videos), { id: Number(videoId) }),
+                include: {
+                    videos: true,
+                },
             });
-            if (!addToPlaylist) {
+            if (!updatedPlaylist) {
                 throw new ApiError_1.ApiError(500, "Error while adding video to the playlist");
             }
             res
                 .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, addToPlaylist, "Video added to the playlist"));
+                .json(new ApiResponse_1.ApiResponse(200, updatedPlaylist, "Video added to playlist successfully"));
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while adding video to the playlist!");
@@ -119,7 +115,7 @@ const getVideoPlaylist = (0, asyncHandler_1.asyncHandler)({
         var _a;
         try {
             const { videoId } = req.params;
-            if (!videoId) {
+            if (!videoId || isNaN(Number(videoId))) {
                 throw new ApiError_1.ApiError(400, "Invalid video ID");
             }
             const playlists = yield hashedPassword_1.prisma.playlist.findMany({

@@ -13,6 +13,8 @@ import tweetRoutes from "./routes/tweetRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import likeRoutes from "./routes/likeRoutes";
 import playlistRoutes from "./routes/playlistRoutes";
+import subscriptionRoutes from "./routes/subscriptionRoutes";
+import dashboardRoutes from "./routes/dashboardRoutes"
 
 // CONFIGURATIONS
 dotenv.config({ quiet: true });
@@ -49,6 +51,8 @@ app.use("/tweets", tweetRoutes);
 app.use("/comments", commentRoutes);
 app.use("/likes", likeRoutes);
 app.use("/playlists", playlistRoutes);
+app.use("/subscriptions", subscriptionRoutes);
+app.use("/dashboard", dashboardRoutes)
 
 // SERVER
 const port = Number(process.env.PORT) || 3000;

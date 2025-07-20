@@ -16,7 +16,7 @@ const router = Router();
 
 router.get("/:playlistId", openAuth, getPlaylistById);
 router.get("/user/:userId", openAuth, getUserPlaylists);
-router.get("/user/p/:videoID", verifyJWT, getVideoPlaylist);
+router.get("/user/p/:videoId", verifyJWT, getVideoPlaylist);
 
 router.post("/", verifyJWT, createPlaylist);
 
@@ -26,7 +26,7 @@ router.patch(
   verifyJWT,
   removeVideoFromPlaylist
 );
-router.patch("/:playlistId", verifyJWT, verifyJWT, updatePlaylist);
+router.patch("/:playlistId", verifyJWT, updatePlaylist);
 
 router.delete("/:playlistId", verifyJWT, deletePlaylist);
 

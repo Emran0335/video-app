@@ -8,53 +8,42 @@ const toggleSubscription = asyncHandler({
     try {
       const { channelId } = req.params;
 
-      if (!channelId || isNaN(Number(channelId))) {
-        throw new ApiError(400, "Invalid channel ID");
-      }
+      const channelUserId = Number(channelId);
+      const currentUserId = Number(req.user?.userId);
 
-      if (Number(channelId) === Number(req.user?.userId)) {
-        throw new ApiError(400, "Cannot subscribe own channel");
-      }
+      if (!channelUserId) throw new ApiError(400, "Invalid channel ID");
+      if (channelUserId === currentUserId)
+        throw new ApiError(400, "Cannot subscribe to your own channel");
 
-      const isSubscribed = await prisma.subscription.findFirst({
+      const existingSubscription = await prisma.subscription.findUnique({
         where: {
-          subscriberId: Number(req.user?.userId),
-          channelId: Number(channelId),
+          subscriberId_channelId: {
+            subscriberId: currentUserId,
+            channelId: channelUserId,
+          },
         },
       });
 
-      if (!isSubscribed) {
-        throw new ApiError(500, "Error while getting details of subscription");
-      }
-
-      if (isSubscribed) {
-        const unsubscribe = await prisma.subscription.delete({
+      if (existingSubscription) {
+        await prisma.subscription.delete({
           where: {
-            id: isSubscribed.id,
+            id: existingSubscription.id,
           },
         });
-
-        if (!unsubscribe) {
-          throw new ApiError(500, "Error while unsubscribing");
-        } else {
-          const subscribe = await prisma.subscription.create({
-            data: {
-              subscriberId: Number(req.user?.userId),
-              channelId: Number(channelId),
-            },
-          });
-
-          if (!subscribe) {
-            throw new ApiError(500, "Error while subscribing");
-          }
-        }
+      } else {
+        await prisma.subscription.create({
+          data: {
+            subscriberId: currentUserId,
+            channelId: channelUserId,
+          },
+        });
       }
 
       res.status(200).json(new ApiResponse(200, {}, "Subscription toggled"));
     } catch (error: any) {
       throw new ApiError(
         401,
-        error?.message || "Error while toggling subscription!"
+        error?.message || "Error while toggle subscription!"
       );
     }
   },
@@ -65,16 +54,12 @@ const getUserChannelSubscribers = asyncHandler({
     try {
       const { channelId } = req.params;
 
-      if (!channelId || isNaN(Number(channelId))) {
-        throw new ApiError(400, "Invalid channel ID");
-      }
+      const channelUserId = Number(channelId);
+      if (!channelUserId) throw new ApiError(400, "Invalid channel ID");
 
       const subscriptions = await prisma.subscription.findMany({
-        where: {
-          id: Number(channelId),
-        },
-        select: {
-          id: true,
+        where: { channelId: channelUserId },
+        include: {
           subscriber: {
             select: {
               userId: true,
@@ -86,25 +71,22 @@ const getUserChannelSubscribers = asyncHandler({
         },
       });
 
-      const transformed = {
-        subscribersCount: subscriptions.length,
-        subscribers: subscriptions.map((subs) => ({
-          userId: subs.subscriber.userId,
-          username: subs.subscriber.username,
-          avatar: subs.subscriber.avatar,
-          fullName: subs.subscriber.fullName,
-        })),
-      };
+      const subscribers = subscriptions.map((sub) => sub.subscriber);
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, transformed, "Subscribers fetched successfully")
-        );
+      res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            subscribers,
+            subscribersCount: subscribers.length,
+          },
+          "Subscribers fetched successfully"
+        )
+      );
     } catch (error: any) {
       throw new ApiError(
         401,
-        error?.message || "Error while getting suscribers!"
+        error?.message || "Error while getting user's channel subscribers!"
       );
     }
   },
@@ -114,14 +96,14 @@ const getSubscribedChannels = asyncHandler({
   requestHandler: async (req, res) => {
     try {
       const { subscriberId } = req.params;
+      const requestingUserId = Number(req.user?.userId);
 
-      if (!subscriberId || isNaN(Number(subscriberId))) {
-        throw new ApiError(400, "No valid subscriber Id found");
-      }
+      const subscriberUserId = Number(subscriberId);
+      if (!subscriberUserId) throw new ApiError(400, "Invalid subscriber ID");
 
       const subscriptions = await prisma.subscription.findMany({
         where: {
-          subscriberId: Number(subscriberId),
+          subscriberId: subscriberUserId,
         },
         include: {
           channel: {
@@ -141,15 +123,17 @@ const getSubscribedChannels = asyncHandler({
       });
 
       const channels = subscriptions.map((sub) => {
-        const subscribersList = sub.channel.subscribers || [];
+        const channel = sub.channel;
+        const subscribersList = channel.subscribers;
+
         return {
-          userId: sub.channel.userId,
-          username: sub.channel.username,
-          fullName: sub.channel.fullName,
-          avatar: sub.channel.avatar,
+          userId: channel.userId,
+          username: channel.username,
+          fullName: channel.fullName,
+          avatar: channel.avatar,
           subscribersCount: subscribersList.length,
           isSubscribed: subscribersList.some(
-            (s) => s.subscriberId === Number(req.user?.userId)
+            (s) => s.subscriberId === requestingUserId
           ),
         };
       });
@@ -167,7 +151,7 @@ const getSubscribedChannels = asyncHandler({
     } catch (error: any) {
       throw new ApiError(
         401,
-        error?.message || "Error while getting suscribed channels!"
+        error?.message || "Error while getting user's subscribed channels!"
       );
     }
   },

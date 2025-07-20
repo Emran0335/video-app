@@ -101,7 +101,7 @@ const toggleCommentLike = asyncHandler({
   requestHandler: async (req, res) => {
     try {
       const { commentId } = req.params;
-      if (!commentId) {
+      if (!commentId || isNaN(Number(commentId))) {
         throw new ApiError(400, "No valid comment Id found");
       }
       const isLiked = await prisma.like.findFirst({

@@ -103,7 +103,7 @@ const toggleCommentLike = (0, asyncHandler_1.asyncHandler)({
         var _a, _b;
         try {
             const { commentId } = req.params;
-            if (!commentId) {
+            if (!commentId || isNaN(Number(commentId))) {
                 throw new ApiError_1.ApiError(400, "No valid comment Id found");
             }
             const isLiked = yield hashedPassword_1.prisma.like.findFirst({
