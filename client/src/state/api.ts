@@ -1,19 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface User {
-  userId: number;
   username: string;
   email: string;
   password: string;
   fullName: string;
-  avatar?: string;
-  coverImage?: string;
+  avatar?: string | File;
+  coverImage?: string | File;
   description?: string;
   refreshToken?: string;
-  createdAt: Date;
-  updatedAt: Date;
-
-  watchHistory: Video[];
 }
 
 export interface Video {
@@ -108,8 +103,8 @@ export const api = createApi({
       query: () => "/users/user/current-user",
       providesTags: ["NewUser"],
     }),
-    registerUser: build.mutation<User, Partial<User>>({
-      query: (userData) => ({
+    registerUser: build.mutation<User, FormData>({
+      query: (userData: FormData) => ({
         url: "/users/user/register",
         method: "POST",
         body: userData,
