@@ -46,7 +46,7 @@ model Video {
   isPublished Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  owner       User       @relation(fields: [ownerId], references: [userId])
+  owner       User       @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
   Comment     Comment[]
   Like        Like[]
   Playlist    Playlist[] @relation("VideoToPlaylist")
@@ -58,7 +58,7 @@ model Tweet {
   ownerId   Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  owner     User     @relation(fields: [ownerId], references: [userId])
+  owner     User     @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
   Like      Like[]
 }
 
@@ -70,7 +70,7 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   videoId   Video    @relation(fields: [video], references: [id])
-  ownerId   User     @relation(fields: [owner], references: [userId])
+  ownerId   User     @relation(fields: [owner], references: [userId], onDelete: Cascade)
   Like      Like[]
 }
 
@@ -96,7 +96,7 @@ model Playlist {
   updatedAt   DateTime @updatedAt
   ownerId     Int // relation with User
   videos      Video[] @relation("VideoToPlaylist")
-  owner       User     @relation(fields: [ownerId], references: [userId])
+  owner       User     @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
 }
 
 model Subscription {
@@ -107,10 +107,10 @@ model Subscription {
   channelId    Int // relation with User
 
   // User who subscribes (subscriber)
-  subscriber User @relation("Subscriber", fields: [subscriberId], references: [userId])
+  subscriber User @relation("Subscriber", fields: [subscriberId], references: [userId], onDelete: Cascade)
 
   // Channel being subscribed to (channel owner)
-  channel User @relation("Channel", fields: [channelId], references: [userId])
+  channel User @relation("Channel", fields: [channelId], references: [userId], onDelete: Cascade)
 
   // Unique constraint to prevent duplicate subscriptions
   @@unique([subscriberId, channelId])
