@@ -1,12 +1,15 @@
 "use client";
 import { useLoginUserMutation, useRegisterUserMutation } from "@/state/api";
 import React, { useState } from "react";
-import Modal from "@/components/Modal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAppDispatch } from "../redux";
 
-const SignIn = () => {
-  const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(true);
+type SignInProps = {
+  setToggleSignUser: () => void;
+};
+
+const SignIn = ({ setToggleSignUser }: SignInProps) => {
   const [loginUser, { isLoading }] = useLoginUserMutation();
   const router = useRouter();
 
@@ -41,12 +44,9 @@ const SignIn = () => {
   const isFormValid = () => {
     return email && password;
   };
-  const onClose = () => {
-    setIsModalNewTaskOpen((prev) => !prev);
-    router.push("/");
-  };
+
   return (
-    <Modal name="Create New Task" isOpen={isModalNewTaskOpen} onClose={onClose}>
+    <div className="flex mx-auto mt-32 h-[400px] w-[500px] items-center justify-center p-1 border border-gray-100 bg-gray-200 rounded-md">
       <form
         className="mx-auto mt-2 flex flex-col max-w-sm px-4 text-gray-900"
         onSubmit={(e) => {
@@ -79,14 +79,17 @@ const SignIn = () => {
         <div className="flex items-center justify-center mt-4">
           <p className="text-gray-600">
             Don&apos;t have an Account yet?
-            <Link href={"/signUp"} className="text-red-400 cursor-pointer">
+            <button
+              className="text-red-400 cursor-pointer"
+              onClick={setToggleSignUser}
+            >
               {" "}
               Please Sign Up now
-            </Link>
+            </button>
           </p>
         </div>
       </form>
-    </Modal>
+    </div>
   );
 };
 

@@ -114,6 +114,14 @@ export const api = createApi({
       }),
       invalidatesTags: ["NewUser"],
     }),
+    logoutUser: build.mutation<void, void>({
+      query: () => ({
+        url: "/users/user/logout",
+        method: "POST",
+        credentials: "include",
+      }),
+      invalidatesTags: ["NewUser"], // <- This must match what's in your providesTags
+    }),
   }),
 });
 
@@ -121,4 +129,5 @@ export const {
   useGetCurrentLoggedInUserQuery,
   useRegisterUserMutation,
   useLoginUserMutation,
+  useLogoutUserMutation,
 } = api;

@@ -8,9 +8,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );
+
   return (
     <div className="flex min-h-screen w-full bg-gray-50 text-gray-900">
-      <Sidebar/>
+      <Sidebar />
       <main
         className={`flex w-full flex-col bg-gray-50 ${
           isSidebarCollapsed ? "" : "md:pl-64"

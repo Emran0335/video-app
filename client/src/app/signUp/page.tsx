@@ -5,8 +5,11 @@ import Modal from "@/components/Modal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const SignupPage = () => {
-  const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(true);
+type SignInProps = {
+  setToggleSignUser: () => void;
+};
+
+const SignupPage = ({ setToggleSignUser }: SignInProps) => {
   const [createUser, { isLoading }] = useRegisterUserMutation();
   const router = useRouter();
 
@@ -51,13 +54,8 @@ const SignupPage = () => {
     return username && email && password;
   };
 
-  const onClose = () => {
-    setIsModalNewTaskOpen((prev) => !prev);
-    router.push("/");
-  };
-
   return (
-    <Modal name="Create New Task" isOpen={isModalNewTaskOpen} onClose={onClose}>
+    <div className="flex mx-auto mt-32 h-[400px] w-[500px] items-center justify-center p-1 border border-gray-100 bg-gray-200 rounded-md">
       <form
         className="mx-auto mt-2 flex flex-col max-w-sm px-4 text-gray-900"
         onSubmit={(e) => {
@@ -131,17 +129,20 @@ const SignupPage = () => {
         >
           {isLoading ? "Creating..." : "Create Task"}
         </button>
+        <div className="flex items-center justify-center mt-4">
+          <p className="text-gray-600">
+            If you already signed up!
+            <button
+              className="text-red-400 cursor-pointer"
+              onClick={setToggleSignUser}
+            >
+              {" "}
+              Please Sign In
+            </button>
+          </p>
+        </div>
       </form>
-      <div className="flex items-center justify-center mt-4">
-        <p className="text-gray-600">
-          If you already signed up!
-          <Link href={"/signIn"} className="text-red-400 cursor-pointer">
-            {" "}
-            Please Sign In
-          </Link>
-        </p>
-      </div>
-    </Modal>
+    </div>
   );
 };
 
