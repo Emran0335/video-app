@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChannelVideos = exports.getChannelStats = void 0;
 const ApiError_1 = require("../utils/ApiError");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const hashedPassword_1 = require("../utils/hashedPassword");
 const getChannelStats = (0, asyncHandler_1.asyncHandler)({
@@ -65,9 +64,7 @@ const getChannelStats = (0, asyncHandler_1.asyncHandler)({
                 totalViews,
                 totalTweets,
             };
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, stats, "User channel stats fetched successfully"));
+            res.status(200).json(stats);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting user channel's stats!");
@@ -104,9 +101,7 @@ const getChannelVideos = (0, asyncHandler_1.asyncHandler)({
                 throw new ApiError_1.ApiError(500, "No video found");
             }
             const transformed = videos.map((video) => (Object.assign(Object.assign({}, video), { likesCount: video._count.Like, commentsCount: video._count.Comment })));
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, transformed, "User's videos fetched successfully"));
+            res.status(200).json(transformed);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting user's videos!");

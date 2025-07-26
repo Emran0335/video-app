@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.toggleTweetLike = exports.toggleCommentLike = exports.toggleVideoLike = exports.getLikedVideos = void 0;
 const ApiError_1 = require("../utils/ApiError");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const hashedPassword_1 = require("../utils/hashedPassword");
 const getLikedVideos = (0, asyncHandler_1.asyncHandler)({
@@ -43,9 +42,7 @@ const getLikedVideos = (0, asyncHandler_1.asyncHandler)({
             if (!likedVideos) {
                 throw new ApiError_1.ApiError(500, "Error while fetching liked videos");
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, likedVideos, "Liked videos fetched successfully"));
+            res.status(200).json(likedVideos);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting all tweet!");
@@ -88,9 +85,7 @@ const toggleVideoLike = (0, asyncHandler_1.asyncHandler)({
                     throw new ApiError_1.ApiError(500, "Error while liking the video");
                 }
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, {}, "Liked video status updated"));
+            res.status(200).json({});
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while changing video like status");
@@ -133,9 +128,7 @@ const toggleCommentLike = (0, asyncHandler_1.asyncHandler)({
                     throw new ApiError_1.ApiError(500, "Error while liking comment");
                 }
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, {}, "Liked comment status updated"));
+            res.status(200).json({});
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while changing comment status!");
@@ -178,9 +171,7 @@ const toggleTweetLike = (0, asyncHandler_1.asyncHandler)({
                     throw new ApiError_1.ApiError(500, "Error while liking tweet");
                 }
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, {}, "Liked tweet status updated"));
+            res.status(200).json({});
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while changing tweet status!");

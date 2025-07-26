@@ -1,5 +1,4 @@
 import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../utils/hashedPassword";
 
@@ -39,7 +38,7 @@ const toggleSubscription = asyncHandler({
         });
       }
 
-      res.status(200).json(new ApiResponse(200, {}, "Subscription toggled"));
+      res.status(200).json({});
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -73,16 +72,10 @@ const getUserChannelSubscribers = asyncHandler({
 
       const subscribers = subscriptions.map((sub) => sub.subscriber);
 
-      res.status(200).json(
-        new ApiResponse(
-          200,
-          {
-            subscribers,
-            subscribersCount: subscribers.length,
-          },
-          "Subscribers fetched successfully"
-        )
-      );
+      res.status(200).json({
+        subscribers,
+        subscribersCount: subscribers.length,
+      });
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -138,16 +131,10 @@ const getSubscribedChannels = asyncHandler({
         };
       });
 
-      res.status(200).json(
-        new ApiResponse(
-          200,
-          {
-            channels,
-            channelsCount: channels.length,
-          },
-          "Subscribed channels fetched successfully"
-        )
-      );
+      res.status(200).json({
+        channels,
+        channelsCount: channels.length,
+      });
     } catch (error: any) {
       throw new ApiError(
         401,

@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSubscribedVideos = exports.togglePublishStatus = exports.deleteVideo = exports.updateVideo = exports.getVideoById = exports.getUserVideos = exports.getAllVideos = exports.publishAVideo = void 0;
 const fs_1 = __importDefault(require("fs"));
 const ApiError_1 = require("../utils/ApiError");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const cloudinary_1 = require("../utils/cloudinary");
 const hashedPassword_1 = require("../utils/hashedPassword");
@@ -78,9 +77,7 @@ const publishAVideo = (0, asyncHandler_1.asyncHandler)({
             if (!video) {
                 throw new ApiError_1.ApiError(500, "Error while creating and uploading video");
             }
-            res
-                .status(201)
-                .json(new ApiResponse_1.ApiResponse(201, video, "Video published successfully"));
+            res.status(201).json(video);
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while publishing video");
@@ -127,9 +124,7 @@ const getAllVideos = (0, asyncHandler_1.asyncHandler)({
             if (!(videos === null || videos === void 0 ? void 0 : videos.length)) {
                 throw new ApiError_1.ApiError(404, "No videos found!");
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, videos, "All videos fetched successfully"));
+            res.status(200).json(videos);
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while fetching videos");
@@ -165,9 +160,7 @@ const getUserVideos = (0, asyncHandler_1.asyncHandler)({
                     },
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, videos, "User vidoes fetched successfully!"));
+            res.status(200).json(videos);
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while user's videos");
@@ -213,9 +206,7 @@ const getVideoById = (0, asyncHandler_1.asyncHandler)({
             const subscriberCount = video.owner.subscribers.length;
             const isSubscribed = video.owner.subscribers.some((sub) => { var _a; return sub.id === Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId); });
             const result = Object.assign(Object.assign({}, video), { likesCount: likesCount, isLiked: isLiked, owner: Object.assign(Object.assign({}, video.owner), { id: video.owner.userId, subscriberCount: subscriberCount, isSubscribed: isSubscribed }) });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, result, "User's video fetched successfully"));
+            res.status(200).json(result);
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while user's video");
@@ -266,9 +257,7 @@ const updateVideo = (0, asyncHandler_1.asyncHandler)({
                     thumbnail: thumbnail.secure_url || (video === null || video === void 0 ? void 0 : video.thumbnail),
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, updatedVideo, "Video is updated successfully"));
+            res.status(200).json(updatedVideo);
         }
         catch (error) {
             throw new ApiError_1.ApiError(400, "Error while updating user's video");
@@ -321,9 +310,7 @@ const deleteVideo = (0, asyncHandler_1.asyncHandler)({
             if (deleteThumbnail.result !== "ok" && deleteVideoFile.result !== "ok") {
                 throw new ApiError_1.ApiError(500, "Error while deleting thumbnail and videoFile from cloudinary");
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, {}, "Video deleted successfully"));
+            res.status(200).json({});
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while deleting video");
@@ -358,9 +345,7 @@ const togglePublishStatus = (0, asyncHandler_1.asyncHandler)({
                     isPublished: !video.isPublished,
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, updateVideo, "Published status toggled successfully!"));
+            res.status(200).json(updateVideo);
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while deleting video");
@@ -410,9 +395,7 @@ const getSubscribedVideos = (0, asyncHandler_1.asyncHandler)({
                     },
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, videos, "Subscribed videos fetched successfully"));
+            res.status(200).json(videos);
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while deleting video");

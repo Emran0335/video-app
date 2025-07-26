@@ -1,5 +1,4 @@
 import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../utils/hashedPassword";
 
@@ -28,9 +27,7 @@ const createPlaylist = asyncHandler({
         throw new ApiError(500, "Error while creating playlist");
       }
 
-      res
-        .status(201)
-        .json(new ApiResponse(201, playlist, "Playlist created successfully"));
+      res.status(201).json(playlist);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -108,15 +105,7 @@ const addVideoToPlaylist = asyncHandler({
         throw new ApiError(500, "Error while adding video to the playlist");
       }
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            updatedPlaylist,
-            "Video added to playlist successfully"
-          )
-        );
+      res.status(200).json(updatedPlaylist);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -157,15 +146,7 @@ const getVideoPlaylist = asyncHandler({
         };
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            playlistWithVideoInfo,
-            "playlists fetched successfully"
-          )
-        );
+      res.status(200).json(playlistWithVideoInfo);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -226,15 +207,7 @@ const getUserPlaylists = asyncHandler({
         };
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            transformed,
-            "User's playlist fetched successfully"
-          )
-        );
+      res.status(200).json(transformed);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -299,11 +272,7 @@ const getPlaylistById = asyncHandler({
         };
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, transformed, "Playlist fetched successfully")
-        );
+      res.status(200).json(transformed);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -347,11 +316,7 @@ const updatePlaylist = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, updatedPlaylist, "Playlist updated successfully")
-        );
+      res.status(200).json(updatedPlaylist);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -434,15 +399,7 @@ const removeVideoFromPlaylist = asyncHandler({
         );
       }
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            removeVideo,
-            "Vidoe removed from playlist successfully"
-          )
-        );
+      res.status(200).json(removeVideo);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -481,11 +438,7 @@ const deletePlaylist = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, delPlaylist, "Playlist deleted successfully")
-        );
+      res.status(200).json(delPlaylist);
     } catch (error: any) {
       throw new ApiError(
         401,

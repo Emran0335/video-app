@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getWatchHistory = exports.getUserChannelProfile = exports.updateUserCoverImage = exports.updateUserAvatar = exports.updateAccountDetails = exports.getCurrentLoggedInUser = exports.changeCurrentPassword = exports.refreshAccessToken = exports.logoutUser = exports.loginUser = exports.registerUser = void 0;
 const hashedPassword_1 = require("../utils/hashedPassword");
 const ApiError_1 = require("../utils/ApiError");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const cloudinary_1 = require("../utils/cloudinary");
 const fs_1 = __importDefault(require("fs"));
@@ -52,10 +51,12 @@ const generateAccessAndRefreshTokens = (userId_1, ...args_1) => __awaiter(void 0
                     refreshToken: refreshToken,
                 },
             });
-            return {
-                accessToken,
-                refreshToken,
-            };
+            if (userWithRefreshToken) {
+                return {
+                    accessToken,
+                    refreshToken: userWithRefreshToken.refreshToken,
+                };
+            }
         }
         return { accessToken };
     }
@@ -121,6 +122,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
                     coverImage: true,
                     description: true,
                     email: true,
+                    refreshToken: true,
                     watchHistory: true,
                     Tweet: true,
                     subscribers: true,
@@ -132,9 +134,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
                     updatedAt: true,
                 },
             });
-            res
-                .status(201)
-                .json(new ApiResponse_1.ApiResponse(200, createdUser, "User registered successfully"));
+            res.status(201).json(createdUser);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while creating new user!");
@@ -189,11 +189,11 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
                 .status(200)
                 .cookie("accessToken", accessToken, options)
                 .cookie("refreshToken", refreshToken, options)
-                .json(new ApiResponse_1.ApiResponse(200, {
+                .json({
                 user: loggedUser,
                 accessToken: accessToken,
                 refreshToken: refreshToken,
-            }, "User logged in successfully"));
+            });
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while logging user!");
@@ -221,7 +221,7 @@ const logoutUser = (0, asyncHandler_1.asyncHandler)({
             res
                 .clearCookie("accessToken", options)
                 .clearCookie("refreshToken", options)
-                .json(new ApiResponse_1.ApiResponse(200, {}, "User logged out successfully"));
+                .json({});
         }
         catch (error) {
             throw new ApiError_1.ApiError(500, (error === null || error === void 0 ? void 0 : error.message) || "Error while logging out");
@@ -258,7 +258,7 @@ const refreshAccessToken = (0, asyncHandler_1.asyncHandler)({
             res
                 .status(200)
                 .cookie("accessToken", accessToken, options)
-                .json(new ApiResponse_1.ApiResponse(200, { accessToken }, "Access token refreshed"));
+                .json({ accessToken });
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Invalid refresh token!");
@@ -282,9 +282,7 @@ const changeCurrentPassword = (0, asyncHandler_1.asyncHandler)({
             }
             // for password to hash again
             yield hashedPassword_1.prisma.user.hashPasswordAgain(user, newPassword);
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, {}, "Password changed successfully"));
+            res.status(200).json({});
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while changing password!");
@@ -297,9 +295,7 @@ const getCurrentLoggedInUser = (0, asyncHandler_1.asyncHandler)({
         if (!req.user) {
             throw new ApiError_1.ApiError(400, "Current logged-in user not found!");
         }
-        res
-            .status(200)
-            .json(new ApiResponse_1.ApiResponse(200, req.user, "Current logged-in user fetched successfully"));
+        res.status(200).json(req.user);
     }),
 });
 exports.getCurrentLoggedInUser = getCurrentLoggedInUser;
@@ -331,9 +327,7 @@ const updateAccountDetails = (0, asyncHandler_1.asyncHandler)({
                     avatar: true,
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, user, "Account details updated successfully"));
+            res.status(200).json(user);
         }
         catch (error) {
             throw new ApiError_1.ApiError(400, "Error while updating account details");
@@ -369,9 +363,7 @@ const updateUserAvatar = (0, asyncHandler_1.asyncHandler)({
                     avatar: avatar.secure_url,
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, userWithNewAvatar, "Avatar is updated successfully"));
+            res.status(200).json(userWithNewAvatar);
         }
         catch (error) {
             throw new ApiError_1.ApiError(400, "Error while updating user's avatar");
@@ -407,9 +399,7 @@ const updateUserCoverImage = (0, asyncHandler_1.asyncHandler)({
                     avatar: coverImage.secure_url,
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, userWithNewCoverImage, "CoverImage is updated successfully"));
+            res.status(200).json(userWithNewCoverImage);
         }
         catch (error) {
             throw new ApiError_1.ApiError(400, "Error while updating user's coverImage");
@@ -480,9 +470,7 @@ const getUserChannelProfile = (0, asyncHandler_1.asyncHandler)({
                 },
             });
             const profileData = Object.assign(Object.assign({}, channelProfile), { userId: channelProfile === null || channelProfile === void 0 ? void 0 : channelProfile.userId, subscribersCount: subcribers, channelsSubscribedToCount: subscribedTo, isSubscribed });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, profileData, "Channel profile fetched successfully"));
+            res.status(200).json(profileData);
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error fetching channel profile");
@@ -547,13 +535,13 @@ const getWatchHistory = (0, asyncHandler_1.asyncHandler)({
                     isPublished: true,
                 },
             });
-            res.status(200).json(new ApiResponse_1.ApiResponse(200, {
+            res.status(200).json({
                 watchHistoryWithOwner,
                 totalCount,
                 currentPage: page,
                 totalPages: Math.ceil(totalCount / limit),
                 hasNextPage: skip + limit < totalCount,
-            }, "Video watch history of the user fetched successfully"));
+            });
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error fetching watch history");

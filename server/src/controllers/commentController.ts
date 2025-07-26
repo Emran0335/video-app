@@ -1,5 +1,4 @@
 import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../utils/hashedPassword";
 
@@ -29,9 +28,7 @@ const addComment = asyncHandler({
         throw new ApiError(500, "Error while creating comment");
       }
 
-      res
-        .status(201)
-        .json(new ApiResponse(201, comment, "Comment creating successfully"));
+      res.status(201).json(comment);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -93,11 +90,7 @@ const getVideoComments = asyncHandler({
         };
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, getComments, "Comments fetched successfully")
-        );
+      res.status(200).json(getComments);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -148,11 +141,7 @@ const updateComment = asyncHandler({
         throw new ApiError(400, "Error while updating comment");
       }
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, updateComment, "Comment updated successfully")
-        );
+      res.status(200).json(updateComment);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -191,11 +180,7 @@ const deleteComment = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, deleteComment, "Comment deleted successfully")
-        );
+      res.status(200).json(deleteComment);
     } catch (error: any) {
       throw new ApiError(
         401,

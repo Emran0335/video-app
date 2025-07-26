@@ -1,5 +1,4 @@
 import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../utils/hashedPassword";
 
@@ -34,11 +33,7 @@ const getLikedVideos = asyncHandler({
         throw new ApiError(500, "Error while fetching liked videos");
       }
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, likedVideos, "Liked videos fetched successfully")
-        );
+      res.status(200).json(likedVideos);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -85,9 +80,7 @@ const toggleVideoLike = asyncHandler({
         }
       }
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Liked video status updated"));
+      res.status(200).json({});
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -131,9 +124,7 @@ const toggleCommentLike = asyncHandler({
         }
       }
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Liked comment status updated"));
+      res.status(200).json({});
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -178,9 +169,7 @@ const toggleTweetLike = asyncHandler({
         }
       }
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Liked tweet status updated"));
+      res.status(200).json({});
     } catch (error: any) {
       throw new ApiError(
         401,

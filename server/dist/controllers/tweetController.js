@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTweet = exports.getUserTweets = exports.updateTweet = exports.getAllTweets = exports.createTweet = void 0;
 const ApiError_1 = require("../utils/ApiError");
 const asyncHandler_1 = require("../utils/asyncHandler");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const hashedPassword_1 = require("../utils/hashedPassword");
 const createTweet = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -32,9 +31,7 @@ const createTweet = (0, asyncHandler_1.asyncHandler)({
             if (!tweet) {
                 throw new ApiError_1.ApiError(500, "Error while creating tweet");
             }
-            res
-                .status(201)
-                .json(new ApiResponse_1.ApiResponse(201, tweet, "Tweet created successfully"));
+            res.status(201).json(tweet);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while creating new tweet!");
@@ -84,9 +81,7 @@ const getAllTweets = (0, asyncHandler_1.asyncHandler)({
                         : false,
                 };
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, tweetsWithInfo, "Tweets fetched successfully"));
+            res.status(200).json(tweetsWithInfo);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting all tweet!");
@@ -161,9 +156,7 @@ const updateTweet = (0, asyncHandler_1.asyncHandler)({
                         : false,
                 };
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, tweetDetails, "Tweet updated successfully"));
+            res.status(200).json(tweetDetails);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while updating tweet!");
@@ -216,9 +209,7 @@ const getUserTweets = (0, asyncHandler_1.asyncHandler)({
                         : false,
                 };
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, tweetDetails, "Fetch user's tweets successfully"));
+            res.status(200).json(tweetDetails);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting user's tweets!");
@@ -251,9 +242,7 @@ const deleteTweet = (0, asyncHandler_1.asyncHandler)({
             if (!deletedTweet) {
                 throw new ApiError_1.ApiError(400, "Error while deleting tweet");
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, deletedTweet, "Tweet deleted successfully"));
+            res.status(200).json(deletedTweet);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while deleting tweet!");

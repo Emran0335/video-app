@@ -1,5 +1,4 @@
 import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../utils/hashedPassword";
 
@@ -66,11 +65,7 @@ const getChannelStats = asyncHandler({
         totalTweets,
       };
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, stats, "User channel stats fetched successfully")
-        );
+      res.status(200).json(stats);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -115,15 +110,7 @@ const getChannelVideos = asyncHandler({
         commentsCount: video._count.Comment,
       }));
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            transformed,
-            "User's videos fetched successfully"
-          )
-        );
+      res.status(200).json(transformed);
     } catch (error: any) {
       throw new ApiError(
         401,

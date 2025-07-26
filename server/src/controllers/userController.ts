@@ -1,6 +1,5 @@
 import { prisma, isPasswordCorrect } from "../utils/hashedPassword";
 import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary";
 import fs from "fs";
@@ -47,10 +46,12 @@ const generateAccessAndRefreshTokens = async (userId: number, val = 0) => {
         },
       });
 
-      return {
-        accessToken,
-        refreshToken,
-      };
+      if (userWithRefreshToken) {
+        return {
+          accessToken,
+          refreshToken: userWithRefreshToken.refreshToken,
+        };
+      }
     }
 
     return { accessToken };
@@ -132,9 +133,10 @@ const registerUser = asyncHandler({
           coverImage: true,
           description: true,
           email: true,
+          refreshToken: true,
           watchHistory: true,
           Tweet: true,
-          subscribers:true,
+          subscribers: true,
           subscribedChannels: true,
           Playlist: true,
           Comment: true,
@@ -143,11 +145,7 @@ const registerUser = asyncHandler({
           updatedAt: true,
         },
       });
-      res
-        .status(201)
-        .json(
-          new ApiResponse(200, createdUser, "User registered successfully")
-        );
+      res.status(201).json(createdUser);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -180,9 +178,8 @@ const loginUser = asyncHandler({
       if (!isPasswordValid) {
         throw new ApiError(401, "Invalid user credentials!");
       }
-      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-        user.userId
-      );
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefreshTokens(user.userId);
 
       const loggedUser = await prisma.user.findUnique({
         where: {
@@ -211,17 +208,11 @@ const loginUser = asyncHandler({
         .status(200)
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
-        .json(
-          new ApiResponse(
-            200,
-            {
-              user: loggedUser,
-              accessToken: accessToken,
-              refreshToken: refreshToken,
-            },
-            "User logged in successfully"
-          )
-        );
+        .json({
+          user: loggedUser,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        });
     } catch (error: any) {
       throw new ApiError(401, error?.message || "Error while logging user!");
     }
@@ -248,7 +239,7 @@ const logoutUser = asyncHandler({
       res
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-        .json(new ApiResponse(200, {}, "User logged out successfully"));
+        .json({});
     } catch (error: any) {
       throw new ApiError(500, error?.message || "Error while logging out");
     }
@@ -297,7 +288,7 @@ const refreshAccessToken = asyncHandler({
       res
         .status(200)
         .cookie("accessToken", accessToken, options)
-        .json(new ApiResponse(200, { accessToken }, "Access token refreshed"));
+        .json({ accessToken });
     } catch (error: any) {
       throw new ApiError(401, error?.message || "Invalid refresh token!");
     }
@@ -326,9 +317,7 @@ const changeCurrentPassword = asyncHandler({
       // for password to hash again
       await prisma.user.hashPasswordAgain(user, newPassword);
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Password changed successfully"));
+      res.status(200).json({});
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -343,15 +332,7 @@ const getCurrentLoggedInUser = asyncHandler({
     if (!req.user) {
       throw new ApiError(400, "Current logged-in user not found!");
     }
-    res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          req.user,
-          "Current logged-in user fetched successfully"
-        )
-      );
+    res.status(200).json(req.user);
   },
 });
 
@@ -384,11 +365,7 @@ const updateAccountDetails = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, user, "Account details updated successfully")
-        );
+      res.status(200).json(user);
     } catch (error) {
       throw new ApiError(400, "Error while updating account details");
     }
@@ -428,15 +405,7 @@ const updateUserAvatar = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            userWithNewAvatar,
-            "Avatar is updated successfully"
-          )
-        );
+      res.status(200).json(userWithNewAvatar);
     } catch (error) {
       throw new ApiError(400, "Error while updating user's avatar");
     }
@@ -476,15 +445,7 @@ const updateUserCoverImage = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            userWithNewCoverImage,
-            "CoverImage is updated successfully"
-          )
-        );
+      res.status(200).json(userWithNewCoverImage);
     } catch (error) {
       throw new ApiError(400, "Error while updating user's coverImage");
     }
@@ -568,15 +529,7 @@ const getUserChannelProfile = asyncHandler({
         isSubscribed,
       };
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            profileData,
-            "Channel profile fetched successfully"
-          )
-        );
+      res.status(200).json(profileData);
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -648,19 +601,13 @@ const getWatchHistory = asyncHandler({
         },
       });
 
-      res.status(200).json(
-        new ApiResponse(
-          200,
-          {
-            watchHistoryWithOwner,
-            totalCount,
-            currentPage: page,
-            totalPages: Math.ceil(totalCount / limit),
-            hasNextPage: skip + limit < totalCount,
-          },
-          "Video watch history of the user fetched successfully"
-        )
-      );
+      res.status(200).json({
+        watchHistoryWithOwner,
+        totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        hasNextPage: skip + limit < totalCount,
+      });
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,

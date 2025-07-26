@@ -47,6 +47,7 @@ exports.verifyJWT = (0, asyncHandler_1.asyncHandler)({
                         avatar: true,
                         coverImage: true,
                         description: true,
+                        refreshToken: true,
                         watchHistory: true,
                         Tweet: true,
                         Comment: true,

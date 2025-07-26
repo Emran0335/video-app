@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletePlaylist = exports.removeVideoFromPlaylist = exports.updatePlaylist = exports.getPlaylistById = exports.getUserPlaylists = exports.getVideoPlaylist = exports.addVideoToPlaylist = exports.createPlaylist = void 0;
 const ApiError_1 = require("../utils/ApiError");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const hashedPassword_1 = require("../utils/hashedPassword");
 const createPlaylist = (0, asyncHandler_1.asyncHandler)({
@@ -35,9 +34,7 @@ const createPlaylist = (0, asyncHandler_1.asyncHandler)({
             if (!playlist) {
                 throw new ApiError_1.ApiError(500, "Error while creating playlist");
             }
-            res
-                .status(201)
-                .json(new ApiResponse_1.ApiResponse(201, playlist, "Playlist created successfully"));
+            res.status(201).json(playlist);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting all tweet!");
@@ -100,9 +97,7 @@ const addVideoToPlaylist = (0, asyncHandler_1.asyncHandler)({
             if (!updatedPlaylist) {
                 throw new ApiError_1.ApiError(500, "Error while adding video to the playlist");
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, updatedPlaylist, "Video added to playlist successfully"));
+            res.status(200).json(updatedPlaylist);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while adding video to the playlist!");
@@ -136,9 +131,7 @@ const getVideoPlaylist = (0, asyncHandler_1.asyncHandler)({
                     isVideoPresent: playlist.videos.some((video) => video.id === Number(videoId)),
                 };
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, playlistWithVideoInfo, "playlists fetched successfully"));
+            res.status(200).json(playlistWithVideoInfo);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting video playlist!");
@@ -192,9 +185,7 @@ const getUserPlaylists = (0, asyncHandler_1.asyncHandler)({
                     totalViews,
                 };
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, transformed, "User's playlist fetched successfully"));
+            res.status(200).json(transformed);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting user's playlist!");
@@ -248,9 +239,7 @@ const getPlaylistById = (0, asyncHandler_1.asyncHandler)({
                     totalViews,
                 };
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, transformed, "Playlist fetched successfully"));
+            res.status(200).json(transformed);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting playlist!");
@@ -287,9 +276,7 @@ const updatePlaylist = (0, asyncHandler_1.asyncHandler)({
                     description: description || playlist.description,
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, updatedPlaylist, "Playlist updated successfully"));
+            res.status(200).json(updatedPlaylist);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while updating playlist!");
@@ -354,9 +341,7 @@ const removeVideoFromPlaylist = (0, asyncHandler_1.asyncHandler)({
             if (!removeVideo) {
                 throw new ApiError_1.ApiError(500, "Something went wrong while removing video from playlist");
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, removeVideo, "Vidoe removed from playlist successfully"));
+            res.status(200).json(removeVideo);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while removing video from the playlist!");
@@ -388,9 +373,7 @@ const deletePlaylist = (0, asyncHandler_1.asyncHandler)({
                     id: playlist.id,
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, delPlaylist, "Playlist deleted successfully"));
+            res.status(200).json(delPlaylist);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while deleting playlist!");

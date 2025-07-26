@@ -1,6 +1,5 @@
 import fs from "fs";
 import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary";
 import { prisma } from "../utils/hashedPassword";
@@ -81,9 +80,7 @@ const publishAVideo = asyncHandler({
         throw new ApiError(500, "Error while creating and uploading video");
       }
 
-      res
-        .status(201)
-        .json(new ApiResponse(201, video, "Video published successfully"));
+      res.status(201).json(video);
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -144,9 +141,7 @@ const getAllVideos = asyncHandler({
         throw new ApiError(404, "No videos found!");
       }
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, videos, "All videos fetched successfully"));
+      res.status(200).json(videos);
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -186,11 +181,7 @@ const getUserVideos = asyncHandler({
           },
         },
       });
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, videos, "User vidoes fetched successfully!")
-        );
+      res.status(200).json(videos);
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -256,11 +247,7 @@ const getVideoById = asyncHandler({
         },
       };
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, result, "User's video fetched successfully")
-        );
+      res.status(200).json(result);
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -323,11 +310,7 @@ const updateVideo = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, updatedVideo, "Video is updated successfully")
-        );
+      res.status(200).json(updatedVideo);
     } catch (error) {
       throw new ApiError(400, "Error while updating user's video");
     }
@@ -394,9 +377,7 @@ const deleteVideo = asyncHandler({
         );
       }
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Video deleted successfully"));
+      res.status(200).json({});
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -441,15 +422,7 @@ const togglePublishStatus = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            updateVideo,
-            "Published status toggled successfully!"
-          )
-        );
+      res.status(200).json(updateVideo);
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -505,11 +478,7 @@ const getSubscribedVideos = asyncHandler({
         },
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, videos, "Subscribed videos fetched successfully")
-        );
+      res.status(200).json(videos);
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,

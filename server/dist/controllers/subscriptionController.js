@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSubscribedChannels = exports.getUserChannelSubscribers = exports.toggleSubscription = void 0;
 const ApiError_1 = require("../utils/ApiError");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const hashedPassword_1 = require("../utils/hashedPassword");
 const toggleSubscription = (0, asyncHandler_1.asyncHandler)({
@@ -48,7 +47,7 @@ const toggleSubscription = (0, asyncHandler_1.asyncHandler)({
                     },
                 });
             }
-            res.status(200).json(new ApiResponse_1.ApiResponse(200, {}, "Subscription toggled"));
+            res.status(200).json({});
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while toggle subscription!");
@@ -77,10 +76,10 @@ const getUserChannelSubscribers = (0, asyncHandler_1.asyncHandler)({
                 },
             });
             const subscribers = subscriptions.map((sub) => sub.subscriber);
-            res.status(200).json(new ApiResponse_1.ApiResponse(200, {
+            res.status(200).json({
                 subscribers,
                 subscribersCount: subscribers.length,
-            }, "Subscribers fetched successfully"));
+            });
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting user's channel subscribers!");
@@ -129,10 +128,10 @@ const getSubscribedChannels = (0, asyncHandler_1.asyncHandler)({
                     isSubscribed: subscribersList.some((s) => s.subscriberId === requestingUserId),
                 };
             });
-            res.status(200).json(new ApiResponse_1.ApiResponse(200, {
+            res.status(200).json({
                 channels,
                 channelsCount: channels.length,
-            }, "Subscribed channels fetched successfully"));
+            });
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while getting user's subscribed channels!");

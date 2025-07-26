@@ -1,6 +1,5 @@
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
-import { ApiResponse } from "../utils/ApiResponse";
 import { prisma } from "../utils/hashedPassword";
 
 const createTweet = asyncHandler({
@@ -25,9 +24,7 @@ const createTweet = asyncHandler({
         throw new ApiError(500, "Error while creating tweet");
       }
 
-      res
-        .status(201)
-        .json(new ApiResponse(201, tweet, "Tweet created successfully"));
+      res.status(201).json(tweet);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -82,11 +79,7 @@ const getAllTweets = asyncHandler({
         };
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, tweetsWithInfo, "Tweets fetched successfully")
-        );
+      res.status(200).json(tweetsWithInfo);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -175,9 +168,7 @@ const updateTweet = asyncHandler({
         };
       });
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, tweetDetails, "Tweet updated successfully"));
+      res.status(200).json(tweetDetails);
     } catch (error: any) {
       throw new ApiError(401, error?.message || "Error while updating tweet!");
     }
@@ -235,11 +226,7 @@ const getUserTweets = asyncHandler({
         };
       });
 
-      res
-        .status(200)
-        .json(
-          new ApiResponse(200, tweetDetails, "Fetch user's tweets successfully")
-        );
+      res.status(200).json(tweetDetails);
     } catch (error: any) {
       throw new ApiError(
         401,
@@ -281,9 +268,7 @@ const deleteTweet = asyncHandler({
         throw new ApiError(400, "Error while deleting tweet");
       }
 
-      res
-        .status(200)
-        .json(new ApiResponse(200, deletedTweet, "Tweet deleted successfully"));
+      res.status(200).json(deletedTweet);
     } catch (error: any) {
       throw new ApiError(401, error?.message || "Error while deleting tweet!");
     }

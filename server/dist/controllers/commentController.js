@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteComment = exports.updateComment = exports.getVideoComments = exports.addComment = void 0;
 const ApiError_1 = require("../utils/ApiError");
-const ApiResponse_1 = require("../utils/ApiResponse");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const hashedPassword_1 = require("../utils/hashedPassword");
 const addComment = (0, asyncHandler_1.asyncHandler)({
@@ -36,9 +35,7 @@ const addComment = (0, asyncHandler_1.asyncHandler)({
             if (!comment) {
                 throw new ApiError_1.ApiError(500, "Error while creating comment");
             }
-            res
-                .status(201)
-                .json(new ApiResponse_1.ApiResponse(201, comment, "Comment creating successfully"));
+            res.status(201).json(comment);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while creating comment!");
@@ -91,9 +88,7 @@ const getVideoComments = (0, asyncHandler_1.asyncHandler)({
                         : false,
                 };
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, getComments, "Comments fetched successfully"));
+            res.status(200).json(getComments);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while fetching comments!");
@@ -135,9 +130,7 @@ const updateComment = (0, asyncHandler_1.asyncHandler)({
             if (!updateComment) {
                 throw new ApiError_1.ApiError(400, "Error while updating comment");
             }
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, updateComment, "Comment updated successfully"));
+            res.status(200).json(updateComment);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while fetching comments!");
@@ -169,9 +162,7 @@ const deleteComment = (0, asyncHandler_1.asyncHandler)({
                     id: comment.id,
                 },
             });
-            res
-                .status(200)
-                .json(new ApiResponse_1.ApiResponse(200, deleteComment, "Comment deleted successfully"));
+            res.status(200).json(deleteComment);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while fetching comments!");

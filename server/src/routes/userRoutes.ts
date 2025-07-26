@@ -39,7 +39,12 @@ router.patch("/user/refresh-token", refreshAccessToken);
 router.post("/user/change-password", verifyJWT, changeCurrentPassword);
 router.get("/user/current-user", verifyJWT, getCurrentLoggedInUser);
 router.patch("/user/update-account", verifyJWT, updateAccountDetails);
-router.patch("/user/avatar", verifyJWT, upload.single("avatar"), updateUserAvatar);
+router.patch(
+  "/user/avatar",
+  verifyJWT,
+  upload.single("avatar"),
+  updateUserAvatar
+);
 router.patch(
   "/user/cover-image",
   verifyJWT,
