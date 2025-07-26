@@ -77,29 +77,25 @@ export interface Subscription {
   channelId: number;
 }
 
-export const fetchAuthSession = async () => {
-  const accessToken = localStorage.getItem("accessToken");
-  return { accessToken };
-};
-
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    prepareHeaders: async (headers) => {
-      const session = await fetchAuthSession();
-      const accessToken = session?.accessToken;
+    credentials: "include",
+    prepareHeaders: (headers) => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("accessToken");
 
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
       }
-
       return headers;
     },
   }),
   reducerPath: "api",
   tagTypes: ["NewUser"],
   endpoints: (build) => ({
-    getCurrentLoggedInUser: build.query<User[], void>({
+    getCurrentLoggedInUser: build.query<User, void>({
       query: () => "/users/user/current-user",
       providesTags: ["NewUser"],
     }),

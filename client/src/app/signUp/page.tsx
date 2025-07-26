@@ -51,12 +51,13 @@ const SignupPage = () => {
     return username && email && password;
   };
 
+  const onClose = () => {
+    setIsModalNewTaskOpen((prev) => !prev);
+    router.push("/");
+  };
+
   return (
-    <Modal
-      name="Create New Task"
-      isOpen={isModalNewTaskOpen}
-      onClose={() => setIsModalNewTaskOpen(false)}
-    >
+    <Modal name="Create New Task" isOpen={isModalNewTaskOpen} onClose={onClose}>
       <form
         className="mx-auto mt-2 flex flex-col max-w-sm px-4 text-gray-900"
         onSubmit={(e) => {
@@ -136,7 +137,7 @@ const SignupPage = () => {
           If you already signed up!
           <Link href={"/signIn"} className="text-red-400 cursor-pointer">
             {" "}
-            Please sing in
+            Please Sign In
           </Link>
         </p>
       </div>

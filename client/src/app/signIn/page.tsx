@@ -3,6 +3,7 @@ import { useLoginUserMutation, useRegisterUserMutation } from "@/state/api";
 import React, { useState } from "react";
 import Modal from "@/components/Modal";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const SignIn = () => {
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(true);
@@ -19,6 +20,13 @@ const SignIn = () => {
       email,
       password,
     });
+    console.log("User logged IN", response.data);
+    if (response.data && "accessToken" in response.data) {
+      localStorage.setItem(
+        "accessToken",
+        (response.data as { accessToken: string }).accessToken
+      );
+    }
 
     if (!("error" in response)) {
       // ✅ Navigate to login page on success
@@ -33,13 +41,12 @@ const SignIn = () => {
   const isFormValid = () => {
     return email && password;
   };
-
+  const onClose = () => {
+    setIsModalNewTaskOpen((prev) => !prev);
+    router.push("/");
+  };
   return (
-    <Modal
-      name="Create New Task"
-      isOpen={isModalNewTaskOpen}
-      onClose={() => setIsModalNewTaskOpen(false)}
-    >
+    <Modal name="Create New Task" isOpen={isModalNewTaskOpen} onClose={onClose}>
       <form
         className="mx-auto mt-2 flex flex-col max-w-sm px-4 text-gray-900"
         onSubmit={(e) => {
@@ -69,6 +76,15 @@ const SignIn = () => {
         >
           {isLoading ? "Creating..." : "Create Task"}
         </button>
+        <div className="flex items-center justify-center mt-4">
+          <p className="text-gray-600">
+            Don&apos;t have an Account yet?
+            <Link href={"/signUp"} className="text-red-400 cursor-pointer">
+              {" "}
+              Please Sign Up now
+            </Link>
+          </p>
+        </div>
       </form>
     </Modal>
   );
