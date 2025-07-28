@@ -63,7 +63,7 @@ const generateAccessAndRefreshTokens = async (userId: number, val = 0) => {
 const registerUser = asyncHandler({
   requestHandler: async (req, res) => {
     try {
-      const { fullName, email, username, password } = req.body;
+      const { fullName, email, username, description, password } = req.body;
 
       let avatarLocalPath;
       if (Array.isArray(req.files)) {
@@ -120,11 +120,12 @@ const registerUser = asyncHandler({
       const createdUser = await prisma.user.create({
         data: {
           fullName: fullName,
+          username: username,
+          description: description,
+          email: email,
           avatar: avatar.url,
           coverImage: coverImage?.url,
-          email: email,
           password: hashedPassword,
-          username: username,
         },
         select: {
           fullName: true,

@@ -74,7 +74,7 @@ const SignIn = ({ setToggleSignUser }: SignInProps) => {
           }`}
           disabled={!isFormValid() || isLoading}
         >
-          {isLoading ? "Creating..." : "Create Task"}
+          {isLoading ? "Signing..." : "Sign In"}
         </button>
         <div className="flex items-center justify-center mt-4">
           <p className="text-gray-600">

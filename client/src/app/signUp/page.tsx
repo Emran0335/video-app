@@ -1,9 +1,6 @@
 "use client";
 import { useRegisterUserMutation } from "@/state/api";
 import React, { useState } from "react";
-import Modal from "@/components/Modal";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 type SignInProps = {
   setToggleSignUser: () => void;
@@ -11,7 +8,6 @@ type SignInProps = {
 
 const SignupPage = ({ setToggleSignUser }: SignInProps) => {
   const [createUser, { isLoading }] = useRegisterUserMutation();
-  const router = useRouter();
 
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -37,7 +33,7 @@ const SignupPage = ({ setToggleSignUser }: SignInProps) => {
 
     if (!("error" in response)) {
       // ✅ Navigate to login page on success
-      router.push("/signIn");
+      setToggleSignUser();
     }
 
     // Reset form
@@ -127,7 +123,7 @@ const SignupPage = ({ setToggleSignUser }: SignInProps) => {
           }`}
           disabled={!isFormValid() || isLoading}
         >
-          {isLoading ? "Creating..." : "Create Task"}
+          {isLoading ? "Signing..." : "Sign Up"}
         </button>
         <div className="flex items-center justify-center mt-4">
           <p className="text-gray-600">

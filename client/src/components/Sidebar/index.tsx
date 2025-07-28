@@ -9,6 +9,7 @@ import {
   LucideIcon,
   SquarePlay,
   StickyNote,
+  User,
   Video,
   X,
   Youtube,
@@ -48,8 +49,10 @@ const Sidebar = () => {
       <div className="w-full h-[100vh] flex flex-col justify-between">
         <div className="flex h-[100%] w-full flex-col justify-start">
           {/* TOP LOGO  */}
-          <div className="z-50 flex min-h-[56px] w-full items-center justify-between bg-white px-6 pt-3">
-            <div className="text-xl font-bold text-gray-800">Emran</div>
+          <div className="z-50 flex min-h-[80px] w-full items-center justify-between bg-white px-6 pt-3">
+            <div className="text-xl font-bold text-gray-800">
+              {user?.username.toUpperCase()}
+            </div>
             {isSidebarCollapsed ? null : (
               <button
                 onClick={() =>
@@ -93,14 +96,13 @@ const Sidebar = () => {
             />
           </nav>
         </div>
-        <div className="mb-32 flex justify-center w-full">
-          <button
-            className="px-12 self-start bg-blue-200 rounded font-medium text-xl py-4 text-gray-800 hover:bg-gray-200 hover:text-gray-500 md:block"
-            onClick={handleLogout}
-          >
-            Sign out
-          </button>
-        </div>
+        <button
+          className="font-medium text-xl mb-16 py-3 flex justify-start items-center px-8 gap-4 w-full text-gray-800 hover:bg-gray-200 hover:text-red-500"
+          onClick={handleLogout}
+        >
+          <User className="w-8 h-8 border border-gray-400 rounded-full p-1" />
+          Sign out
+        </button>
       </div>
     </div>
   );

@@ -68,7 +68,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         try {
-            const { fullName, email, username, password } = req.body;
+            const { fullName, email, username, description, password } = req.body;
             let avatarLocalPath;
             if (Array.isArray(req.files)) {
                 const avatarFile = req.files.find((file) => file.fieldname === "avatar");
@@ -109,11 +109,12 @@ const registerUser = (0, asyncHandler_1.asyncHandler)({
             const createdUser = yield hashedPassword_1.prisma.user.create({
                 data: {
                     fullName: fullName,
+                    username: username,
+                    description: description,
+                    email: email,
                     avatar: avatar.url,
                     coverImage: coverImage === null || coverImage === void 0 ? void 0 : coverImage.url,
-                    email: email,
                     password: hashedPassword,
-                    username: username,
                 },
                 select: {
                     fullName: true,
