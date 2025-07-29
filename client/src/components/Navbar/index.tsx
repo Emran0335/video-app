@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import { Menu, Search } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsSidebarCollapsed } from "@/state";
@@ -34,7 +33,7 @@ const Navbar = () => {
       <div className="h-full w-[400px] px-2 py-2 rounded-md flex items-center justify-end">
         {user && (
           <>
-            <h1 className="font-medium w-[140px] hidden md:block">
+            <h1 className="font-medium w-[170px] hidden md:block">
               {user.fullName}
             </h1>
             <div className="w-[32px] h-[32px] rounded-full overflow-hidden">

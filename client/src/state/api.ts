@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface User {
+  userId: number;
   username: string;
   email: string;
   password: string;
@@ -25,6 +26,14 @@ export interface Video {
 
   Like: Like[];
   Comment: Comment[];
+}
+
+export interface WatchHistory {
+  watchHistoryWithOwner: Video;
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
 }
 
 export interface Tweet {
@@ -93,9 +102,9 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["NewUser"],
+  tagTypes: ["NewUser", "User"],
   endpoints: (build) => ({
-    getCurrentLoggedInUser: build.query<User, void>({
+    getCurrentLoggedInUser: build.query<User[], void>({
       query: () => "/users/user/current-user",
       providesTags: ["NewUser"],
     }),
@@ -106,7 +115,7 @@ export const api = createApi({
         body: userData,
       }),
     }),
-    loginUser: build.mutation<User, Partial<User>>({
+    loginUser: build.mutation<User[], Partial<User>>({
       query: (userData) => ({
         url: "/users/user/login",
         method: "POST",
@@ -122,11 +131,44 @@ export const api = createApi({
       }),
       invalidatesTags: ["NewUser"], // <- This must match what's in your providesTags
     }),
+    getUserChannelProfile: build.query<User[], { username: string }>({
+      query: ({ username }) => `/users/user/channel/${username}`,
+      providesTags: (result) =>
+        result
+          ? result.map(({ userId }) => ({ type: "User", userId }))
+          : [{ type: "User" }],
+    }),
+    getUserHistory: build.query<
+      WatchHistory,
+      { page?: number; limit?: number }
+    >({
+      query: ({ page, limit }) =>
+        `users/user/history?page=${page}&limit=${limit}`,
+    }),
+    refreshToken: build.mutation<User[], void>({
+      query: () => ({
+        url: "/users/user/refresh-token",
+        method: "PATCH",
+        credentials: "include",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    changeCurrentPassword: build.mutation<User[], FormData>({
+      query: (userPassword: FormData) => ({
+        url: "/users/user/change-password",
+        method: "POST",
+        body: userPassword,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    
   }),
 });
 
 export const {
   useGetCurrentLoggedInUserQuery,
+  useGetUserChannelProfileQuery,
+  useGetUserHistoryQuery,
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,
