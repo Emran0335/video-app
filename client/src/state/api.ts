@@ -36,6 +36,14 @@ export interface WatchHistory {
   hasNextPage: boolean;
 }
 
+type WatchHistoryResponse = {
+  watchHistoryWithOwner: WatchHistory[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+};
+
 export interface Tweet {
   id: number;
   content: string;
@@ -102,7 +110,7 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["NewUser", "User"],
+  tagTypes: ["NewUser", "User", "Video"],
   endpoints: (build) => ({
     getCurrentLoggedInUser: build.query<User[], void>({
       query: () => "/users/user/current-user",
@@ -139,10 +147,10 @@ export const api = createApi({
           : [{ type: "User" }],
     }),
     getUserHistory: build.query<
-      WatchHistory,
+      WatchHistoryResponse,
       { page?: number; limit?: number }
     >({
-      query: ({ page, limit }) =>
+      query: ({ page = 1, limit = 10 } = {}) =>
         `users/user/history?page=${page}&limit=${limit}`,
     }),
     refreshToken: build.mutation<User[], void>({
@@ -153,15 +161,107 @@ export const api = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    changeCurrentPassword: build.mutation<User[], FormData>({
-      query: (userPassword: FormData) => ({
+    changeCurrentPassword: build.mutation<User[], Partial<User>>({
+      query: (userData) => ({
         url: "/users/user/change-password",
         method: "POST",
-        body: userPassword,
+        credentials: "include",
+        body: userData,
       }),
       invalidatesTags: ["User"],
     }),
-    
+    updateUserAccountDetails: build.mutation<User[], Partial<User>>({
+      query: (userData) => ({
+        url: "/users/user/update-account",
+        method: "PATCH",
+        credentials: "include",
+        body: userData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updateUserAvatar: build.mutation<User[], FormData>({
+      query: (userData: FormData) => ({
+        url: "/users/user/update-account",
+        method: "PATCH",
+        credentials: "include",
+        body: userData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updateUserCoverImage: build.mutation<User[], FormData>({
+      query: (userData: FormData) => ({
+        url: "/users/user/update-account",
+        method: "PATCH",
+        credentials: "include",
+        body: userData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    // video endpoints
+    getAllVideos: build.query<Video[], void>({
+      query: () => "/videos",
+      providesTags: ["Video"],
+    }),
+    getUserVideos: build.query<Video[], { userId: number }>({
+      query: ({ userId }) => `/videos/video${userId}`,
+      providesTags: ["Video"],
+    }),
+    getUserVideoById: build.query<Video[], { videoId: number }>({
+      query: ({ videoId }) => ({
+        url: `/videos/video/${videoId}`,
+        credentials: "include",
+      }),
+      providesTags: ["Video"],
+    }),
+    publishAVideo: build.mutation<Video[], FormData>({
+      query: (videoData: FormData) => ({
+        url: "/videos/video",
+        method: "POST",
+        credentials: "include",
+        body: videoData,
+      }),
+      invalidatesTags: ["Video"],
+    }),
+    updateVideo: build.mutation<
+      Video[],
+      { videoData: FormData; videoId: number }
+    >({
+      query: ({ videoData, videoId }) => ({
+        url: `/videos/video/${videoId}`,
+        method: "PATCH",
+        credentials: "include",
+        body: videoData,
+      }),
+      invalidatesTags: (result, error, { videoId }) => [
+        { type: "Video", id: videoId },
+      ],
+    }),
+    togglePublishStatus: build.mutation<
+      Video[],
+      { videoId: number; isPublished: boolean }
+    >({
+      query: ({ videoId, isPublished }) => ({
+        url: `/videos/video/toggle/${videoId}`,
+        method: "PATCH",
+        credentials: "include",
+        body: { isPublished },
+      }),
+      invalidatesTags: (result, error, { videoId }) => [
+        { type: "Video", id: videoId },
+      ],
+    }),
+    getSubscribedVideos: build.query<Video, void>({
+      query: () => "/videos/video/subscriptions",
+    }),
+    deleteVideo: build.mutation<Video, { videoId: number }>({
+      query: ({ videoId }) => ({
+        url: `/videos/video/${videoId}`,
+        method: "DELETE",
+        credentials: "include",
+        body: {},
+      }),
+    }),
   }),
 });
 
@@ -172,4 +272,19 @@ export const {
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,
+  useRefreshTokenMutation,
+  useChangeCurrentPasswordMutation,
+  useUpdateUserAccountDetailsMutation,
+  useUpdateUserAvatarMutation,
+  useUpdateUserCoverImageMutation,
+
+  // video endpoints
+  useGetAllVideosQuery,
+  useGetUserVideosQuery,
+  useGetUserVideoByIdQuery,
+  useGetSubscribedVideosQuery,
+  usePublishAVideoMutation,
+  useUpdateVideoMutation,
+  useTogglePublishStatusMutation,
+  useDeleteVideoMutation,
 } = api;
