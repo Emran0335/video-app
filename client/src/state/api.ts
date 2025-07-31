@@ -199,7 +199,16 @@ export const api = createApi({
     }),
 
     // video endpoints
-    getAllVideos: build.query<Video[], void>({
+    getAllVideos: build.query<
+      Video[],
+      {
+        page: number;
+        limit: number;
+        query?: string;
+        sortBy?: "createdAt";
+        sortType?: "desc";
+      }
+    >({
       query: () => "/videos",
       providesTags: ["Video"],
     }),
