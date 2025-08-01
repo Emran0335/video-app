@@ -21,6 +21,7 @@ export interface Video {
   ownerId: number;
   views: number;
   isPublished: boolean;
+  owner: Partial<User>;
   createdAt: Date;
   updatedAt: Date;
 
