@@ -10,7 +10,7 @@ type ModalProps = {
   name: string;
 };
 
-const Modal = ({ children, isOpen, onClose, name }: ModalProps) => {
+const Modal = ({children, isOpen, onClose, name }: ModalProps) => {
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(

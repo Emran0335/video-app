@@ -17,6 +17,7 @@ export interface Video {
   videoFile: string;
   thumbnail: string;
   title: string;
+  description: string;
   duration: number;
   ownerId: number;
   views: number;
@@ -113,7 +114,7 @@ export const api = createApi({
   reducerPath: "api",
   tagTypes: ["NewUser", "User", "Video"],
   endpoints: (build) => ({
-    getCurrentLoggedInUser: build.query<User[], void>({
+    getCurrentLoggedInUser: build.query<User, void>({
       query: () => "/users/user/current-user",
       providesTags: ["NewUser"],
     }),
@@ -140,11 +141,11 @@ export const api = createApi({
       }),
       invalidatesTags: ["NewUser"], // <- This must match what's in your providesTags
     }),
-    getUserChannelProfile: build.query<User[], { username: string }>({
+    getUserChannelProfile: build.query<User, { username: string }>({
       query: ({ username }) => `/users/user/channel/${username}`,
       providesTags: (result) =>
         result
-          ? result.map(({ userId }) => ({ type: "User", userId }))
+          ? [{ type: "User", userId: result.userId }]
           : [{ type: "User" }],
     }),
     getUserHistory: build.query<
@@ -214,10 +215,10 @@ export const api = createApi({
       providesTags: ["Video"],
     }),
     getUserVideos: build.query<Video[], { userId: number }>({
-      query: ({ userId }) => `/videos/video${userId}`,
+      query: ({ userId }) => `/videos/video/user/${userId}`,
       providesTags: ["Video"],
     }),
-    getUserVideoById: build.query<Video[], { videoId: number }>({
+    getVideoById: build.query<Video, { videoId: number }>({
       query: ({ videoId }) => ({
         url: `/videos/video/${videoId}`,
         credentials: "include",
@@ -291,7 +292,7 @@ export const {
   // video endpoints
   useGetAllVideosQuery,
   useGetUserVideosQuery,
-  useGetUserVideoByIdQuery,
+  useGetVideoByIdQuery,
   useGetSubscribedVideosQuery,
   usePublishAVideoMutation,
   useUpdateVideoMutation,

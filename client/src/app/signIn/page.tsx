@@ -2,8 +2,6 @@
 import { useLoginUserMutation, useRegisterUserMutation } from "@/state/api";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useAppDispatch } from "../redux";
 
 type SignInProps = {
   setToggleSignUser: () => void;

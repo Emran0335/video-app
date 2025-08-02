@@ -11,11 +11,10 @@ const VideoContainer = () => {
     page: page,
     limit: 20,
   });
-  console.log("Videos", videos);
 
   if (!videos || videos.length === 0) {
     return (
-      <div className="flex justify-center mt-[30vh]">
+      <div className="flex justify-center mt-[200px]">
         <div className="flex flex-col items-center">
           <Video className="w-20 h-20" />
           <h1>No Videos Available</h1>
@@ -25,8 +24,8 @@ const VideoContainer = () => {
   }
 
   return (
-    <div className="overflow-hidden mt-5">
-      <div className="flex flex-wrap justify-around">
+    <div>
+      <div className="flex flex-wrap gap-2 py-4 px-4">
         {videos?.map((video) => (
           <VideoCard key={video?.id} video={video} />
         ))}

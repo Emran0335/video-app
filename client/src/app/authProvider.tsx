@@ -10,7 +10,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [toggleSignUser, setToggleSignUser] = useState(false);
 
-  if (user) return <>{children}</>;
+  if (user) {
+    return <div>{children}</div>;
+  }
 
   const changeSignUser = () => {
     setToggleSignUser((prev) => !prev);

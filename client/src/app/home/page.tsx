@@ -3,7 +3,7 @@ import VideoContainer from "@/components/Video/VideoContainer";
 
 const HomePage = () => {
   return (
-    <div>
+    <div className="">
       <VideoContainer />
     </div>
   );

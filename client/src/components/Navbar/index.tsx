@@ -30,13 +30,13 @@ const Navbar = () => {
           />
         </div>
       </div>
-      <div className="h-full w-[400px] px-2 py-2 rounded-md flex items-center justify-end">
+      <div className="h-full w-[400px] py-2 rounded-md flex items-center justify-end">
         {user && (
-          <>
-            <h1 className="font-medium w-[170px] hidden md:block">
+          <div className="flex items-center gap-4">
+            <h1 className="font-medium hidden md:block">
               {user.fullName}
             </h1>
-            <div className="w-[32px] h-[32px] rounded-full overflow-hidden">
+            <div className="w-[40px] h-[40px] rounded-full border-2 border-gray-200 overflow-hidden">
               <Image
               src={user.avatar as string}
               alt={user.username}
@@ -45,7 +45,7 @@ const Navbar = () => {
               className="object-cover"
             />
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -1,17 +1,21 @@
+import { formatDuration, getTimeDistanceToNow } from "@/lib/utils";
 import { Video } from "@/state/api";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import { formatDuration, getTimeDistanceToNow } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import React from "react";
 
-type VideoCardProps = {
+type VideoListCardProps = {
+  showVideoDescription?: string;
   video: Video;
 };
 
-const VideoCard = ({ video }: VideoCardProps) => {
+const VideoListCard = ({
+  showVideoDescription,
+  video,
+}: VideoListCardProps) => {
   const duration = formatDuration(video.duration);
-  const timeDistance = getTimeDistanceToNow(video.createdAt);
+  const times = getTimeDistanceToNow(video.createdAt);
 
   const router = useRouter();
 
@@ -23,13 +27,13 @@ const VideoCard = ({ video }: VideoCardProps) => {
   return (
     <Link href={`/watchpage/${video.id}`}>
       <div className="relative mb-2 bg-gray-200 rounded-2xl text-white p-1 hover:bg-gray-300">
-        <div className="relative flex flex-col w-[350px] h-[300px]">
+        <div className="relative flex flex-col w-full h-[120px]">
           <Image
-            className="rounded-t-2xl shadow-2xl w-full h-full shadow-gray-200 object-cover"
+            className="rounded-xl shadow-2xl w-full h-full shadow-gray-200 object-contain"
             src={video.thumbnail}
             alt={video.title}
             width={300}
-            height={200}
+            height={150}
           />
           <p className="absolute bottom-1 bg-gray-200 rounded-2xl w-12 h-6 right-3 text-center text-gray-600">
             {duration}
@@ -56,12 +60,19 @@ const VideoCard = ({ video }: VideoCardProps) => {
             {video.owner && (
               <h2 className="text-gray-600">{video.owner.fullName}</h2>
             )}
+          <p className="text-gray-400 text-center text-[0.95rem]">{`${video.views} views * ${times}`}</p>
           </div>
         </div>
-        <p className="text-gray-400 text-center text-[0.95rem]">{`${video.views} views * ${timeDistance}`}</p>
+        {showVideoDescription && (
+          <span className="text-center px-2">
+            <p className="text-gray-600 text-sm font-semibold">
+              {video?.description}
+            </p>
+          </span>
+        )}
       </div>
     </Link>
   );
 };
 
-export default VideoCard;
+export default VideoListCard;
