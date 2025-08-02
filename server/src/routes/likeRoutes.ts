@@ -10,8 +10,8 @@ import {
 const router = Router();
 
 router.get("/like/videos", verifyJWT, getLikedVideos);
-router.post("/toggle/v/:videoId", verifyJWT, toggleVideoLike);
-router.post("/toggle/c/:commentId", verifyJWT, toggleCommentLike);
-router.post("/toggle/t/:tweetId", verifyJWT, toggleTweetLike);
+router.patch("/toggle/v/:videoId", verifyJWT, toggleVideoLike);
+router.patch("/toggle/c/:commentId", verifyJWT, toggleCommentLike);
+router.patch("/toggle/t/:tweetId", verifyJWT, toggleTweetLike);
 
 export default router;

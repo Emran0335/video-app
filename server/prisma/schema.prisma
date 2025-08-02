@@ -99,7 +99,6 @@ model Like {
   tweet     Tweet?   @relation(fields: [tweetId], references: [id])
   likedBy   User?    @relation(fields: [likedById], references: [userId])
 
-  @@unique([id])
   @@map("likes")
 }
 

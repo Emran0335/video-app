@@ -87,17 +87,24 @@ const SignupPage = ({ setToggleSignUser }: SignInProps) => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2">
+        <div className="relative mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-2">
+          <label htmlFor="avatar" className="absolute text-sm mt-[-16px] text-pink-600 ml-10 bg-gray-200">
+            {avatar ? "avatar" : "Choose Avatar"}
+          </label>
           <input
             type="file"
             className="px-2 rounded-lg border py-1 mb-2"
             accept="image/*"
+            placeholder="Choose Your Avatar"
             onChange={(e) => {
               if (e.target.files?.[0]) {
                 setAvatar(e.target.files[0]);
               }
             }}
           />
+          <label htmlFor="coverImage" className="absolute text-sm text-pink-600 mt-[-16px] ml-[200px] bg-gray-200">
+            {coverImage ? "CoverImage" : "Choose CoverImage"}
+          </label>
           <input
             type="file"
             className="px-2 rounded-lg border py-1 mb-2"

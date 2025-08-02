@@ -10,6 +10,9 @@ export interface User {
   coverImage?: string | File;
   description?: string;
   refreshToken?: string;
+
+  isSubscribed?: boolean;
+  subscriberCount?: number;
 }
 
 export interface Video {
@@ -24,10 +27,13 @@ export interface Video {
   isPublished: boolean;
   owner: Partial<User>;
   createdAt: Date;
-  updatedAt: Date;
 
-  Like: Like[];
-  Comment: Comment[];
+  updatedAt: Date;
+  isLiked: boolean;
+  likesCount: number;
+
+  likes: Like[];
+  comments: Comment[];
 }
 
 export interface WatchHistory {
@@ -144,9 +150,7 @@ export const api = createApi({
     getUserChannelProfile: build.query<User, { username: string }>({
       query: ({ username }) => `/users/user/channel/${username}`,
       providesTags: (result) =>
-        result
-          ? [{ type: "User", userId: result.userId }]
-          : [{ type: "User" }],
+        result ? [{ type: "User", userId: result.userId }] : [{ type: "User" }],
     }),
     getUserHistory: build.query<
       WatchHistoryResponse,
@@ -273,6 +277,28 @@ export const api = createApi({
         body: {},
       }),
     }),
+
+    toggleVideoLike: build.mutation<Like, { videoId: number }>({
+      query: ({ videoId }) => ({
+        url: `/likes/toggle/v/${videoId}`,
+        method: "PATCH",
+        credentials: "include",
+        body: { videoId },
+      }),
+      invalidatesTags: (result, error, { videoId }) => [
+        { type: "Video", id: videoId },
+      ],
+    }),
+
+    // subscriptions
+    toggleSubscription: build.mutation<Subscription, Partial<Video>>({
+      query: ({ ownerId }) => ({
+        url: `/subscriptions/c/${ownerId}`,
+        method: "POST",
+        credentials: "include",
+        body: {},
+      }),
+    }),
   }),
 });
 
@@ -298,4 +324,10 @@ export const {
   useUpdateVideoMutation,
   useTogglePublishStatusMutation,
   useDeleteVideoMutation,
+
+  // likes
+  useToggleVideoLikeMutation,
+
+  // subscriptions
+  useToggleSubscriptionMutation,
 } = api;

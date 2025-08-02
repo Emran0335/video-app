@@ -160,7 +160,7 @@ const toggleTweetLike = asyncHandler({
       } else {
         const liked = await prisma.like.create({
           data: {
-            tweetId: Number(tweetId),
+            commentId: Number(tweetId),
             likedById: Number(req.user?.userId),
           },
         });
