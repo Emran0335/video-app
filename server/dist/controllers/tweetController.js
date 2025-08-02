@@ -55,7 +55,7 @@ const getAllTweets = (0, asyncHandler_1.asyncHandler)({
                             fullName: true,
                         },
                     },
-                    Like: {
+                    likes: {
                         select: {
                             likedBy: true,
                         },
@@ -68,7 +68,7 @@ const getAllTweets = (0, asyncHandler_1.asyncHandler)({
                 throw new ApiError_1.ApiError(400, "No tweets found!");
             }
             const tweetsWithInfo = tweets.map((tweet) => {
-                const likes = tweet.Like;
+                const likes = tweet.likes;
                 return {
                     id: tweet.id,
                     content: tweet.content,
@@ -77,7 +77,7 @@ const getAllTweets = (0, asyncHandler_1.asyncHandler)({
                     owner: tweet.owner,
                     likesCount: likes.length,
                     isLiked: userId
-                        ? likes.some((like) => like.likedBy === userId)
+                        ? likes.some((like) => { var _a; return ((_a = like.likedBy) === null || _a === void 0 ? void 0 : _a.userId) === userId; })
                         : false,
                 };
             });
@@ -134,7 +134,7 @@ const updateTweet = (0, asyncHandler_1.asyncHandler)({
                             fullName: true,
                         },
                     },
-                    Like: {
+                    likes: {
                         select: {
                             likedBy: true,
                         },
@@ -143,7 +143,7 @@ const updateTweet = (0, asyncHandler_1.asyncHandler)({
             });
             const tweetDetails = tweetWithRelation.map((tweet) => {
                 var _a;
-                const likes = tweet.Like;
+                const likes = tweet.likes;
                 return {
                     id: tweet.id,
                     content: tweet.content,
@@ -152,7 +152,7 @@ const updateTweet = (0, asyncHandler_1.asyncHandler)({
                     updatedAt: tweet.updatedAt,
                     likesCount: likes.length,
                     isLiked: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId)
-                        ? likes.some((like) => { var _a; return like.likedBy === Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId); })
+                        ? likes.some((like) => { var _a, _b; return ((_a = like.likedBy) === null || _a === void 0 ? void 0 : _a.userId) === Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId); })
                         : false,
                 };
             });
@@ -187,7 +187,7 @@ const getUserTweets = (0, asyncHandler_1.asyncHandler)({
                             fullName: true,
                         },
                     },
-                    Like: {
+                    likes: {
                         select: {
                             likedBy: true,
                         },
@@ -198,14 +198,14 @@ const getUserTweets = (0, asyncHandler_1.asyncHandler)({
                 throw new ApiError_1.ApiError(401, "No tweets found for this user");
             }
             const tweetDetails = tweets.map((tweet) => {
-                const likes = tweet.Like;
+                const likes = tweet.likes;
                 return {
                     id: tweet.id,
                     content: tweet.content,
                     owner: tweet.owner,
                     likesCount: likes.length,
-                    isLiked: Number(userId)
-                        ? likes.some((like) => like.likedBy === Number(userId))
+                    isLiked: userId
+                        ? likes.some((like) => { var _a; return ((_a = like.likedBy) === null || _a === void 0 ? void 0 : _a.userId) === Number(userId); })
                         : false,
                 };
             });

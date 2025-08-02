@@ -14,12 +14,10 @@ const toggleSubscription = asyncHandler({
       if (channelUserId === currentUserId)
         throw new ApiError(400, "Cannot subscribe to your own channel");
 
-      const existingSubscription = await prisma.subscription.findUnique({
+      const existingSubscription = await prisma.subscription.findFirst({
         where: {
-          subscriberId_channelId: {
-            subscriberId: currentUserId,
-            channelId: channelUserId,
-          },
+          subscriberId: currentUserId,
+          channelId: channelUserId,
         },
       });
 

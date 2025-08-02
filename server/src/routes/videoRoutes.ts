@@ -16,7 +16,7 @@ import { openAuth } from "../middlewares/openAuth";
 const router = Router();
 
 router.get("/", getAllVideos);
-router.get("/video/:userId", getUserVideos);
+router.get("/video/user/:userId", getUserVideos);
 router.get("/video/:videoId", openAuth, getVideoById);
 
 router.post(

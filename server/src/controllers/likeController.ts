@@ -9,15 +9,15 @@ const getLikedVideos = asyncHandler({
 
       const likedVideos = await prisma.like.findMany({
         where: {
-          likedBy: Number(req.user?.userId),
+          likedById: Number(req.user?.userId),
         },
         include: {
-          videoId: {
+          video: {
             select: {
               isPublished: true,
             },
           },
-          likedById: {
+          likedBy: {
             select: {
               fullName: true,
               username: true,
@@ -54,8 +54,8 @@ const toggleVideoLike = asyncHandler({
 
       const isLiked = await prisma.like.findFirst({
         where: {
-          video: Number(videoId),
-          likedBy: Number(req.user?.userId),
+          videoId: Number(videoId),
+          likedById: Number(req.user?.userId),
         },
       });
 
@@ -71,8 +71,8 @@ const toggleVideoLike = asyncHandler({
       } else {
         const liked = await prisma.like.create({
           data: {
-            video: Number(videoId),
-            likedBy: Number(req.user?.userId),
+            videoId: Number(videoId),
+            likedById: Number(req.user?.userId),
           },
         });
         if (!liked) {
@@ -99,8 +99,8 @@ const toggleCommentLike = asyncHandler({
       }
       const isLiked = await prisma.like.findFirst({
         where: {
-          comment: Number(commentId),
-          likedBy: Number(req.user?.userId),
+          commentId: Number(commentId),
+          likedById: Number(req.user?.userId),
         },
       });
       if (isLiked) {
@@ -115,8 +115,8 @@ const toggleCommentLike = asyncHandler({
       } else {
         const liked = await prisma.like.create({
           data: {
-            comment: Number(commentId),
-            likedBy: Number(req.user?.userId),
+            commentId: Number(commentId),
+            likedById: Number(req.user?.userId),
           },
         });
         if (!liked) {
@@ -143,8 +143,8 @@ const toggleTweetLike = asyncHandler({
       }
       const isLiked = await prisma.like.findFirst({
         where: {
-          tweet: Number(tweetId),
-          likedBy: Number(req.user?.userId),
+          tweetId: Number(tweetId),
+          likedById: Number(req.user?.userId),
         },
       });
 
@@ -160,8 +160,8 @@ const toggleTweetLike = asyncHandler({
       } else {
         const liked = await prisma.like.create({
           data: {
-            comment: Number(tweetId),
-            likedBy: Number(req.user?.userId),
+            tweetId: Number(tweetId),
+            likedById: Number(req.user?.userId),
           },
         });
         if (!liked) {

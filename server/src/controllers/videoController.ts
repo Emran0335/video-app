@@ -205,7 +205,7 @@ const getVideoById = asyncHandler({
           id: Number(videoId),
         },
         include: {
-          Like: {
+          likes: {
             select: {
               likedBy: true,
             },
@@ -220,7 +220,7 @@ const getVideoById = asyncHandler({
               subscribedChannels: true,
             },
           },
-          Comment: true,
+          comments: true,
         },
       });
 
@@ -228,8 +228,8 @@ const getVideoById = asyncHandler({
         throw new ApiError(404, "Video not found");
       }
 
-      const likesCount = video.Like.length;
-      const isLiked = video.Like.some((like) => like.likedBy);
+      const likesCount = video.likes.length;
+      const isLiked = video.likes.some((like) => like.likedBy);
       const subscriberCount = video.owner.subscribers.length;
       const isSubscribed = video.owner.subscribers.some(
         (sub) => sub.id === Number(req.user?.userId)

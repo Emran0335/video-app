@@ -60,7 +60,7 @@ const getVideoComments = asyncHandler({
               avatar: true,
             },
           },
-          Like: {
+          likes: {
             select: {
               likedBy: true,
             },
@@ -75,7 +75,7 @@ const getVideoComments = asyncHandler({
       }
 
       const getComments = comments.map((comment) => {
-        const comments = comment.Like;
+        const comments = comment.likes;
 
         return {
           id: comment.id,
@@ -84,7 +84,7 @@ const getVideoComments = asyncHandler({
           likesCount: comments.length,
           isLiked: Number(req.user?.userId)
             ? comments.some(
-                (comment) => comment.likedBy === Number(req.user?.userId)
+                (comment) => comment.likedBy?.userId === Number(req.user?.userId)
               )
             : false,
         };
@@ -180,7 +180,7 @@ const deleteComment = asyncHandler({
         },
       });
 
-      res.status(200).json(deleteComment);
+      res.status(200).json(deletedComment);
     } catch (error: any) {
       throw new ApiError(
         401,

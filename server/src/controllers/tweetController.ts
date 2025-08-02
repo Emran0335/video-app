@@ -50,7 +50,7 @@ const getAllTweets = asyncHandler({
               fullName: true,
             },
           },
-          Like: {
+          likes: {
             select: {
               likedBy: true,
             },
@@ -65,7 +65,7 @@ const getAllTweets = asyncHandler({
       }
 
       const tweetsWithInfo = tweets.map((tweet) => {
-        const likes = tweet.Like;
+        const likes = tweet.likes;
         return {
           id: tweet.id,
           content: tweet.content,
@@ -74,7 +74,7 @@ const getAllTweets = asyncHandler({
           owner: tweet.owner,
           likesCount: likes.length,
           isLiked: userId
-            ? likes.some((like) => like.likedBy === userId)
+            ? likes.some((like) => like.likedBy?.userId === userId)
             : false,
         };
       });
@@ -144,7 +144,7 @@ const updateTweet = asyncHandler({
               fullName: true,
             },
           },
-          Like: {
+          likes: {
             select: {
               likedBy: true,
             },
@@ -153,7 +153,7 @@ const updateTweet = asyncHandler({
       });
 
       const tweetDetails = tweetWithRelation.map((tweet) => {
-        const likes = tweet.Like;
+        const likes = tweet.likes;
 
         return {
           id: tweet.id,
@@ -163,7 +163,9 @@ const updateTweet = asyncHandler({
           updatedAt: tweet.updatedAt,
           likesCount: likes.length,
           isLiked: Number(req.user?.userId)
-            ? likes.some((like) => like.likedBy === Number(req.user?.userId))
+            ? likes.some(
+                (like) => like.likedBy?.userId === Number(req.user?.userId)
+              )
             : false,
         };
       });
@@ -200,7 +202,7 @@ const getUserTweets = asyncHandler({
               fullName: true,
             },
           },
-          Like: {
+          likes: {
             select: {
               likedBy: true,
             },
@@ -213,15 +215,15 @@ const getUserTweets = asyncHandler({
       }
 
       const tweetDetails = tweets.map((tweet) => {
-        const likes = tweet.Like;
+        const likes = tweet.likes;
 
         return {
           id: tweet.id,
           content: tweet.content,
           owner: tweet.owner,
           likesCount: likes.length,
-          isLiked: Number(userId)
-            ? likes.some((like) => like.likedBy === Number(userId))
+          isLiked: userId
+            ? likes.some((like) => like.likedBy?.userId === Number(userId))
             : false,
         };
       });

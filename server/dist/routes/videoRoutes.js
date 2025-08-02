@@ -7,7 +7,7 @@ const auth_1 = require("../middlewares/auth");
 const openAuth_1 = require("../middlewares/openAuth");
 const router = (0, express_1.Router)();
 router.get("/", videoController_1.getAllVideos);
-router.get("/video/:userId", videoController_1.getUserVideos);
+router.get("/video/user/:userId", videoController_1.getUserVideos);
 router.get("/video/:videoId", openAuth_1.openAuth, videoController_1.getVideoById);
 router.post("/video", multer_1.upload.fields([
     {

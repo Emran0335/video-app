@@ -20,7 +20,7 @@ const getChannelStats = asyncHandler({
           views: true,
           _count: {
             select: {
-              Like: true,
+              likes: true,
             },
           },
         },
@@ -33,7 +33,7 @@ const getChannelStats = asyncHandler({
       const totalVideos = videos.length;
       const totalViews = videos.reduce((acc, video) => acc + video.views, 0);
       const totalLikes = videos.reduce(
-        (acc, video) => acc + video._count.Like,
+        (acc, video) => acc + video._count.likes,
         0
       );
 
@@ -93,8 +93,8 @@ const getChannelVideos = asyncHandler({
           views: true,
           _count: {
             select: {
-              Like: true,
-              Comment: true,
+              likes: true,
+              comments: true,
             },
           },
         },
@@ -106,8 +106,8 @@ const getChannelVideos = asyncHandler({
 
       const transformed = videos.map((video) => ({
         ...video,
-        likesCount: video._count.Like,
-        commentsCount: video._count.Comment,
+        likesCount: video._count.likes,
+        commentsCount: video._count.comments,
       }));
 
       res.status(200).json(transformed);

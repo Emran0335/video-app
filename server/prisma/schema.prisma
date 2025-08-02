@@ -26,12 +26,15 @@ model User {
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   watchHistory       Video[]
-  Tweet              Tweet[]
-  Comment            Comment[]
-  Like               Like[]
+  tweets             Tweet[]
+  comments           Comment[]
+  likes              Like[]
   subscribedChannels Subscription[] @relation("Subscriber") // User as subscriber
   subscribers        Subscription[] @relation("Channel") // User as channel owner
-  Playlist           Playlist[]
+  playlist           Playlist[]
+
+  @@unique([userId])
+  @@map("users")
 }
 
 model Video {
@@ -47,9 +50,12 @@ model Video {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   owner       User       @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
-  Comment     Comment[]
-  Like        Like[]
-  Playlist    Playlist[] @relation("VideoToPlaylist")
+  comments    Comment[]
+  likes       Like[]
+  playlist    Playlist[] @relation("VideoToPlaylist")
+
+  @@unique([id])
+  @@map("videos")
 }
 
 model Tweet {
@@ -59,7 +65,10 @@ model Tweet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   owner     User     @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
-  Like      Like[]
+  likes     Like[]
+
+  @@unique([id])
+  @@map("tweets")
 }
 
 model Comment {
@@ -71,21 +80,27 @@ model Comment {
   updatedAt DateTime @updatedAt
   videoId   Video    @relation(fields: [video], references: [id])
   ownerId   User     @relation(fields: [owner], references: [userId], onDelete: Cascade)
-  Like      Like[]
+  likes     Like[]
+
+  @@unique([id])
+  @@map("comments")
 }
 
 model Like {
   id        Int      @id @default(autoincrement())
-  video     Int? // relation with Video
-  comment   Int? // relation with comment
-  tweet     Int? // relation with Tweet
-  likedBy   Int? // relation with User
+  videoId   Int? // relation with Video
+  commentId Int? // relation with comment
+  tweetId   Int? // relation with Tweet
+  likedById Int? // relation with User
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  videoId   Video?    @relation(fields: [video], references: [id])
-  commentId Comment? @relation(fields: [comment], references: [id])
-  tweetId   Tweet?   @relation(fields: [tweet], references: [id])
-  likedById User?     @relation(fields: [likedBy], references: [userId])
+  video     Video?   @relation(fields: [videoId], references: [id])
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  tweet     Tweet?   @relation(fields: [tweetId], references: [id])
+  likedBy   User?    @relation(fields: [likedById], references: [userId])
+
+  @@unique([id])
+  @@map("likes")
 }
 
 model Playlist {
@@ -95,8 +110,11 @@ model Playlist {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   ownerId     Int // relation with User
-  videos      Video[] @relation("VideoToPlaylist")
+  videos      Video[]  @relation("VideoToPlaylist")
   owner       User     @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
+
+  @@unique([id])
+  @@map("playlists")
 }
 
 model Subscription {
@@ -106,12 +124,9 @@ model Subscription {
   subscriberId Int // relation with User
   channelId    Int // relation with User
 
-  // User who subscribes (subscriber)
   subscriber User @relation("Subscriber", fields: [subscriberId], references: [userId], onDelete: Cascade)
+  channel    User @relation("Channel", fields: [channelId], references: [userId], onDelete: Cascade)
 
-  // Channel being subscribed to (channel owner)
-  channel User @relation("Channel", fields: [channelId], references: [userId], onDelete: Cascade)
-
-  // Unique constraint to prevent duplicate subscriptions
-  @@unique([subscriberId, channelId])
+  @@unique([subscriberId, channelId, id])
+  @@map("subscriptions")
 }

@@ -30,7 +30,7 @@ const getChannelStats = (0, asyncHandler_1.asyncHandler)({
                     views: true,
                     _count: {
                         select: {
-                            Like: true,
+                            likes: true,
                         },
                     },
                 },
@@ -40,7 +40,7 @@ const getChannelStats = (0, asyncHandler_1.asyncHandler)({
             }
             const totalVideos = videos.length;
             const totalViews = videos.reduce((acc, video) => acc + video.views, 0);
-            const totalLikes = videos.reduce((acc, video) => acc + video._count.Like, 0);
+            const totalLikes = videos.reduce((acc, video) => acc + video._count.likes, 0);
             const subscribersCount = yield hashedPassword_1.prisma.subscription.count({
                 where: {
                     channelId: Number(userId),
@@ -91,8 +91,8 @@ const getChannelVideos = (0, asyncHandler_1.asyncHandler)({
                     views: true,
                     _count: {
                         select: {
-                            Like: true,
-                            Comment: true,
+                            likes: true,
+                            comments: true,
                         },
                     },
                 },
@@ -100,7 +100,7 @@ const getChannelVideos = (0, asyncHandler_1.asyncHandler)({
             if (!videos) {
                 throw new ApiError_1.ApiError(500, "No video found");
             }
-            const transformed = videos.map((video) => (Object.assign(Object.assign({}, video), { likesCount: video._count.Like, commentsCount: video._count.Comment })));
+            const transformed = videos.map((video) => (Object.assign(Object.assign({}, video), { likesCount: video._count.likes, commentsCount: video._count.comments })));
             res.status(200).json(transformed);
         }
         catch (error) {

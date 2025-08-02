@@ -63,7 +63,7 @@ const getVideoComments = (0, asyncHandler_1.asyncHandler)({
                             avatar: true,
                         },
                     },
-                    Like: {
+                    likes: {
                         select: {
                             likedBy: true,
                         },
@@ -77,14 +77,14 @@ const getVideoComments = (0, asyncHandler_1.asyncHandler)({
             }
             const getComments = comments.map((comment) => {
                 var _a;
-                const comments = comment.Like;
+                const comments = comment.likes;
                 return {
                     id: comment.id,
                     owner: comment.ownerId,
                     content: comment.content,
                     likesCount: comments.length,
                     isLiked: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId)
-                        ? comments.some((comment) => { var _a; return comment.likedBy === Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId); })
+                        ? comments.some((comment) => { var _a, _b; return ((_a = comment.likedBy) === null || _a === void 0 ? void 0 : _a.userId) === Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId); })
                         : false,
                 };
             });
@@ -162,7 +162,7 @@ const deleteComment = (0, asyncHandler_1.asyncHandler)({
                     id: comment.id,
                 },
             });
-            res.status(200).json(deleteComment);
+            res.status(200).json(deletedComment);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while fetching comments!");

@@ -20,15 +20,15 @@ const getLikedVideos = (0, asyncHandler_1.asyncHandler)({
             const { page = 1, limit = 10 } = req.query;
             const likedVideos = yield hashedPassword_1.prisma.like.findMany({
                 where: {
-                    likedBy: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
+                    likedById: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
                 include: {
-                    videoId: {
+                    video: {
                         select: {
                             isPublished: true,
                         },
                     },
-                    likedById: {
+                    likedBy: {
                         select: {
                             fullName: true,
                             username: true,
@@ -60,8 +60,8 @@ const toggleVideoLike = (0, asyncHandler_1.asyncHandler)({
             }
             const isLiked = yield hashedPassword_1.prisma.like.findFirst({
                 where: {
-                    video: Number(videoId),
-                    likedBy: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
+                    videoId: Number(videoId),
+                    likedById: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
             });
             if (isLiked) {
@@ -77,8 +77,8 @@ const toggleVideoLike = (0, asyncHandler_1.asyncHandler)({
             else {
                 const liked = yield hashedPassword_1.prisma.like.create({
                     data: {
-                        video: Number(videoId),
-                        likedBy: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
+                        videoId: Number(videoId),
+                        likedById: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
                     },
                 });
                 if (!liked) {
@@ -103,8 +103,8 @@ const toggleCommentLike = (0, asyncHandler_1.asyncHandler)({
             }
             const isLiked = yield hashedPassword_1.prisma.like.findFirst({
                 where: {
-                    comment: Number(commentId),
-                    likedBy: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
+                    commentId: Number(commentId),
+                    likedById: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
             });
             if (isLiked) {
@@ -120,8 +120,8 @@ const toggleCommentLike = (0, asyncHandler_1.asyncHandler)({
             else {
                 const liked = yield hashedPassword_1.prisma.like.create({
                     data: {
-                        comment: Number(commentId),
-                        likedBy: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
+                        commentId: Number(commentId),
+                        likedById: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
                     },
                 });
                 if (!liked) {
@@ -146,8 +146,8 @@ const toggleTweetLike = (0, asyncHandler_1.asyncHandler)({
             }
             const isLiked = yield hashedPassword_1.prisma.like.findFirst({
                 where: {
-                    tweet: Number(tweetId),
-                    likedBy: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
+                    tweetId: Number(tweetId),
+                    likedById: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
             });
             if (isLiked) {
@@ -163,8 +163,8 @@ const toggleTweetLike = (0, asyncHandler_1.asyncHandler)({
             else {
                 const liked = yield hashedPassword_1.prisma.like.create({
                     data: {
-                        comment: Number(tweetId),
-                        likedBy: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
+                        tweetId: Number(tweetId),
+                        likedById: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
                     },
                 });
                 if (!liked) {

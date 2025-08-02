@@ -180,7 +180,7 @@ const getVideoById = (0, asyncHandler_1.asyncHandler)({
                     id: Number(videoId),
                 },
                 include: {
-                    Like: {
+                    likes: {
                         select: {
                             likedBy: true,
                         },
@@ -195,14 +195,14 @@ const getVideoById = (0, asyncHandler_1.asyncHandler)({
                             subscribedChannels: true,
                         },
                     },
-                    Comment: true,
+                    comments: true,
                 },
             });
             if (!video) {
                 throw new ApiError_1.ApiError(404, "Video not found");
             }
-            const likesCount = video.Like.length;
-            const isLiked = video.Like.some((like) => like.likedBy);
+            const likesCount = video.likes.length;
+            const isLiked = video.likes.some((like) => like.likedBy);
             const subscriberCount = video.owner.subscribers.length;
             const isSubscribed = video.owner.subscribers.some((sub) => { var _a; return sub.id === Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId); });
             const result = Object.assign(Object.assign({}, video), { likesCount: likesCount, isLiked: isLiked, owner: Object.assign(Object.assign({}, video.owner), { id: video.owner.userId, subscriberCount: subscriberCount, isSubscribed: isSubscribed }) });
