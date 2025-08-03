@@ -6,10 +6,11 @@ import {
   History,
   Home,
   LockIcon,
+  LogOut,
   LucideIcon,
   SquarePlay,
   StickyNote,
-  User,
+  UserCog,
   Video,
   X,
   Youtube,
@@ -28,7 +29,6 @@ const Sidebar = () => {
   const { data: user } = useGetCurrentLoggedInUserQuery();
   const dispatch = useAppDispatch();
   const { isSidebarCollapsed } = useAppSelector((state) => state.global);
-  const router = useRouter();
   const [logoutUser, { isLoading }] = useLogoutUserMutation();
 
   const handleLogout = async () => {
@@ -94,13 +94,14 @@ const Sidebar = () => {
               label="My Channel"
               icon={SquarePlay}
             />
+            <SidebarLink href="/admin/dashboard" label="Admin" icon={UserCog} />
           </nav>
         </div>
         <button
           className="font-medium text-xl mb-16 py-3 flex justify-start items-center px-8 gap-4 w-full text-gray-800 hover:bg-gray-200 hover:text-red-500"
           onClick={handleLogout}
         >
-          <User className="w-8 h-8 border border-gray-400 rounded-full p-1" />
+          <LogOut className="w-8 h-8 border border-gray-400 rounded-full p-1" />
           Sign out
         </button>
       </div>

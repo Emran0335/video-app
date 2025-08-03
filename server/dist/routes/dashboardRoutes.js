@@ -5,6 +5,6 @@ const openAuth_1 = require("../middlewares/openAuth");
 const dashboardController_1 = require("../controllers/dashboardController");
 const auth_1 = require("../middlewares/auth");
 const router = (0, express_1.Router)();
-router.get("/stats/:userId", openAuth_1.openAuth, dashboardController_1.getChannelStats);
 router.get("/videos", auth_1.verifyJWT, dashboardController_1.getChannelVideos);
+router.get("/stats/:userId", openAuth_1.openAuth, dashboardController_1.getChannelStats);
 exports.default = router;

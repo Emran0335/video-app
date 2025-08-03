@@ -163,7 +163,7 @@ const toggleTweetLike = (0, asyncHandler_1.asyncHandler)({
             else {
                 const liked = yield hashedPassword_1.prisma.like.create({
                     data: {
-                        commentId: Number(tweetId),
+                        tweetId: Number(tweetId),
                         likedById: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
                     },
                 });

@@ -29,11 +29,10 @@ const VideoInfo = ({ video, showVideoDescription }: videoInfoProps) => {
   const [likesCount, setLikesCount] = useState(video.likesCount);
 
   const toggleVideoLikeHandler = useCallback(async () => {
-    if (user?.userId === video.owner.userId) {
+    if (user?.userId !== video.owner.userId) {
       setIsModalNewTaskOpen(true);
       return;
     }
-
     try {
       await toggleVideoLike({ videoId: video.id }).unwrap();
       setIsLiked((prev) => !prev);
@@ -52,7 +51,7 @@ const VideoInfo = ({ video, showVideoDescription }: videoInfoProps) => {
 
   return (
     <div className="border border-gray-300 rounded-xl px-3 py-2 mt-2 opacity-60">
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <div className="">
           <h1 className="text-[1.3rem] font-semibold">{video.title}</h1>
           <p className="text-[0.9rem] text-gray-800">{`${video.views} views * ${times}`}</p>

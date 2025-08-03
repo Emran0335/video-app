@@ -51,7 +51,7 @@ const SignupPage = ({ setToggleSignUser }: SignInProps) => {
   };
 
   return (
-    <div className="flex mx-auto mt-32 h-[400px] w-[500px] items-center justify-center p-1 border border-gray-100 bg-gray-200 rounded-md">
+    <div className="flex mx-auto mt-32 h-[450px] w-[500px] items-center justify-center p-1 border border-gray-100 bg-gray-200 rounded-md">
       <form
         className="mx-auto mt-2 flex flex-col max-w-sm px-4 text-gray-900"
         onSubmit={(e) => {

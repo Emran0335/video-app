@@ -8,7 +8,7 @@ import { verifyJWT } from "../middlewares/auth";
 
 const router = Router();
 
-router.get("/stats/:userId", openAuth, getChannelStats);
 router.get("/videos", verifyJWT, getChannelVideos);
+router.get("/stats/:userId", openAuth, getChannelStats);
 
 export default router;

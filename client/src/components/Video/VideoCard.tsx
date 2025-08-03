@@ -39,11 +39,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
           <button className="mt-1 cursor-pointer" onClick={moveToChannelUser}>
             <Image
               className="w-12 h-12 bg-gray-100 rounded-full object-cover"
-              src={
-                typeof video.owner.avatar === "string"
-                  ? video.owner.avatar
-                  : "/default-avatar.png"
-              }
+              src={video.owner?.avatar as string}
               alt={video.owner.fullName as string}
               width={400}
               height={400}

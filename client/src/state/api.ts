@@ -102,6 +102,14 @@ export interface Subscription {
   channelId: number;
 }
 
+export interface Stats {
+  subscribersCount: number;
+  totalLikes: number;
+  totalVideos: number;
+  totalViews: number;
+  totalTweets: number;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -299,6 +307,14 @@ export const api = createApi({
         body: {},
       }),
     }),
+
+    //dashboard
+    getChannelVideos: build.query<Video[], void>({
+      query: () => "/dashboard/videos",
+    }),
+    getChannelStats: build.query<Stats[], { userId: number }>({
+      query: ({ userId }) => `/dashboard/stats/${userId}`,
+    }),
   }),
 });
 
@@ -330,4 +346,8 @@ export const {
 
   // subscriptions
   useToggleSubscriptionMutation,
+
+  // dashboard
+  useGetChannelStatsQuery,
+  useGetChannelVideosQuery,
 } = api;
