@@ -59,26 +59,30 @@ export interface Tweet {
   createdAt: Date;
   updatedAt: Date;
 
-  Like: Like[];
+  likes: Like[];
 }
 
 export interface Comment {
   id: number;
   content: string;
   video: number;
-  owner: number;
+  owner: Partial<User>;
+  isLiked: boolean;
+  likesCount: number;
   createdAt: Date;
   updatedAt: Date;
 
-  Like: Like[];
+  likes: Like[];
 }
 
 export interface Like {
   id: number;
-  video?: number;
-  comment?: number;
-  tweet?: number;
+  videoId?: number;
+  commentId?: number;
+  tweetId?: number;
   likedBy?: number;
+  isLiked: boolean;
+  likesCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -126,7 +130,7 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["NewUser", "User", "Video"],
+  tagTypes: ["NewUser", "User", "Video", "Comment", "Like"],
   endpoints: (build) => ({
     getCurrentLoggedInUser: build.query<User, void>({
       query: () => "/users/user/current-user",
@@ -268,7 +272,7 @@ export const api = createApi({
         url: `/videos/video/toggle/${videoId}`,
         method: "PATCH",
         credentials: "include",
-        body: { isPublished },
+        body: { videoId, isPublished },
       }),
       invalidatesTags: (result, error, { videoId }) => [
         { type: "Video", id: videoId },
@@ -286,19 +290,78 @@ export const api = createApi({
       }),
     }),
 
+    // like endpoints
+    getLikedVideos: build.query<Like[], void>({
+      query: () => "/likes/like/videos",
+      providesTags: ["Like"],
+    }),
     toggleVideoLike: build.mutation<Like, { videoId: number }>({
       query: ({ videoId }) => ({
         url: `/likes/toggle/v/${videoId}`,
-        method: "PATCH",
+        method: "POST",
         credentials: "include",
         body: { videoId },
       }),
       invalidatesTags: (result, error, { videoId }) => [
-        { type: "Video", id: videoId },
+        { type: "Like", id: videoId },
+      ],
+    }),
+    toggleCommentLike: build.mutation<Like[], { commentId: number }>({
+      query: ({ commentId }) => ({
+        url: `/likes/toggle/c/${commentId}`,
+        method: "POST",
+        credentials: "include",
+        body: { commentId },
+      }),
+      invalidatesTags: (result, error, { commentId }) => [
+        { type: "Like", id: commentId },
       ],
     }),
 
-    // subscriptions
+    //comments endpoints
+    getVideoComments: build.query<
+      Comment[],
+      { videoId: number; page: number; limit: number }
+    >({
+      query: ({ videoId, page, limit }) =>
+        `/comments/comment/${videoId}?page=${page}&limit=${limit}`,
+      providesTags: ["Comment"],
+    }),
+
+    addComment: build.mutation<Comment[], { content: string; videoId: number }>(
+      {
+        query: ({ content, videoId }) => ({
+          url: `/comments/comment/${videoId}`,
+          method: "POST",
+          credentials: "include",
+          body: { content },
+        }),
+        invalidatesTags: ["Comment"],
+      }
+    ),
+
+    deleteComment: build.mutation<Comment, { commentId: number }>({
+      query: ({ commentId }) => ({
+        url: `/comments/c/${commentId}`,
+        method: "DELETE",
+        body: {},
+      }),
+      invalidatesTags: ["Comment"],
+    }),
+
+    updateComment: build.mutation<
+      Comment[],
+      { content: string; commentId: number }
+    >({
+      query: ({ content, commentId }) => ({
+        url: `/comments/c/${commentId}`,
+        method: "PATCH",
+        body: content,
+      }),
+      invalidatesTags: ["Comment"],
+    }),
+
+    // subscriptions endpoints
     toggleSubscription: build.mutation<Subscription, Partial<Video>>({
       query: ({ ownerId }) => ({
         url: `/subscriptions/c/${ownerId}`,
@@ -342,7 +405,15 @@ export const {
   useDeleteVideoMutation,
 
   // likes
+  useGetLikedVideosQuery,
   useToggleVideoLikeMutation,
+  useToggleCommentLikeMutation,
+
+  //comments
+  useGetVideoCommentsQuery,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
+  useUpdateCommentMutation,
 
   // subscriptions
   useToggleSubscriptionMutation,

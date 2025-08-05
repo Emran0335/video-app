@@ -70,7 +70,8 @@ const getVideoComments = (0, asyncHandler_1.asyncHandler)({
                     },
                 },
                 skip: (Number(page) - 1) * Number(limit),
-                take: Number(page),
+                take: Number(limit),
+                orderBy: { createdAt: "desc" },
             });
             if (!comments) {
                 throw new ApiError_1.ApiError(500, "Comments not found!");

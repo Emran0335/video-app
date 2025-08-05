@@ -67,7 +67,8 @@ const getVideoComments = asyncHandler({
           },
         },
         skip: (Number(page) - 1) * Number(limit),
-        take: Number(page),
+        take: Number(limit),
+        orderBy: { createdAt: "desc" },
       });
 
       if (!comments) {
@@ -84,7 +85,8 @@ const getVideoComments = asyncHandler({
           likesCount: comments.length,
           isLiked: Number(req.user?.userId)
             ? comments.some(
-                (comment) => comment.likedBy?.userId === Number(req.user?.userId)
+                (comment) =>
+                  comment.likedBy?.userId === Number(req.user?.userId)
               )
             : false,
         };
