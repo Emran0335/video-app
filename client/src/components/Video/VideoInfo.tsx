@@ -29,16 +29,17 @@ const VideoInfo = ({ video, showVideoDescription }: videoInfoProps) => {
   const [likesCount, setLikesCount] = useState(video.likesCount);
 
   const toggleVideoLikeHandler = useCallback(async () => {
-    if (user?.userId !== video.owner.userId) {
+    if (user?.userId === video.owner.userId) {
       setIsModalNewTaskOpen(true);
       return;
-    }
-    try {
-      await toggleVideoLike({ videoId: video.id }).unwrap();
-      setIsLiked((prev) => !prev);
-      setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
-    } catch (error) {
-      console.error("Failed to toggle like:", error);
+    } else {
+      try {
+        await toggleVideoLike({ videoId: video.id }).unwrap();
+        setIsLiked((prev) => !prev);
+        setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+      } catch (error) {
+        console.error("Failed to toggle like:", error);
+      }
     }
   }, [
     video.owner.userId,

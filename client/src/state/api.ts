@@ -340,23 +340,24 @@ export const api = createApi({
       }
     ),
 
-    deleteComment: build.mutation<Comment, { commentId: number }>({
+    deleteComment: build.mutation<{ success: boolean }, { commentId: number }>({
       query: ({ commentId }) => ({
         url: `/comments/c/${commentId}`,
         method: "DELETE",
-        body: {},
+        credentials: "include",
       }),
       invalidatesTags: ["Comment"],
     }),
 
     updateComment: build.mutation<
-      Comment[],
+      Comment,
       { content: string; commentId: number }
     >({
       query: ({ content, commentId }) => ({
         url: `/comments/c/${commentId}`,
         method: "PATCH",
-        body: content,
+        credentials: "include",
+        body: { content },
       }),
       invalidatesTags: ["Comment"],
     }),

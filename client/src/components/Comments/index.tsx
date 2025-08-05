@@ -11,12 +11,13 @@ import {
 } from "@/state/api";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import SignInModal from "../UserModal/SignInModal";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { icons } from "@/assets/Icons";
 import { getTimeDistanceToNow } from "@/lib/utils";
 import { EllipsisVertical, ThumbsDown, ThumbsUp } from "lucide-react";
+import Link from "next/link";
 
 type CommentsProps = {
   video: Video;
@@ -29,33 +30,36 @@ const Comments = ({ video }: CommentsProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentUpdated, setCommentUpdated] = useState(false);
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
-  const [update, setUpdate] = useState<number | null>(null);
+  const [update, setUpdate] = useState<number>(0);
   const [content, setContent] = useState("");
+  const [updateContent, setUpdateContent] = useState("");
+
+  console.log("UpdateId", update);
 
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
-
+  console.log("activeCommentId", activeCommentId);
   const { videoId } = useParams();
   const menuRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-  const { data: videoComments } = useGetVideoCommentsQuery({
+  const { data: videoComments, refetch } = useGetVideoCommentsQuery({
     videoId: video.id,
     page: page,
     limit: 10,
   });
-  console.log("Comments", videoComments);
+
   const [commentContent] = useAddCommentMutation();
   const [deleteComment] = useDeleteCommentMutation();
   const [updateComment] = useUpdateCommentMutation();
   const [toggleCommentLike, { isSuccess }] = useToggleCommentLikeMutation();
 
   const handleCommentSubmit = async () => {
-    if (user?.userId !== video.owner.userId) {
+    if (user?.userId === video.owner.userId) {
       setIsModalNewTaskOpen(true);
       return;
     } else {
       try {
         await commentContent({
-          videoId: video.id,
+          videoId: Number(videoId),
           content: content,
         });
         setContent("");
@@ -72,27 +76,28 @@ const Comments = ({ video }: CommentsProps) => {
       await deleteComment({
         commentId: commentId,
       });
+      await refetch();
       setCommentUpdated((prev) => !prev);
       setPage(1);
+      setComments([]);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleCommentUpdate = async (content: string, commentId: number) => {
+  const handleCommentUpdate = async (comment: Comment) => {
     try {
       await updateComment({
-        commentId: commentId,
-        content: content,
-      });
-      setUpdate(null);
-      setCommentUpdated((prev) => !prev);
-      setPage(1);
+        commentId: comment.id,
+        content: content ? comment.content : updateContent,
+      }).unwrap(); // unwrap to catch errors properly
+      await refetch();
+      setUpdate(0); //hide form AFTER successful update
+      setContent("");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
-
   useEffect(() => {
     if (videoComments) {
       if (page === 1) {
@@ -100,11 +105,13 @@ const Comments = ({ video }: CommentsProps) => {
       } else {
         setComments((prev) => [...prev, ...videoComments]);
       }
-
+      async function refetchData() {
+        return await refetch();
+      }
       // Check if we still have more comments
       setHasMore(videoComments.length === 10); // If fewer than 10, no more pages
     }
-  }, [videoComments, page]);
+  }, [videoComments, page, refetch]);
 
   const fetchMoreData = () => {
     setPage((prevPage) => prevPage + 1);
@@ -139,14 +146,14 @@ const Comments = ({ video }: CommentsProps) => {
     setActiveCommentId(activeCommentId === commentId ? null : commentId);
   };
 
-  const handleUpdate = (comment: Comment) => {
-    setUpdate(comment.id);
-    setContent((prev) => prev + comment.content);
+  const handleUpdate = (commentId: number) => {
+    setUpdate(commentId);
     setActiveCommentId(null);
   };
 
   const cancelEditing = () => {
-    setUpdate(null);
+    setUpdate(0);
+    setContent("");
   };
 
   const handleDelete = (commentId: number) => {
@@ -154,12 +161,16 @@ const Comments = ({ video }: CommentsProps) => {
     setActiveCommentId(null);
   };
 
-  const handleClickOutside = (event: { target: EventTarget | null }) => {
-    if (
-      menuRefs.current.some((ref) => ref && !ref.contains(event.target as Node))
-    ) {
-      setActiveCommentId(null);
-    }
+  const handleClickOutside = (event: MouseEvent) => {
+    // Use setTimeout to let button clicks happen first
+    setTimeout(() => {
+      const clickedInsideAny = menuRefs.current.some(
+        (ref) => ref && ref.contains(event.target as Node)
+      );
+      if (!clickedInsideAny) {
+        setActiveCommentId(null);
+      }
+    }, 0);
   };
 
   useEffect(() => {
@@ -171,12 +182,12 @@ const Comments = ({ video }: CommentsProps) => {
 
   return (
     <>
-      <div className="text-gray-600">
-        <div className="">
-          <p className="text-gray-600">
+      <div className="text-gray-600 border rounded-xl border-gray-200 mt-4 px-4 pt-2 pb-2">
+        <div className="mt-2 px-4 py-2 border border-gray-200 rounded-xl">
+          <p className="text-lg font-bold">
             {Array.isArray(comments) && comments.length
-              ? `${comments.length} comments`
-              : "No comments"}
+              ? `${comments.length} Comments`
+              : "No Comments"}
           </p>
           <form
             action="#"
@@ -184,19 +195,23 @@ const Comments = ({ video }: CommentsProps) => {
               e.preventDefault();
               handleCommentSubmit();
             }}
+            className="mt-4 mb-2 flex items-center gap-4"
           >
-            <div className="w-[24px] h-[24px]">
-              <Image
-                src={(user?.avatar as string) || (video.owner.avatar as string)}
-                alt={user?.description as string}
-                width={20}
-                height={20}
-                className="rounded-full w-full h-full object-cover"
-              />
+            <div className="w-[48px] h-[40px] rounded-full border-2 border-gray-200 overflow-hidden">
+              <Link href="/admin/dashboard">
+                <Image
+                  src={user?.avatar as string}
+                  alt={user?.username as string}
+                  width={40}
+                  height={40}
+                  style={{ width: "auto", height: "auto" }}
+                  className="object-cover"
+                />
+              </Link>
             </div>
             <input
               type="text"
-              className="rounded-lg mr-3 px-2 border border-gray-400"
+              className="rounded-lg w-full py-2 mr-3 px-2 border border-gray-200 outline-none"
               placeholder="Add a comment"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -209,13 +224,13 @@ const Comments = ({ video }: CommentsProps) => {
             )}
             <button
               type="submit"
-              className="ml-4 text-gray-600 font-semibold rounded-lg border border-gray-300 flex items-center hover:bg-zinc-400"
+              className="ml-4 px-2 py-2 text-gray-600 font-semibold cursor-pointer rounded-lg border border-gray-300 flex items-center hover:bg-gray-200"
             >
               Comment
             </button>
           </form>
         </div>
-        <div className="w-full text-gray-600">
+        <div className="w-full">
           {Array.isArray(comments) && comments.length > 0 && (
             <InfiniteScroll
               dataLength={comments.length}
@@ -226,24 +241,32 @@ const Comments = ({ video }: CommentsProps) => {
                   {icons.loading}
                 </div>
               }
-              scrollableTarget="scrollabDiv"
+              scrollableTarget="scrollableDiv"
             >
               {comments.map((comment, index) => (
-                <div key={index}>
-                  <div className="flex">
-                    <div className="w-[24px] h-[24px]">
+                <div
+                  key={comment.id}
+                  className="border flex border-gray-200 rounded-xl mt-4 py-2 px-4"
+                >
+                  <div className="w-[32px] h-[32px] rounded-full border-2 border-gray-200 overflow-hidden">
+                    <Link href="/admin/dashboard">
                       <Image
                         src={comment.owner.avatar as string}
-                        alt={comment.content}
-                        width={20}
-                        height={20}
-                        className="rounded-full w-full h-full object-cover"
+                        alt={user?.username as string}
+                        width={40}
+                        height={40}
+                        style={{ width: "auto", height: "auto" }}
+                        className="object-cover"
                       />
-                    </div>
+                    </Link>
+                  </div>
+                  <div className="flex w-full items-center">
                     <div className="px-3 justify-start grow">
-                      <div className="">
-                        <p>@{comment.owner.username}</p>
-                        <p className="ml-2">
+                      <div className="flex text-sm">
+                        <p className="font-semibold">
+                          @{comment.owner.username}
+                        </p>
+                        <p className="ml-4">
                           .{getTimeDistanceToNow(comment.createdAt)}
                         </p>
                       </div>
@@ -252,32 +275,33 @@ const Comments = ({ video }: CommentsProps) => {
                           action="#"
                           onSubmit={(e) => {
                             e.preventDefault();
-                            handleCommentUpdate(content, comment.id);
+                            handleCommentUpdate(comment);
                           }}
-                          className="mt-1 flex items-center"
+                          className="mt-4 flex items-center"
                         >
                           <input
                             type="text"
-                            className="mr-2 border-b-[1px] py-1 bg-black/0 text-white outline-none duration-200 focus:border-blue-800 w-full"
+                            className="mr-2 border-b-[1px] border-b-gray-200 bg-black/0 text-gray-600 outline-none duration-200 focus:border-blue-200 w-full placeholder:text-gray-400"
                             placeholder="Add a comment"
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
+                            value={updateContent}
+                            onChange={(e) => setUpdateContent(e.target.value)}
                           />
                           <button
                             type="submit"
-                            className="ml-4 text-gray-600 font-semibold text-sm rounded-lg border border-gray-600 flex items-center hover:bg-zinc-400"
+                            className="text-gray-600 font-semibold text-sm rounded-lg border border-gray-200 px-2 py-2 text-center hover:bg-gray-200 cursor-pointer"
                           >
-                            Update
+                            Save
                           </button>
                           <button
+                            type="button"
                             onClick={cancelEditing}
-                            className="ml-4 text-gray-600 font-semibold text-sm rounded-lg border border-gray-600 flex items-center hover:bg-zinc-400"
+                            className="ml-4 text-gray-600 font-semibold text-sm rounded-lg border border-gray-200 px-2 py-2 text-center hover:bg-gray-200 cursor-pointer"
                           >
                             Cancel
                           </button>
                         </form>
                       ) : (
-                        <div className="mt-1 break-words break-all">
+                        <div className="mt-6 break-words break-all">
                           {comment.content}
                         </div>
                       )}
@@ -313,16 +337,18 @@ const Comments = ({ video }: CommentsProps) => {
                           <EllipsisVertical />
                         </button>
                         {activeCommentId === comment.id && (
-                          <div className="absolute left-0 w-24 bg-black rounded-lg shadow-lg text-sm">
+                          <div className="absolute left-[-85px] top-[0px] w-24 bg-gray-200 rounded-lg shadow-lg text-sm">
                             <button
-                              onClick={() => handleUpdate(comment)}
-                              className="block w-full text-left px-4 py-2 hover:bg-slate-900 hover:rounded-lg"
+                              type="button"
+                              onClick={() => handleUpdate(comment.id)}
+                              className="block w-full text-sm font-semibold cursor-pointer text-center px-4 py-2 hover:bg-gray-400 hover:rounded-t-lg hover:text-gray-100"
                             >
                               Update
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleDelete(comment.id)}
-                              className="block w-full text-left px-4 py-2 hover:bg-slate-900 hover:rounded-lg"
+                              className="block w-full text-center text-sm font-semibold cursor-pointer px-4 py-2 hover:bg-gray-400 hover:rounded-b-lg hover:text-gray-100"
                             >
                               Delete
                             </button>

@@ -65,7 +65,13 @@ const Sidebar = () => {
           </div>
           {/* TEAM  */}
           <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 px-4 py-4">
-            <Image src={logo} alt="logo" width={40} height={40} />
+            <Image
+              src={logo}
+              alt="logo"
+              width={40}
+              style={{ width: "auto", height: "auto" }}
+              height={40}
+            />
             <div>
               <h3 className="font-semibold tracking-wide">VIDEO STREAM</h3>
               <div className="flex items-start gap-2">
