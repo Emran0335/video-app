@@ -22,28 +22,32 @@ const VideoCard = ({ video }: VideoCardProps) => {
 
   return (
     <Link href={`/watchpage/${video.id}`}>
-      <div className="relative mb-2 bg-gray-200 rounded-2xl text-white p-1 hover:bg-gray-300">
-        <div className="relative flex flex-col w-[350px] h-[300px]">
+      <div className="mb-2 bg-gray-200 text-white p-1 hover:bg-gray-300">
+        <div className="relative w-[350px] h-[250px]">
           <Image
-            className="rounded-t-2xl shadow-2xl w-full h-full shadow-gray-200 object-cover"
+            className="shadow-2xl border-amber-500 p-0 m-0 shadow-gray-200 object-cover"
             src={video.thumbnail}
             alt={video.title}
-            width={300}
-            height={200}
+            style={{ width: "auto", height: "auto" }}
+            width={350}
+            height={300}
           />
-          <p className="absolute bottom-1 bg-gray-200 rounded-2xl w-12 h-6 right-3 text-center text-gray-600">
+          <p className="absolute bottom-6 bg-gray-200 rounded-2xl w-12 h-6 right-3 text-center text-gray-600">
             {duration}
           </p>
         </div>
         <div className="flex items-center gap-4 px-2 mt-4">
           <button className="mt-1 cursor-pointer" onClick={moveToChannelUser}>
-            <Image
-              className="w-12 h-12 bg-gray-100 rounded-full object-cover"
-              src={video.owner?.avatar as string}
-              alt={video.owner.fullName as string}
-              width={400}
-              height={400}
-            />
+            <div className="w-[48px] h-[48px] rounded-full border-2 border-gray-200 overflow-hidden">
+              <Image
+                src={video.owner.avatar as string}
+                alt={video.owner.fullName as string}
+                width={40}
+                height={40}
+                style={{ width: "auto", height: "auto" }}
+                className="object-cover"
+              />
+            </div>
           </button>
           <div className="ml-4">
             <h2 className="text-lg font-semibold text-gray-800">

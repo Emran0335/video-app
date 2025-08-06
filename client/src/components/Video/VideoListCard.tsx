@@ -10,10 +10,7 @@ type VideoListCardProps = {
   video: Video;
 };
 
-const VideoListCard = ({
-  showVideoDescription,
-  video,
-}: VideoListCardProps) => {
+const VideoListCard = ({ showVideoDescription, video }: VideoListCardProps) => {
   const duration = formatDuration(video.duration);
   const times = getTimeDistanceToNow(video.createdAt);
 
@@ -32,6 +29,7 @@ const VideoListCard = ({
             className="rounded-xl shadow-2xl w-full h-full shadow-gray-200 object-contain"
             src={video.thumbnail}
             alt={video.title}
+            style={{ width: "auto", height: "auto" }}
             width={300}
             height={150}
           />
@@ -49,6 +47,7 @@ const VideoListCard = ({
                   : "/default-avatar.png"
               }
               alt={video.owner.fullName as string}
+              style={{ width: "auto", height: "auto" }}
               width={400}
               height={400}
             />
@@ -60,7 +59,7 @@ const VideoListCard = ({
             {video.owner && (
               <h2 className="text-gray-600">{video.owner.fullName}</h2>
             )}
-          <p className="text-gray-400 text-center text-[0.95rem]">{`${video.views} views * ${times}`}</p>
+            <p className="text-gray-400 text-center text-[0.95rem]">{`${video.views} views * ${times}`}</p>
           </div>
         </div>
         {showVideoDescription && (

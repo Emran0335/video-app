@@ -7,6 +7,7 @@ import { icons } from "@/assets/Icons";
 import VideoInfo from "@/components/Video/VideoInfo";
 import Comments from "@/components/Comments";
 import VideoListCard from "@/components/Video/VideoListCard";
+import Image from "next/image";
 
 const VideoPage = () => {
   const { videoId } = useParams();
@@ -35,10 +36,13 @@ const VideoPage = () => {
         <div className="flex">
           <div className="w-full p-4">
             <div>
-              <VideoPlayer videoFile={video.videoFile} />
+              <VideoPlayer video={video} />
             </div>
             <div>
-              <VideoInfo video={video} showVideoDescription={video.description}/>
+              <VideoInfo
+                video={video}
+                showVideoDescription={video.description}
+              />
             </div>
             <div>
               <Comments video={video} />
