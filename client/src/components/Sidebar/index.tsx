@@ -23,7 +23,6 @@ import {
   useGetCurrentLoggedInUserQuery,
   useLogoutUserMutation,
 } from "@/state/api";
-import { useRouter } from "next/navigation";
 
 const Sidebar = () => {
   const { data: user } = useGetCurrentLoggedInUserQuery();

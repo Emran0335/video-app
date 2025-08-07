@@ -118,13 +118,17 @@ const toggleCommentLike = asyncHandler({
             commentId: Number(commentId),
             likedById: Number(req.user?.userId),
           },
+          select: {
+            likedBy: true,
+            likedById: true,
+          },
         });
         if (!liked) {
           throw new ApiError(500, "Error while liking comment");
         }
       }
 
-      res.status(200).json({});
+      res.status(200).json(isLiked);
     } catch (error: any) {
       throw new ApiError(
         401,

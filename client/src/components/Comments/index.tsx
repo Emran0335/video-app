@@ -34,8 +34,6 @@ const Comments = ({ video }: CommentsProps) => {
   const [content, setContent] = useState("");
   const [updateContent, setUpdateContent] = useState("");
 
-  console.log("UpdateId", update);
-
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   console.log("activeCommentId", activeCommentId);
   const { videoId } = useParams();
@@ -47,7 +45,7 @@ const Comments = ({ video }: CommentsProps) => {
     limit: 10,
   });
 
-  const [commentContent] = useAddCommentMutation();
+  const [addComment] = useAddCommentMutation();
   const [deleteComment] = useDeleteCommentMutation();
   const [updateComment] = useUpdateCommentMutation();
   const [toggleCommentLike, { isSuccess }] = useToggleCommentLikeMutation();
@@ -58,7 +56,7 @@ const Comments = ({ video }: CommentsProps) => {
       return;
     } else {
       try {
-        await commentContent({
+        await addComment({
           videoId: Number(videoId),
           content: content,
         });
@@ -122,6 +120,7 @@ const Comments = ({ video }: CommentsProps) => {
       const response = await toggleCommentLike({
         commentId: commentId,
       });
+      await refetch();
       if (isSuccess && response.data) {
         setComments((prevComment) =>
           prevComment.map((comment) =>
@@ -262,12 +261,12 @@ const Comments = ({ video }: CommentsProps) => {
                   </div>
                   <div className="flex w-full items-center">
                     <div className="px-3 justify-start grow">
-                      <div className="flex text-sm">
-                        <p className="font-semibold">
+                      <div className="flex items-center">
+                        <p className="text-[1rem] font-semibold">
                           @{comment.owner.username}
                         </p>
-                        <p className="ml-4">
-                          .{getTimeDistanceToNow(comment.createdAt)}
+                        <p className="ml-4 text-[0.8rem] text-gray-500">
+                          {getTimeDistanceToNow(comment.createdAt)}
                         </p>
                       </div>
                       {update === comment.id ? (

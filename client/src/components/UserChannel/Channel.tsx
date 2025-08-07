@@ -22,6 +22,7 @@ const Channel = ({ username }: ChannelProps) => {
             width={100}
             height={100}
             className="object-cover"
+            style={{ width: "auto", height: "auto" }}
           />
         </div>
       </div>

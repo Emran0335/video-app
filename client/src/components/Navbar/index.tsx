@@ -58,6 +58,7 @@ const Navbar = () => {
                   width={40}
                   height={40}
                   className="object-cover"
+                  style={{ width: "auto", height: "auto" }}
                 />
               </Link>
             </div>

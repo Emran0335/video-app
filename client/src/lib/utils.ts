@@ -12,9 +12,9 @@ export const formatDuration = (duration: number) => {
   }
 };
 
-export const getTimeDistanceToNow = (inputDate: Date | string) => {
+export const getTimeDistanceToNow = (date: Date) => {
   const now = new Date();
-  const then = new Date(inputDate);
+  const then = new Date(date);
   const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
 
   const units = [

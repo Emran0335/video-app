@@ -67,6 +67,7 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
               alt={video.title}
               width={32}
               height={32}
+              style={{ width: "auto", height: "auto" }}
             />
           )}
           <h3>

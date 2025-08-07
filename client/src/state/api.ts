@@ -80,7 +80,7 @@ export interface Like {
   videoId?: number;
   commentId?: number;
   tweetId?: number;
-  likedBy?: number;
+  likedBy?: Partial<User>[];
   isLiked: boolean;
   likesCount: number;
   createdAt: Date;

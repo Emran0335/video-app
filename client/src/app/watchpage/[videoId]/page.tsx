@@ -7,7 +7,6 @@ import { icons } from "@/assets/Icons";
 import VideoInfo from "@/components/Video/VideoInfo";
 import Comments from "@/components/Comments";
 import VideoListCard from "@/components/Video/VideoListCard";
-import Image from "next/image";
 
 const VideoPage = () => {
   const { videoId } = useParams();

@@ -83,6 +83,7 @@ const getVideoComments = asyncHandler({
           owner: comment.ownerId,
           content: comment.content,
           likesCount: comments.length,
+          createdAt: comment.createdAt,
           isLiked: Number(req.user?.userId)
             ? comments.some(
                 (comment) =>

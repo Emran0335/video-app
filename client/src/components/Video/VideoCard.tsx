@@ -28,9 +28,9 @@ const VideoCard = ({ video }: VideoCardProps) => {
             className="shadow-2xl border-amber-500 p-0 m-0 shadow-gray-200 object-cover"
             src={video.thumbnail}
             alt={video.title}
-            style={{ width: "auto", height: "auto" }}
             width={350}
             height={300}
+            style={{ width: "auto", height: "auto" }}
           />
           <p className="absolute bottom-6 bg-gray-200 rounded-2xl w-12 h-6 right-3 text-center text-gray-600">
             {duration}
@@ -44,8 +44,8 @@ const VideoCard = ({ video }: VideoCardProps) => {
                 alt={video.owner.fullName as string}
                 width={40}
                 height={40}
-                style={{ width: "auto", height: "auto" }}
                 className="object-cover"
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
           </button>

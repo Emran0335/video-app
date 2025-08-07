@@ -123,12 +123,16 @@ const toggleCommentLike = (0, asyncHandler_1.asyncHandler)({
                         commentId: Number(commentId),
                         likedById: Number((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId),
                     },
+                    select: {
+                        likedBy: true,
+                        likedById: true,
+                    },
                 });
                 if (!liked) {
                     throw new ApiError_1.ApiError(500, "Error while liking comment");
                 }
             }
-            res.status(200).json({});
+            res.status(200).json(isLiked);
         }
         catch (error) {
             throw new ApiError_1.ApiError(401, (error === null || error === void 0 ? void 0 : error.message) || "Error while changing comment status!");

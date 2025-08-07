@@ -95,7 +95,7 @@ model Like {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   video     Video?   @relation(fields: [videoId], references: [id])
-  comment   Comment? @relation(fields: [commentId], references: [id])
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   tweet     Tweet?   @relation(fields: [tweetId], references: [id])
   likedBy   User?    @relation(fields: [likedById], references: [userId])
 
