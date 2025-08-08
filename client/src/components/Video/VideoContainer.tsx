@@ -3,11 +3,12 @@ import React, { useState } from "react";
 import { useGetAllVideosQuery } from "@/state/api";
 import { Video } from "lucide-react";
 import VideoCard from "./VideoCard";
+import { icons } from "@/assets/Icons";
 
 const VideoContainer = () => {
   const [page, setPage] = useState(1);
 
-  const { data: videos } = useGetAllVideosQuery({
+  const { data: videos, isLoading } = useGetAllVideosQuery({
     page: page,
     limit: 20,
   });
@@ -20,6 +21,12 @@ const VideoContainer = () => {
           <h1>No Videos Available</h1>
         </div>
       </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center">{icons.loading}</div>
     );
   }
 

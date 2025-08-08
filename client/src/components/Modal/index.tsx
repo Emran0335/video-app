@@ -1,3 +1,4 @@
+"use client"
 import React from "react";
 import ReactDOM from "react-dom";
 import Header from "../Header";
@@ -15,12 +16,12 @@ const Modal = ({children, isOpen, onClose, name }: ModalProps) => {
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50 p-4">
-      <div className="w-full max-w-2xl rounded-lg bg-white p-4 shadow-lg dark:bg-dark-secondary">
+      <div className="w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
         <Header
           name={name}
           buttonComponent={
             <button
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-primary text-white hover:bg-blue-600"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-primary text-gray-200 hover:bg-blue-600"
               onClick={onClose}
             >
               <X size={18} />

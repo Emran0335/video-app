@@ -13,17 +13,14 @@ import { ThumbsDown, ThumbsUp } from "lucide-react";
 
 type videoInfoProps = {
   video: Video;
-  showVideoDescription: string;
 };
 
-const VideoInfo = ({ video, showVideoDescription }: videoInfoProps) => {
+const VideoInfo = ({ video }: videoInfoProps) => {
   const times = getTimeDistanceToNow(video.createdAt);
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const [toggleSubscribe] = useToggleSubscriptionMutation();
   const [toggleVideoLike] = useToggleVideoLikeMutation();
   const { currentData: user } = useGetCurrentLoggedInUserQuery();
-
-  console.log("VideoInfo", video);
 
   const [isLiked, setIsLiked] = useState(video.isLiked);
   const [likesCount, setLikesCount] = useState(video.likesCount);

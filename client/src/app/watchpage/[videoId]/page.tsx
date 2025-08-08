@@ -11,10 +11,10 @@ import VideoListCard from "@/components/Video/VideoListCard";
 const VideoPage = () => {
   const { videoId } = useParams();
 
-  const { currentData: video, isLoading } = useGetVideoByIdQuery({
+  const { currentData: video } = useGetVideoByIdQuery({
     videoId: Number(videoId),
   });
-  const { currentData: videos } = useGetAllVideosQuery({
+  const { currentData: videos, isLoading } = useGetAllVideosQuery({
     page: 1,
     limit: 20,
   });
@@ -38,10 +38,7 @@ const VideoPage = () => {
               <VideoPlayer video={video} />
             </div>
             <div>
-              <VideoInfo
-                video={video}
-                showVideoDescription={video.description}
-              />
+              <VideoInfo video={video} />
             </div>
             <div>
               <Comments video={video} />
@@ -49,7 +46,7 @@ const VideoPage = () => {
           </div>
           <div className="w-[30%] mt-4 mr-4">
             {videos ? (
-              <>
+              <div className="grid grid-cols-1 gap-2">
                 {videos
                   .filter((enlistedVideo) => enlistedVideo.id !== video.id)
                   .map((videoList) => (
@@ -59,7 +56,7 @@ const VideoPage = () => {
                       showVideoDescription={videoList.description}
                     />
                   ))}
-              </>
+              </div>
             ) : (
               <div>
                 <p>No Videos Enlisted Yet!</p>

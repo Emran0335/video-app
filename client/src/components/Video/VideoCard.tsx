@@ -22,7 +22,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
 
   return (
     <Link href={`/watchpage/${video.id}`}>
-      <div className="mb-2 bg-gray-200 text-white p-1 hover:bg-gray-300">
+      <div className="flex flex-col bg-gray-200 text-white hover:bg-gray-300">
         <div className="relative w-[350px] h-[250px]">
           <Image
             className="shadow-2xl border-amber-500 p-0 m-0 shadow-gray-200 object-cover"
@@ -36,7 +36,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
             {duration}
           </p>
         </div>
-        <div className="flex items-center gap-4 px-2 mt-4">
+        <div className="flex items-center gap-4 px-2">
           <button className="mt-1 cursor-pointer" onClick={moveToChannelUser}>
             <div className="w-[48px] h-[48px] rounded-full border-2 border-gray-200 overflow-hidden">
               <Image
@@ -49,16 +49,16 @@ const VideoCard = ({ video }: VideoCardProps) => {
               />
             </div>
           </button>
-          <div className="ml-4">
+          <div className="ml-2">
             <h2 className="text-lg font-semibold text-gray-800">
               {video.title}
             </h2>
             {video.owner && (
               <h2 className="text-gray-600">{video.owner.fullName}</h2>
             )}
+            <p className="text-gray-400 text-[0.95rem]">{`${video.views} views * ${timeDistance}`}</p>
           </div>
         </div>
-        <p className="text-gray-400 text-center text-[0.95rem]">{`${video.views} views * ${timeDistance}`}</p>
       </div>
     </Link>
   );

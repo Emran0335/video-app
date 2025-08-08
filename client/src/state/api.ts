@@ -20,7 +20,7 @@ export interface Video {
   videoFile: string;
   thumbnail: string;
   title: string;
-  description: string;
+  description?: string;
   duration: number;
   ownerId: number;
   views: number;
@@ -230,7 +230,7 @@ export const api = createApi({
       query: () => "/videos",
       providesTags: ["Video"],
     }),
-    getUserVideos: build.query<Video[], { userId: number }>({
+    getUserVideos: build.query<Video, { userId: number }>({
       query: ({ userId }) => `/videos/video/user/${userId}`,
       providesTags: ["Video"],
     }),

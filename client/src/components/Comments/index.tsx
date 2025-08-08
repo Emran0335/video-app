@@ -11,7 +11,7 @@ import {
 } from "@/state/api";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SignInModal from "../UserModal/SignInModal";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { icons } from "@/assets/Icons";

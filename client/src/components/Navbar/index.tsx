@@ -38,8 +38,7 @@ const Navbar = () => {
             className="w-full rounded border-none bg-gray-100 py-2 pl-8 placeholder-gray-800 focus:border-transparent focus:outline-none shadow-lg"
           />
         </div>
-        <Link
-          href=""
+        <Link href="/addVideo"
           className="flex items-center gap-2 w-30 py-5 px-3 rounded-2xl h-6 cursor-pointer bg-gray-100 hover:bg-gray-200 hover:text-gray-700"
         >
           <Plus className="w-6 h-6" />
