@@ -18,6 +18,7 @@ import { icons } from "@/assets/Icons";
 import { getTimeDistanceToNow } from "@/lib/utils";
 import { EllipsisVertical, ThumbsDown, ThumbsUp } from "lucide-react";
 import Link from "next/link";
+import Modal from "../Modal";
 
 type CommentsProps = {
   video: Video;
@@ -216,10 +217,17 @@ const Comments = ({ video }: CommentsProps) => {
               onChange={(e) => setContent(e.target.value)}
             />
             {isModalNewTaskOpen && (
-              <SignInModal
+              <Modal
                 isOpen={isModalNewTaskOpen}
                 onClose={() => setIsModalNewTaskOpen(false)}
-              />
+                name="Please sign in to comment"
+              >
+                <SignInModal
+                  isOpen={isModalNewTaskOpen}
+                  onClose={() => setIsModalNewTaskOpen(false)}
+                  id={video.id}
+                />
+              </Modal>
             )}
             <button
               type="submit"

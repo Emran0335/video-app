@@ -30,7 +30,7 @@ const VideoListCard = ({ showVideoDescription, video }: VideoListCardProps) => {
             src={video.thumbnail}
             alt={video.title}
             style={{ width: "auto", height: "auto" }}
-            width={300}
+            width={400}
             height={250}
           />
           <p className="absolute bottom-1 bg-gray-200 rounded-2xl w-12 h-6 right-3 text-center text-gray-600">

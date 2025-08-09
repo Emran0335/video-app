@@ -23,12 +23,12 @@ const VideoCard = ({ video }: VideoCardProps) => {
   return (
     <Link href={`/watchpage/${video.id}`}>
       <div className="flex flex-col bg-gray-200 text-white hover:bg-gray-300">
-        <div className="relative w-[350px] h-[250px]">
+        <div className="relative w-full h-[220px] overflow-hidden">
           <Image
-            className="shadow-2xl border-amber-500 p-0 m-0 shadow-gray-200 object-cover"
+            className="shadow-2xl w-full shadow-gray-200 object-cover"
             src={video.thumbnail}
             alt={video.title}
-            width={350}
+            width={450}
             height={300}
             style={{ width: "auto", height: "auto" }}
           />
@@ -36,7 +36,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
             {duration}
           </p>
         </div>
-        <div className="flex items-center gap-4 px-2">
+        <div className="flex items-center gap-4 px-2 py-2">
           <button className="mt-1 cursor-pointer" onClick={moveToChannelUser}>
             <div className="w-[48px] h-[48px] rounded-full border-2 border-gray-200 overflow-hidden">
               <Image

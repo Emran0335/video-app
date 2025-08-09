@@ -3,7 +3,7 @@ import VideoContainer from "@/components/Video/VideoContainer";
 
 const HomePage = () => {
   return (
-    <div className="">
+    <div className="mb-8">
       <VideoContainer />
     </div>
   );

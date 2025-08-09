@@ -24,8 +24,8 @@ const VideoModal = ({ closeModal }: VideoModalProps) => {
     const videoData = new FormData();
     videoData.append("title", title);
     videoData.append("description", description);
-    videoData.append("thumbnail", thumbnail as File); // append file, not name
-    videoData.append("videoFile", videoFile as File); // append file, not name
+    videoData.append("thumbnail", thumbnail); // append file, not name
+    videoData.append("videoFile", videoFile); // append file, not name
 
     const response = await publishAVideo(videoData); // make sure your mutation accepts FormData
 
@@ -101,7 +101,7 @@ const VideoModal = ({ closeModal }: VideoModalProps) => {
           <input
             type="file"
             className="px-2 rounded-lg border py-1 mb-2"
-            accept="image/*"
+            accept="video/*"
             onChange={(e) => {
               if (e.target.files?.[0]) {
                 setVideoFile(e.target.files[0]);

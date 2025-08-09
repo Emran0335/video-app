@@ -13,6 +13,7 @@ import { useState } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Modal from "../Modal";
 
 type videoInfoProps = {
   video: Video;
@@ -23,7 +24,6 @@ const VideoInfo = ({ video }: videoInfoProps) => {
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const [toggleSubscribe] = useToggleSubscriptionMutation();
   const [toggleVideoLike] = useToggleVideoLikeMutation();
-  const [videoViewCount] = useVideoViewCountMutation()
   const { currentData: user } = useGetCurrentLoggedInUserQuery();
 
   const router = useRouter();
@@ -81,11 +81,17 @@ const VideoInfo = ({ video }: videoInfoProps) => {
         </div>
         <div className="">
           {isModalNewTaskOpen && (
-            <SignInModal
+            <Modal
               isOpen={isModalNewTaskOpen}
               onClose={() => setIsModalNewTaskOpen(false)}
-              id={video.id}
-            />
+              name="Please sign in to like"
+            >
+              <SignInModal
+                isOpen={isModalNewTaskOpen}
+                onClose={() => setIsModalNewTaskOpen(false)}
+                id={video.id}
+              />
+            </Modal>
           )}
           <button
             onClick={toggleVideoLikeHandler}

@@ -91,8 +91,7 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
       <video
         ref={videoElRef}
         poster={video.thumbnail}
-        autoPlay
-        className="w-full h-full object-contain"
+        className="w-full sticky h-full object-contain"
       >
         <source src={video.videoFile} type="video/mp4" />
       </video>
