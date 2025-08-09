@@ -37,7 +37,7 @@ const VideoListCard = ({ showVideoDescription, video }: VideoListCardProps) => {
             {duration}
           </p>
         </div>
-        <div className="flex py-2 gap-4">
+        <div className="flex py-1 gap-4">
           <button
             className="cursor-pointer flex items-center justify-center w-[40px] h-[40px] rounded-full border-2 border-gray-200 overflow-hidden"
             onClick={moveToChannelUser}
@@ -57,13 +57,13 @@ const VideoListCard = ({ showVideoDescription, video }: VideoListCardProps) => {
             </h2>
             {showVideoDescription && (
               <div className="text-gray-600">
-                <p className="text-sm font-semibold">{video?.description}</p>
+                <p className="text-sm">{video?.description}</p>
               </div>
             )}
             {video.owner && (
-              <h2 className="text-gray-600">{video.owner.fullName}</h2>
+              <h2 className="text-gray-600 text-[14px]">{video.owner.fullName}</h2>
             )}
-            <p className="text-gray-500 text-[0.95rem]">{`${video.views} views * ${times}`}</p>
+            <p className="text-gray-500 text-[0.85rem]">{`${video.views} views * ${times}`}</p>
           </div>
         </div>
       </div>

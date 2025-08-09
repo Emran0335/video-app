@@ -1,17 +1,20 @@
 "use client";
-import React, { useState } from "react";
-import { useGetAllVideosQuery } from "@/state/api";
+import React, { useEffect, useState } from "react";
+import { useGetAllVideosQuery, useVideoViewCountMutation } from "@/state/api";
 import { Video } from "lucide-react";
 import VideoCard from "./VideoCard";
 import { icons } from "@/assets/Icons";
 
 const VideoContainer = () => {
   const [page, setPage] = useState(1);
-
-  const { data: videos, isLoading } = useGetAllVideosQuery({
+  const {
+    data: videos,
+    isLoading,
+  } = useGetAllVideosQuery({
     page: page,
     limit: 20,
   });
+
 
   if (!videos || videos.length === 0) {
     return (

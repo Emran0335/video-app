@@ -288,6 +288,19 @@ export const api = createApi({
         credentials: "include",
         body: {},
       }),
+      invalidatesTags: ["Video"],
+    }),
+
+    videoViewCount: build.mutation<Video, { videoId: number }>({
+      query: ({ videoId }) => ({
+        url: `/views/view/video/${videoId}`,
+        method: "PATCH",
+        credentials: "include",
+        body: { videoId },
+      }),
+      invalidatesTags: (result, error, { videoId }) => [
+        { type: "Video", id: videoId },
+      ],
     }),
 
     // like endpoints
@@ -405,21 +418,24 @@ export const {
   useTogglePublishStatusMutation,
   useDeleteVideoMutation,
 
-  // likes
+  //view endpoints
+  useVideoViewCountMutation,
+
+  // likes endpoints
   useGetLikedVideosQuery,
   useToggleVideoLikeMutation,
   useToggleCommentLikeMutation,
 
-  //comments
+  //comments enpdoints
   useGetVideoCommentsQuery,
   useAddCommentMutation,
   useDeleteCommentMutation,
   useUpdateCommentMutation,
 
-  // subscriptions
+  // subscriptions endpoints
   useToggleSubscriptionMutation,
 
-  // dashboard
+  // dashboard endpoints
   useGetChannelStatsQuery,
   useGetChannelVideosQuery,
 } = api;

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -32,6 +26,7 @@ model User {
   subscribedChannels Subscription[] @relation("Subscriber") // User as subscriber
   subscribers        Subscription[] @relation("Channel") // User as channel owner
   playlist           Playlist[]
+  views              View[]
 
   @@unique([userId])
   @@map("users")
@@ -53,9 +48,23 @@ model Video {
   comments    Comment[]
   likes       Like[]
   playlist    Playlist[] @relation("VideoToPlaylist")
+  viewlist    View[]
 
   @@unique([id])
   @@map("videos")
+}
+
+model View {
+  id        Int      @id @default(autoincrement())
+  videoId   Int
+  userId    Int
+  video     Video    @relation(fields: [videoId], references: [id])
+  viewedBy  User     @relation(fields: [userId], references: [userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+  @@map("views")
 }
 
 model Tweet {

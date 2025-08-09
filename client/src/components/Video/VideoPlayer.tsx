@@ -1,6 +1,6 @@
 "use client";
 
-import { Video } from "@/state/api";
+import { useVideoViewCountMutation, Video } from "@/state/api";
 import {
   Download,
   Maximize,
@@ -9,6 +9,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type VideoPlayerProps = {
@@ -44,7 +45,7 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
     } else {
       videoElRef.current.play();
     }
-    setIsPlaying(!isPlaying);
+    setIsPlaying((prev) => !prev);
   };
 
   const handleTimeUpdate = () => {
@@ -64,7 +65,7 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseInt(e.target.value);
+    const newVolume = parseFloat(e.target.value);
     if (videoElRef.current) {
       videoElRef.current.volume = newVolume;
     }

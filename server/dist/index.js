@@ -13,6 +13,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 // ROUTES IMPORTS
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const videoRoutes_1 = __importDefault(require("./routes/videoRoutes"));
+const viewRoutes_1 = __importDefault(require("./routes/viewRoutes"));
 const tweetRoutes_1 = __importDefault(require("./routes/tweetRoutes"));
 const commentRoutes_1 = __importDefault(require("./routes/commentRoutes"));
 const likeRoutes_1 = __importDefault(require("./routes/likeRoutes"));
@@ -44,6 +45,7 @@ app.get("/", (req, res) => {
 });
 app.use("/users", userRoutes_1.default);
 app.use("/videos", videoRoutes_1.default);
+app.use("/views", viewRoutes_1.default);
 app.use("/tweets", tweetRoutes_1.default);
 app.use("/comments", commentRoutes_1.default);
 app.use("/likes", likeRoutes_1.default);

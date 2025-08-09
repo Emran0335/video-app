@@ -56,7 +56,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
             {video.owner && (
               <h2 className="text-gray-600">{video.owner.fullName}</h2>
             )}
-            <p className="text-gray-400 text-[0.95rem]">{`${video.views} views * ${timeDistance}`}</p>
+            <p className="text-gray-400 pb-2 text-[0.95rem]">{`${video.views} views * ${timeDistance}`}</p>
           </div>
         </div>
       </div>

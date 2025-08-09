@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 // ROUTES IMPORTS
 import userRoutes from "./routes/userRoutes";
 import videoRoutes from "./routes/videoRoutes";
+import viewRoutes from "./routes/viewRoutes"
 import tweetRoutes from "./routes/tweetRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import likeRoutes from "./routes/likeRoutes";
@@ -46,6 +47,7 @@ app.get("/", (req, res) => {
 });
 app.use("/users", userRoutes);
 app.use("/videos", videoRoutes);
+app.use("/views", viewRoutes);
 app.use("/tweets", tweetRoutes);
 app.use("/comments", commentRoutes);
 app.use("/likes", likeRoutes);

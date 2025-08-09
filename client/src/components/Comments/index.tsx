@@ -35,7 +35,7 @@ const Comments = ({ video }: CommentsProps) => {
   const [updateContent, setUpdateContent] = useState("");
 
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
-  console.log("activeCommentId", activeCommentId);
+
   const { videoId } = useParams();
   const menuRefs = useRef<Array<HTMLDivElement | null>>([]);
 

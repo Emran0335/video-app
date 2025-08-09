@@ -1,15 +1,18 @@
 "use client";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { getTimeDistanceToNow } from "@/lib/utils";
 import {
   useGetCurrentLoggedInUserQuery,
   useToggleSubscriptionMutation,
   useToggleVideoLikeMutation,
+  useVideoViewCountMutation,
   Video,
 } from "@/state/api";
 import SignInModal from "../UserModal/SignInModal";
 import { useState } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 type videoInfoProps = {
   video: Video;
@@ -20,7 +23,10 @@ const VideoInfo = ({ video }: videoInfoProps) => {
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const [toggleSubscribe] = useToggleSubscriptionMutation();
   const [toggleVideoLike] = useToggleVideoLikeMutation();
+  const [videoViewCount] = useVideoViewCountMutation()
   const { currentData: user } = useGetCurrentLoggedInUserQuery();
+
+  const router = useRouter();
 
   const [isLiked, setIsLiked] = useState(video.isLiked);
   const [likesCount, setLikesCount] = useState(video.likesCount);
@@ -47,12 +53,31 @@ const VideoInfo = ({ video }: videoInfoProps) => {
     isLiked,
   ]);
 
+  const moveToChannelUser = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    router.push(`/channel/${video.owner.username}`);
+  };
+
   return (
-    <div className="border border-gray-300 rounded-xl px-3 py-2 mt-2 opacity-60">
+    <div className="border border-gray-300 rounded-xl px-3 py-2 mt-2">
       <div className="flex justify-between items-center">
-        <div className="">
-          <h1 className="text-[1.3rem] font-semibold">{video.title}</h1>
-          <p className="text-[0.9rem] text-gray-800">{`${video.views} views * ${times}`}</p>
+        <div className="flex gap-4 items-center justify-between">
+          <button className="mt-1 cursor-pointer" onClick={moveToChannelUser}>
+            <div className="w-[48px] h-[48px] rounded-full border-2 border-gray-200 overflow-hidden">
+              <Image
+                src={video.owner.avatar as string}
+                alt={video.owner.fullName as string}
+                width={40}
+                height={40}
+                className="object-cover"
+                style={{ width: "auto", height: "auto" }}
+              />
+            </div>
+          </button>
+          <div className="">
+            <h1 className="text-[1.3rem] font-semibold">{video.title}</h1>
+            <p className="text-[0.9rem] text-gray-800">{`${video.views} views * ${times}`}</p>
+          </div>
         </div>
         <div className="">
           {isModalNewTaskOpen && (
@@ -64,7 +89,7 @@ const VideoInfo = ({ video }: videoInfoProps) => {
           )}
           <button
             onClick={toggleVideoLikeHandler}
-            className={`px-3 border rounded-lg border-gray-400 flex items-center hover:bg-gray-700`}
+            className={`px-3 border rounded-lg border-gray-400 flex items-center hover:bg-gray-400 hover:text-white`}
           >
             <p className="mr-1">{likesCount}</p>
             {isLiked ? <ThumbsUp className="w-5 h-5" /> : <ThumbsDown />}

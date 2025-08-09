@@ -1,7 +1,11 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import VideoPlayer from "@/components/Video/VideoPlayer";
-import { useGetAllVideosQuery, useGetVideoByIdQuery } from "@/state/api";
+import {
+  useGetAllVideosQuery,
+  useGetVideoByIdQuery,
+  useVideoViewCountMutation,
+} from "@/state/api";
 import { useParams } from "next/navigation";
 import { icons } from "@/assets/Icons";
 import VideoInfo from "@/components/Video/VideoInfo";
@@ -18,6 +22,15 @@ const VideoPage = () => {
     page: 1,
     limit: 20,
   });
+  const [videoViewCount] = useVideoViewCountMutation();
+
+  useEffect(() => {
+    if (video?.owner.userId !== Number(videoId)) {
+      videoViewCount({
+        videoId: Number(videoId),
+      });
+    }
+  }, [video, videoViewCount, videoId]);
 
   if (!video) {
     return (

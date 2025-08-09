@@ -35,9 +35,14 @@ router.post(
   publishAVideo
 );
 
-router.patch("/video/:videoId", verifyJWT, upload.single("thumbnail"), updateVideo);
+router.patch(
+  "/video/:videoId",
+  verifyJWT,
+  upload.single("thumbnail"),
+  updateVideo
+);
 router.delete("/video/:videoId", verifyJWT, deleteVideo);
 router.patch("/video/toggle/:videoId", verifyJWT, togglePublishStatus);
-router.get("/video/subscriptions",verifyJWT, getSubscribedVideos);
+router.get("/video/subscriptions", verifyJWT, getSubscribedVideos);
 
 export default router;
