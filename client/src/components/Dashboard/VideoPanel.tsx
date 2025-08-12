@@ -24,7 +24,7 @@ const VideoPanel = ({ videos }: VideoPanelProps) => {
   const allVideos = filter || videos;
   return (
     <>
-      <div className="relative w-[400px] mx-auto mb-8 mt-4 rounded-full bg-zinc-200 border py-1 pl-8 pr-3 overflow-hidden">
+      <div className="relative w-[400px] mx-auto rounded-full bg-zinc-200 border py-1 pl-8 pr-3 overflow-hidden">
         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
           <Search />
         </span>

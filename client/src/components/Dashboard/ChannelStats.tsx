@@ -6,7 +6,7 @@ type ChannelStatsProps = {
 };
 
 const ChannelStats = ({ stats }: ChannelStatsProps) => {
-  return <div>{stats?.map((stat)=> stat.totalVideos)}</div>;
+  return <div>{stats?.map((stat) => stat.totalVideos)}</div>;
 };
 
 export default ChannelStats;

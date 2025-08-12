@@ -16,7 +16,7 @@ const DashboardPage = () => {
   const { data: videos } = useGetChannelVideosQuery();
 
   return (
-    <div className="m-4">
+    <div className="w-full">
       <ChannelStats stats={stats} />
       <VideoPanel videos={videos} />
     </div>

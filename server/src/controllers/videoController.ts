@@ -296,7 +296,7 @@ const updateVideo = asyncHandler({
           throw new ApiError(400, "Couldn't find public Id of old thumbnail!");
         }
         const publicId = match[1];
-        await deleteFromCloudinary(publicId);
+        await deleteFromCloudinary(publicId, 'image');
       }
 
       const updatedVideo = await prisma.video.update({
@@ -336,15 +336,9 @@ const deleteVideo = asyncHandler({
         throw new ApiError(404, "Video not found!");
       }
 
-      if (video?.ownerId !== req.user?.userId) {
+      if (video.ownerId !== Number(req.user?.userId)) {
         throw new ApiError(401, "Not have permission to delete video!");
       }
-
-      await prisma.video.delete({
-        where: {
-          id: Number(videoId),
-        },
-      });
 
       // delete videoFile and thumbail
       const thumbailUrl = video?.thumbnail;
@@ -359,7 +353,7 @@ const deleteVideo = asyncHandler({
       }
       let publicId = match[1];
 
-      const deleteThumbnail = await deleteFromCloudinary(publicId);
+      const deleteThumbnail = await deleteFromCloudinary(publicId, "image");
 
       // let's delete videoFile
       match = videoFileUrl.match(regex);
@@ -368,16 +362,22 @@ const deleteVideo = asyncHandler({
       }
       publicId = match[1];
 
-      const deleteVideoFile = await deleteFromCloudinary(publicId);
+      const deleteVideoFile = await deleteFromCloudinary(publicId, "video");
 
-      if (deleteThumbnail.result !== "ok" && deleteVideoFile.result !== "ok") {
+      if (!deleteThumbnail && !deleteVideoFile) {
         throw new ApiError(
           500,
           "Error while deleting thumbnail and videoFile from cloudinary"
         );
       }
 
-      res.status(200).json({});
+      await prisma.video.delete({
+        where: {
+          id: video.id,
+        },
+      });
+
+      res.status(200).json({message: "Video deleted successfull!"});
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,

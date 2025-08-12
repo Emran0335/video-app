@@ -58,8 +58,8 @@ model View {
   id        Int      @id @default(autoincrement())
   videoId   Int
   userId    Int
-  video     Video    @relation(fields: [videoId], references: [id])
-  viewedBy  User     @relation(fields: [userId], references: [userId])
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  viewedBy  User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -87,7 +87,7 @@ model Comment {
   owner     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  videoId   Video    @relation(fields: [video], references: [id])
+  videoId   Video    @relation(fields: [video], references: [id], onDelete: Cascade)
   ownerId   User     @relation(fields: [owner], references: [userId], onDelete: Cascade)
   likes     Like[]
 
@@ -103,10 +103,10 @@ model Like {
   likedById Int? // relation with User
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  video     Video?   @relation(fields: [videoId], references: [id])
+  video     Video?   @relation(fields: [videoId], references: [id], onDelete: Cascade)
   comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  tweet     Tweet?   @relation(fields: [tweetId], references: [id])
-  likedBy   User?    @relation(fields: [likedById], references: [userId])
+  tweet     Tweet?   @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+  likedBy   User?    @relation(fields: [likedById], references: [userId], onDelete: Cascade)
 
   @@map("likes")
 }

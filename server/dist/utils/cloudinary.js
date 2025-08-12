@@ -37,16 +37,7 @@ const uploadOnCloudinary = (localFilePath) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.uploadOnCloudinary = uploadOnCloudinary;
-const deleteFromCloudinary = (publicId_1, ...args_1) => __awaiter(void 0, [publicId_1, ...args_1], void 0, function* (publicId, resourceType = "image") {
-    try {
-        const response = yield cloudinary_1.v2.uploader.destroy(publicId, {
-            resource_type: resourceType,
-        });
-        return response;
-    }
-    catch (error) {
-        console.error("Error while deleting asset from cloudinary:", error.message);
-        return null;
-    }
+const deleteFromCloudinary = (publicId, type) => __awaiter(void 0, void 0, void 0, function* () {
+    return cloudinary_1.v2.uploader.destroy(publicId, { resource_type: type });
 });
 exports.deleteFromCloudinary = deleteFromCloudinary;

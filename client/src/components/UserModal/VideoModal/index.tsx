@@ -16,7 +16,7 @@ const VideoModal = ({ closeModal }: VideoModalProps) => {
 
   const router = useRouter();
 
-  const [publishAVideo, { isLoading }] = usePublishAVideoMutation();
+  const [publishAVideo, { isLoading, isSuccess }] = usePublishAVideoMutation();
 
   const handleSubmit = async () => {
     if (!title || !description || !thumbnail || !videoFile) return;
@@ -49,6 +49,12 @@ const VideoModal = ({ closeModal }: VideoModalProps) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center">{icons.loading}</div>
+    );
+  }
+
+    if (isSuccess) {
+    return (
+      <div className="flex items-center justify-center">Video Uploaded Successfully</div>
     );
   }
 

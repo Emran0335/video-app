@@ -9,7 +9,6 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type VideoPlayerProps = {
@@ -45,7 +44,7 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
     } else {
       videoElRef.current.play();
     }
-    setIsPlaying((prev) => !prev);
+    setIsPlaying(!isPlaying);
   };
 
   const handleTimeUpdate = () => {
@@ -59,7 +58,7 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (videoElRef.current) {
       const newTime =
-        (parseInt(e.target.value) / 100) * videoElRef.current.duration;
+        (Number(e.target.value) / 100) * Number(videoElRef.current.duration);
       videoElRef.current.currentTime = newTime;
     }
   };
@@ -89,6 +88,12 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
   return (
     <div className="relative w-full max-h-[70vh] overflow-hidden border border-gray-200">
       <video
+        key={video.id}
+        autoPlay
+        playsInline
+        onLoadedData={() => {
+          videoElRef.current?.play().catch(console.error);
+        }}
         ref={videoElRef}
         poster={video.thumbnail}
         className="w-full sticky h-full object-contain"

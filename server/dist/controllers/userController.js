@@ -355,7 +355,7 @@ const updateUserAvatar = (0, asyncHandler_1.asyncHandler)({
                 throw new ApiError_1.ApiError(400, "Couldn't find public Id of old avatar!");
             }
             const publicId = match[1];
-            yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
+            yield (0, cloudinary_1.deleteFromCloudinary)(publicId, 'image');
             const userWithNewAvatar = yield hashedPassword_1.prisma.user.update({
                 where: {
                     userId: (_c = req.user) === null || _c === void 0 ? void 0 : _c.userId,
@@ -391,7 +391,7 @@ const updateUserCoverImage = (0, asyncHandler_1.asyncHandler)({
                 throw new ApiError_1.ApiError(400, "Couldn't find public Id of old coverImage!");
             }
             const publicId = match[1];
-            yield (0, cloudinary_1.deleteFromCloudinary)(publicId);
+            yield (0, cloudinary_1.deleteFromCloudinary)(publicId, 'image');
             const userWithNewCoverImage = yield hashedPassword_1.prisma.user.update({
                 where: {
                     userId: (_c = req.user) === null || _c === void 0 ? void 0 : _c.userId,

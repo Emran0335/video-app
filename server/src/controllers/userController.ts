@@ -395,7 +395,7 @@ const updateUserAvatar = asyncHandler({
         throw new ApiError(400, "Couldn't find public Id of old avatar!");
       }
       const publicId = match[1];
-      await deleteFromCloudinary(publicId);
+      await deleteFromCloudinary(publicId, 'image');
 
       const userWithNewAvatar = await prisma.user.update({
         where: {
@@ -435,7 +435,7 @@ const updateUserCoverImage = asyncHandler({
         throw new ApiError(400, "Couldn't find public Id of old coverImage!");
       }
       const publicId = match[1];
-      await deleteFromCloudinary(publicId);
+      await deleteFromCloudinary(publicId, 'image');
 
       const userWithNewCoverImage = await prisma.user.update({
         where: {
