@@ -31,9 +31,16 @@ export interface Video {
   updatedAt: Date;
   isLiked: boolean;
   likesCount: number;
+  commentsCount: number;
 
   likes: Like[];
   comments: Comment[];
+  viewList: View[];
+}
+export interface View {
+  id: number;
+  videoId: Video;
+  userId: User;
 }
 
 export interface WatchHistory {
@@ -264,15 +271,14 @@ export const api = createApi({
         { type: "Video", id: videoId },
       ],
     }),
-    togglePublishStatus: build.mutation<
-      Video[],
+    toggleVideoPublishStatus: build.mutation<
+      { updateVideo: Video; message: string },
       { videoId: number; isPublished: boolean }
     >({
-      query: ({ videoId, isPublished }) => ({
+      query: ({ videoId }) => ({
         url: `/videos/video/toggle/${videoId}`,
         method: "PATCH",
         credentials: "include",
-        body: { videoId, isPublished },
       }),
       invalidatesTags: (result, error, { videoId }) => [
         { type: "Video", id: videoId },
@@ -281,16 +287,16 @@ export const api = createApi({
     getSubscribedVideos: build.query<Video, void>({
       query: () => "/videos/video/subscriptions",
     }),
-    deleteVideo: build.mutation<Video, { videoId: number }>({
+    deleteVideo: build.mutation<{ message: string }, { videoId: number }>({
       query: ({ videoId }) => ({
         url: `/videos/video/${videoId}`,
         method: "DELETE",
         credentials: "include",
-        body: {},
       }),
-      invalidatesTags: ["Video"],
+      invalidatesTags: (result, error, { videoId }) => [
+        { type: "Video", id: videoId },
+      ],
     }),
-
     videoViewCount: build.mutation<Video, { videoId: number }>({
       query: ({ videoId }) => ({
         url: `/views/view/video/${videoId}`,
@@ -415,7 +421,7 @@ export const {
   useGetSubscribedVideosQuery,
   usePublishAVideoMutation,
   useUpdateVideoMutation,
-  useTogglePublishStatusMutation,
+  useToggleVideoPublishStatusMutation,
   useDeleteVideoMutation,
 
   //view endpoints

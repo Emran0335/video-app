@@ -7,7 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 const Navbar = () => {
-  const { isSidebarCollapsed } = useAppSelector((state) => state.global);
+  const isSidebarCollapsed = useAppSelector(
+    (state) => state.global.isSidebarCollapsed
+  );
   const dispatch = useAppDispatch();
   const { data: user } = useGetCurrentLoggedInUserQuery();
 
@@ -18,14 +20,14 @@ const Navbar = () => {
           isSidebarCollapsed && "w-[30%]"
         }`}
       >
-        {isSidebarCollapsed && (
+        {isSidebarCollapsed ? (
           <button
             onClick={() => dispatch(setIsSidebarCollapsed(!isSidebarCollapsed))}
             className="w-8"
           >
             <Menu className="text-gray-800" />
           </button>
-        )}
+        ) : null}
       </div>
       <div className="flex items-center gap-12 justify-between w-[70%]">
         <div className="relative mr-16 flex w-[600px] h-min border-2 border-gray-300 rounded-full overflow-hidden items-center">
