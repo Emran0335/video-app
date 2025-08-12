@@ -74,6 +74,21 @@ const publishAVideo = asyncHandler({
           isPublished: true,
           ownerId: Number(req.user?.userId),
         },
+        select: {
+          title: true,
+          description: true,
+          thumbnail: true,
+          videoFile: true,
+          duration: true,
+          isPublished: true,
+          views: true,
+          likes: true,
+          comments: true,
+          playlist: true,
+          createdAt: true,
+          updatedAt: true,
+          viewlist: true,
+        },
       });
 
       if (!video) {
@@ -296,7 +311,7 @@ const updateVideo = asyncHandler({
           throw new ApiError(400, "Couldn't find public Id of old thumbnail!");
         }
         const publicId = match[1];
-        await deleteFromCloudinary(publicId, 'image');
+        await deleteFromCloudinary(publicId, "image");
       }
 
       const updatedVideo = await prisma.video.update({
@@ -377,7 +392,7 @@ const deleteVideo = asyncHandler({
         },
       });
 
-      res.status(200).json({message: "Video deleted successfull!"});
+      res.status(200).json({ message: "Video deleted successfull!" });
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -387,7 +402,7 @@ const deleteVideo = asyncHandler({
   },
 });
 
-const togglePublishStatus = asyncHandler({
+const toggleVideoPublishStatus = asyncHandler({
   requestHandler: async (req, res) => {
     try {
       const { videoId } = req.params;
@@ -422,7 +437,10 @@ const togglePublishStatus = asyncHandler({
         },
       });
 
-      res.status(200).json(updateVideo);
+      res.status(200).json({
+        updateVideo,
+        message: "Video publish status updated",
+      });
     } catch (error: any) {
       throw new ApiError(
         error.statusCode || 500,
@@ -495,6 +513,6 @@ export {
   getVideoById,
   updateVideo,
   deleteVideo,
-  togglePublishStatus,
+  toggleVideoPublishStatus,
   getSubscribedVideos,
 };

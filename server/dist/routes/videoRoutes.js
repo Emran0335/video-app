@@ -21,6 +21,6 @@ router.post("/video", multer_1.upload.fields([
 ]), auth_1.verifyJWT, videoController_1.publishAVideo);
 router.patch("/video/:videoId", auth_1.verifyJWT, multer_1.upload.single("thumbnail"), videoController_1.updateVideo);
 router.delete("/video/:videoId", auth_1.verifyJWT, videoController_1.deleteVideo);
-router.patch("/video/toggle/:videoId", auth_1.verifyJWT, videoController_1.togglePublishStatus);
+router.patch("/video/toggle/:videoId", auth_1.verifyJWT, videoController_1.toggleVideoPublishStatus);
 router.get("/video/subscriptions", auth_1.verifyJWT, videoController_1.getSubscribedVideos);
 exports.default = router;

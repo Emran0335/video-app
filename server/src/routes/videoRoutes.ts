@@ -7,7 +7,7 @@ import {
   getUserVideos,
   getVideoById,
   publishAVideo,
-  togglePublishStatus,
+  toggleVideoPublishStatus,
   updateVideo,
 } from "../controllers/videoController";
 import { verifyJWT } from "../middlewares/auth";
@@ -42,7 +42,7 @@ router.patch(
   updateVideo
 );
 router.delete("/video/:videoId", verifyJWT, deleteVideo);
-router.patch("/video/toggle/:videoId", verifyJWT, togglePublishStatus);
+router.patch("/video/toggle/:videoId", verifyJWT, toggleVideoPublishStatus);
 router.get("/video/subscriptions", verifyJWT, getSubscribedVideos);
 
 export default router;

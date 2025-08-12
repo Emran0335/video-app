@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSubscribedVideos = exports.togglePublishStatus = exports.deleteVideo = exports.updateVideo = exports.getVideoById = exports.getUserVideos = exports.getAllVideos = exports.publishAVideo = void 0;
+exports.getSubscribedVideos = exports.toggleVideoPublishStatus = exports.deleteVideo = exports.updateVideo = exports.getVideoById = exports.getUserVideos = exports.getAllVideos = exports.publishAVideo = void 0;
 const fs_1 = __importDefault(require("fs"));
 const ApiError_1 = require("../utils/ApiError");
 const asyncHandler_1 = require("../utils/asyncHandler");
@@ -72,6 +72,21 @@ const publishAVideo = (0, asyncHandler_1.asyncHandler)({
                     description: description || "",
                     isPublished: true,
                     ownerId: Number((_c = req.user) === null || _c === void 0 ? void 0 : _c.userId),
+                },
+                select: {
+                    title: true,
+                    description: true,
+                    thumbnail: true,
+                    videoFile: true,
+                    duration: true,
+                    isPublished: true,
+                    views: true,
+                    likes: true,
+                    comments: true,
+                    playlist: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    viewlist: true,
                 },
             });
             if (!video) {
@@ -245,7 +260,7 @@ const updateVideo = (0, asyncHandler_1.asyncHandler)({
                     throw new ApiError_1.ApiError(400, "Couldn't find public Id of old thumbnail!");
                 }
                 const publicId = match[1];
-                yield (0, cloudinary_1.deleteFromCloudinary)(publicId, 'image');
+                yield (0, cloudinary_1.deleteFromCloudinary)(publicId, "image");
             }
             const updatedVideo = yield hashedPassword_1.prisma.video.update({
                 where: {
@@ -318,7 +333,7 @@ const deleteVideo = (0, asyncHandler_1.asyncHandler)({
     }),
 });
 exports.deleteVideo = deleteVideo;
-const togglePublishStatus = (0, asyncHandler_1.asyncHandler)({
+const toggleVideoPublishStatus = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
@@ -345,14 +360,17 @@ const togglePublishStatus = (0, asyncHandler_1.asyncHandler)({
                     isPublished: !video.isPublished,
                 },
             });
-            res.status(200).json(updateVideo);
+            res.status(200).json({
+                updateVideo,
+                message: "Video publish status updated",
+            });
         }
         catch (error) {
             throw new ApiError_1.ApiError(error.statusCode || 500, error.message || "Error while deleting video");
         }
     }),
 });
-exports.togglePublishStatus = togglePublishStatus;
+exports.toggleVideoPublishStatus = toggleVideoPublishStatus;
 const getSubscribedVideos = (0, asyncHandler_1.asyncHandler)({
     requestHandler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
