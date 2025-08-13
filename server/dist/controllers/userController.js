@@ -148,7 +148,7 @@ const loginUser = (0, asyncHandler_1.asyncHandler)({
         try {
             const { email, username, password } = req.body;
             if (!username && !email) {
-                throw new ApiError_1.ApiError(500, "Username and email is required");
+                throw new ApiError_1.ApiError(500, "Username and email are required");
             }
             const user = yield hashedPassword_1.prisma.user.findFirst({
                 where: {
@@ -208,7 +208,7 @@ const logoutUser = (0, asyncHandler_1.asyncHandler)({
         try {
             yield hashedPassword_1.prisma.user.update({
                 where: {
-                    userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId,
+                    userId: Number((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId),
                 },
                 data: {
                     refreshToken: null,

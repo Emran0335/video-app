@@ -161,7 +161,7 @@ const loginUser = asyncHandler({
     try {
       const { email, username, password } = req.body;
       if (!username && !email) {
-        throw new ApiError(500, "Username and email is required");
+        throw new ApiError(500, "Username and email are required");
       }
 
       const user = await prisma.user.findFirst({
@@ -225,7 +225,7 @@ const logoutUser = asyncHandler({
     try {
       await prisma.user.update({
         where: {
-          userId: req.user?.userId,
+          userId: Number(req.user?.userId),
         },
         data: {
           refreshToken: null,

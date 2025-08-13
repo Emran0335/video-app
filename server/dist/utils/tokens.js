@@ -9,7 +9,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const generateAccessToken = (user) => {
     const tokenAccess = process.env.ACCESS_TOKEN_SECRET;
     if (!tokenAccess) {
-        throw new Error("REFRESH_TOKEN_SECRET is not defined in environment variables");
+        throw new Error("ACCESS_TOKEN_SECRET is not defined in environment variables");
     }
     return jsonwebtoken_1.default.sign({
         id: user.userId.toString(),

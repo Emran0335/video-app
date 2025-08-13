@@ -12,7 +12,7 @@ export const generateAccessToken = (user: TokenPayload) => {
   const tokenAccess = process.env.ACCESS_TOKEN_SECRET;
   if (!tokenAccess) {
     throw new Error(
-      "REFRESH_TOKEN_SECRET is not defined in environment variables"
+      "ACCESS_TOKEN_SECRET is not defined in environment variables"
     );
   }
   return jwt.sign(
