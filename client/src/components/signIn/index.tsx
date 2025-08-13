@@ -2,10 +2,9 @@
 import { useLoginUserMutation } from "@/state/api";
 import { Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 
 type SignInProps = {
-  isSignIn?: boolean;
+  isSignIn: boolean;
   toggle: () => void;
 };
 
