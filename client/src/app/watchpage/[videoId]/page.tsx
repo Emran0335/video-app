@@ -18,10 +18,7 @@ const VideoPage = () => {
   const { currentData: video } = useGetVideoByIdQuery({
     videoId: Number(videoId),
   });
-  const { currentData: videos, isLoading } = useGetAllVideosQuery({
-    page: 1,
-    limit: 20,
-  });
+  const { currentData: videos, isLoading } = useGetAllVideosQuery();
   const [videoViewCount] = useVideoViewCountMutation();
 
   useEffect(() => {

@@ -48,13 +48,19 @@ const VideoModal = ({ closeModal }: VideoModalProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center">{icons.loading}</div>
+      <div className="flex items-center justify-center">
+        <h2 className="text-center">Please wait...</h2>
+        <div className="flex items-center justify-center">{icons.loading}</div>
+        <p className="text-center">Large file takes time</p>
+      </div>
     );
   }
 
-    if (isSuccess) {
+  if (isSuccess) {
     return (
-      <div className="flex items-center justify-center">Video Uploaded Successfully</div>
+      <div className="flex items-center justify-center">
+        Video Uploaded Successfully
+      </div>
     );
   }
 
@@ -117,7 +123,7 @@ const VideoModal = ({ closeModal }: VideoModalProps) => {
         </div>
         <button
           className={`mt-4 flex w-full justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-            !isFormValid() || "isLoading" ? "cursor-not-allowed opacity-50" : ""
+            !isFormValid() || isLoading ? "cursor-not-allowed opacity-50" : ""
           }`}
           disabled={!isFormValid() || isLoading}
         >

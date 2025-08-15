@@ -1,6 +1,5 @@
 "use client";
-
-import { useVideoViewCountMutation, Video } from "@/state/api";
+import { Video } from "@/state/api";
 import {
   Download,
   Maximize,

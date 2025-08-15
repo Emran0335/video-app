@@ -3,6 +3,7 @@ import StoreProvider, { useAppSelector } from "./redux";
 import AuthProvider from "./authProvider";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
+import { Bounce, ToastContainer } from "react-toastify";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const isSidebarCollapsed = useAppSelector(
@@ -20,6 +21,19 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <Navbar />
         {children}
       </main>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
     </div>
   );
 };

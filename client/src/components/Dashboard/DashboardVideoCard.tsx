@@ -2,7 +2,6 @@
 import { formatDate, getTimeDistanceToNow } from "@/lib/utils";
 import {
   useDeleteVideoMutation,
-  useGetCurrentLoggedInUserQuery,
   useToggleVideoPublishStatusMutation,
   Video,
 } from "@/state/api";
@@ -10,14 +9,23 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import Modal from "../Modal";
+import EditVideoModal from "@/components/Dashboard/UpdateVideoModal";
+import { Delete, Edit } from "lucide-react";
 
 type DashboardVideoCardProps = {
   video: Video;
 };
 
 const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
+  const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
+
+  const openVideoModalHandler = () => {
+    setIsModalNewTaskOpen((prev) => !prev);
+  };
+
   const [publishStatus, setPublishStatus] = useState(video?.isPublished);
-  console.log("DAas", video);
+
   const [toggleVidioPublish, { isLoading: isTogglePublishing }] =
     useToggleVideoPublishStatusMutation();
   const [deleteVideo, { isLoading: isDeleting }] = useDeleteVideoMutation();
@@ -36,17 +44,18 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
     }
   };
 
-  const handleDeleteVideo = async (videoId: number) => {
+  const handleDeleteVideo = async () => {
     try {
-      const result = await deleteVideo({
+      await deleteVideo({
         videoId: Number(video.id),
       }).unwrap();
-      toast.success(result.message);
+      toast.loading("Video deleted successfully");
     } catch (error) {
       toast.error("Error while deleting video");
       console.log(error);
     }
   };
+
   return (
     <tr key={video.id} className="group border">
       <td className="border-collapse border-b border-gray-600 px-4 py-3 group-last:border-none">
@@ -80,7 +89,7 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
         </div>
       </td>
       <td className="border-collapse border-b border-gray-600 px-4 py-3 group-last:border-none">
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-start gap-2 pl-4">
           {publishStatus ? (
             <Link href={`/watchpage/${video.id}`}>
               <Image
@@ -128,6 +137,30 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
       </td>
       <td className="border-collapse text-center border-b border-gray-600 px-4 py-3 group-last:border-none">
         {video.likesCount}
+      </td>
+      <td>
+        {isModalNewTaskOpen && (
+          <Modal
+            isOpen={isModalNewTaskOpen}
+            onClose={() => setIsModalNewTaskOpen(false)}
+            name="Edit the Video"
+          >
+            <EditVideoModal video={video} closeModal={() => setIsModalNewTaskOpen(false)} />
+          </Modal>
+        )}
+        <div className="flex justify-center gap-2">
+          <button
+            type="button"
+            className="cursor-pointer"
+            onClick={handleDeleteVideo}
+            disabled={isDeleting}
+          >
+            <Delete className="w-5 h-5 hover:text-red-500" />
+          </button>
+          <button type="button" className="cursor-pointer" onClick={openVideoModalHandler}>
+            <Edit className="w-5 h-5 hover:text-red-500" />
+          </button>
+        </div>
       </td>
     </tr>
   );

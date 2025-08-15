@@ -224,18 +224,15 @@ export const api = createApi({
     }),
 
     // video endpoints
-    getAllVideos: build.query<
-      Video[],
-      {
-        page: number;
-        limit: number;
-        query?: string;
-        sortBy?: "createdAt";
-        sortType?: "desc";
-      }
-    >({
+    getAllVideos: build.query<Video[], void>({
       query: () => "/videos",
-      providesTags: ["Video"],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Video", id } as const)),
+              { type: "Video", id: "LIST" },
+            ]
+          : [{ type: "Video", id: "LIST" }],
     }),
     getUserVideos: build.query<Video, { userId: number }>({
       query: ({ userId }) => `/videos/video/user/${userId}`,
@@ -267,8 +264,8 @@ export const api = createApi({
         credentials: "include",
         body: videoData,
       }),
-      invalidatesTags: (result, error, { videoId }) => [
-        { type: "Video", id: videoId },
+      invalidatesTags: [
+        { type: "Video", id: "LIST" }, // this matches the list query above
       ],
     }),
     toggleVideoPublishStatus: build.mutation<
@@ -293,8 +290,8 @@ export const api = createApi({
         method: "DELETE",
         credentials: "include",
       }),
-      invalidatesTags: (result, error, { videoId }) => [
-        { type: "Video", id: videoId },
+      invalidatesTags: [
+        { type: "Video", id: "LIST" }, // this matches the list query above
       ],
     }),
     videoViewCount: build.mutation<Video, { videoId: number }>({
@@ -394,6 +391,13 @@ export const api = createApi({
     //dashboard
     getChannelVideos: build.query<Video[], void>({
       query: () => "/dashboard/videos",
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Video", id } as const)),
+              { type: "Video", id: "LIST" },
+            ]
+          : [{ type: "Video", id: "LIST" }],
     }),
     getChannelStats: build.query<Stats[], { userId: number }>({
       query: ({ userId }) => `/dashboard/stats/${userId}`,

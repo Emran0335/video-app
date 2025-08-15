@@ -159,7 +159,7 @@ const SignupPage = ({ isSignIn, toggle }: SignInProps) => {
       </button>
       {!isSignIn && (
         <div className="text-center text-teal-600">
-          <span className="mr-1">If you have and account?</span>
+          <span className="mr-1">If you have an account?</span>
           <button
             className="text-sm text-teal-600 hover:underline"
             onClick={() => toggle()}

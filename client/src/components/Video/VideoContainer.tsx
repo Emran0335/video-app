@@ -10,10 +10,7 @@ const VideoContainer = () => {
   const {
     data: videos,
     isLoading,
-  } = useGetAllVideosQuery({
-    page: page,
-    limit: 20,
-  });
+  } = useGetAllVideosQuery();
 
 
   if (!videos || videos.length === 0) {

@@ -14,7 +14,7 @@ const DashboardPage = () => {
     userId: Number(user?.userId),
   });
   const { data: videos } = useGetChannelVideosQuery();
-console.log("Video Channels", videos)
+
   return (
     <div className="w-full mx-auto md:w-6xl">
       <ChannelStats stats={stats} />
