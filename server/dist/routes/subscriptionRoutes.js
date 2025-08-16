@@ -5,7 +5,7 @@ const auth_1 = require("../middlewares/auth");
 const subscriptionController_1 = require("../controllers/subscriptionController");
 const openAuth_1 = require("../middlewares/openAuth");
 const router = (0, express_1.Router)();
-router.get("/c/:channelId", auth_1.verifyJWT, subscriptionController_1.getUserChannelSubscribers);
+router.get("/channel/:channelId", auth_1.verifyJWT, subscriptionController_1.getUserChannelSubscribers);
 router.post("/c/:channelId", auth_1.verifyJWT, subscriptionController_1.toggleSubscription);
 router.get("/u/:subscriberId", openAuth_1.openAuth, subscriptionController_1.getSubscribedChannels);
 exports.default = router;

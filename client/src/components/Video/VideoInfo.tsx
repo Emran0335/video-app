@@ -1,11 +1,11 @@
 "use client";
-import { useCallback, useEffect } from "react";
 import { getTimeDistanceToNow } from "@/lib/utils";
 import {
   useGetCurrentLoggedInUserQuery,
+  useGetSubscribedVideosQuery,
+  useGetUserChannelSubscribersQuery,
   useToggleSubscriptionMutation,
   useToggleVideoLikeMutation,
-  useVideoViewCountMutation,
   Video,
 } from "@/state/api";
 import SignInModal from "../UserModal/SignInModal";
@@ -14,70 +14,115 @@ import { ThumbsDown, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Modal from "../Modal";
+import { toast } from "react-toastify";
 
-type videoInfoProps = {
+type VideoInfoProps = {
   video: Video;
 };
 
-const VideoInfo = ({ video }: videoInfoProps) => {
+const VideoInfo = ({ video }: VideoInfoProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const times = getTimeDistanceToNow(video.createdAt);
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const [toggleSubscribe] = useToggleSubscriptionMutation();
   const [toggleVideoLike] = useToggleVideoLikeMutation();
   const { currentData: user } = useGetCurrentLoggedInUserQuery();
-
+  const { data: subscription } = useGetUserChannelSubscribersQuery({
+    channelId: video.ownerId,
+  });
+  console.log("subs", subscription);
   const router = useRouter();
 
   const [isLiked, setIsLiked] = useState(video.isLiked);
   const [likesCount, setLikesCount] = useState(video.likesCount);
 
-  const toggleVideoLikeHandler = useCallback(async () => {
-    if (user?.userId === video.owner.userId) {
+  const toggleVideoLikeHandler = async () => {
+    if (!user) {
       setIsModalNewTaskOpen(true);
       return;
     } else {
       try {
-        await toggleVideoLike({ videoId: video.id }).unwrap();
-        setIsLiked((prev) => !prev);
-        setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+        setIsLoading(true);
+        const result = await toggleVideoLike({
+          videoId: video.ownerId,
+        }).unwrap();
+        if (result) {
+          setIsLiked((prev) => {
+            setLikesCount((count) => (prev ? count - 1 : count + 1));
+            return !prev;
+          });
+        }
       } catch (error) {
-        console.error("Failed to toggle like:", error);
+        toast.error("Failed to toggle like");
+      } finally {
+        setIsLoading(false);
       }
     }
-  }, [
-    video.owner.userId,
-    video.id,
-    user?.userId,
-    toggleVideoLike,
-    setIsModalNewTaskOpen,
-    isLiked,
-  ]);
+  };
+
+  const toggleSubscribeHandler = async () => {
+    if (!user) {
+      setIsModalNewTaskOpen(true);
+      return;
+    } else {
+      try {
+        setIsLoading(true);
+        await toggleSubscribe({
+          channelId: video.ownerId,
+        }).unwrap();
+      } catch (error) {
+        toast.error("Failed to subscribe the channel");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   const moveToChannelUser = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     router.push(`/channel/${video.owner.username}`);
   };
 
+  const subscribed = subscription?.subscribers.some(
+    (id) => Number(id) === user?.userId
+  );
+  const subscribers =
+    subscription?.subscribersCount === 0
+      ? "subscriber"
+      : subscription?.subscribersCount === 1
+      ? "subscriber"
+      : "subscribers";
+
   return (
-    <div className="border border-gray-300 rounded-xl px-3 py-2 mt-2">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-4 items-center justify-between">
-          <button className="mt-1 cursor-pointer" onClick={moveToChannelUser}>
+    <div className="border border-gray-300 rounded-xl px-3 mt-2">
+      <h1 className="text-[1.3rem] font-semibold">{video.title}</h1>
+      <div className="flex py-2 justify-between items-center">
+        <div className="flex gap-4 items-start justify-between">
+          <button className="cursor-pointer" onClick={moveToChannelUser}>
             <div className="w-[48px] h-[48px] rounded-full border-2 border-gray-200 overflow-hidden">
               <Image
                 src={video.owner.avatar as string}
                 alt={video.owner.fullName as string}
-                width={40}
-                height={40}
-                className="object-cover"
-                style={{ width: "auto", height: "auto" }}
+                width={44}
+                height={44}
+                className="w-11 h-11 object-cover rounded-full border-1 border-gray-200"
               />
             </div>
           </button>
-          <div className="">
-            <h1 className="text-[1.3rem] font-semibold">{video.title}</h1>
-            <p className="text-[0.9rem] text-gray-800">{`${video.views} views * ${times}`}</p>
+          <div className="flex flex-col">
+            <p>{video.owner.fullName}</p>
+            <p className="text-[0.9rem] text-gray-800">
+              {subscription?.subscribersCount} {subscribers}
+            </p>
           </div>
+          <button
+            className={`border-gray-200 border cursor-pointer text-center text-gray-600 py-1 px-2 rounded-lg hover:bg-gray-400 shadow-2xl hover:text-gray-100 ${
+              subscribed && "text-pink-700 border-2 border-pink-200"
+            }`}
+            onClick={toggleSubscribeHandler}
+          >
+            {subscribed ? "Subscribed" : "Subscribe"}
+          </button>
         </div>
         <div className="">
           {isModalNewTaskOpen && (

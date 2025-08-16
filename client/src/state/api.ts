@@ -109,8 +109,10 @@ export interface Subscription {
   id: number;
   createdAt: Date;
   updatedAt: Date;
-  subscriberId: number;
+  subscriberId?: number;
+  subscribersCount?: number;
   channelId: number;
+  subscribers: number[];
 }
 
 export interface Stats {
@@ -137,7 +139,7 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["NewUser", "User", "Video", "Comment", "Like"],
+  tagTypes: ["NewUser", "User", "Video", "Comment", "Like", "Subscription"],
   endpoints: (build) => ({
     getCurrentLoggedInUser: build.query<User, void>({
       query: () => "/users/user/current-user",
@@ -379,14 +381,27 @@ export const api = createApi({
     }),
 
     // subscriptions endpoints
-    toggleSubscription: build.mutation<Subscription, Partial<Video>>({
-      query: ({ ownerId }) => ({
-        url: `/subscriptions/c/${ownerId}`,
+    toggleSubscription: build.mutation<
+      { message: string },
+      { channelId: number }
+    >({
+      // channelId -> video.ownerId(userId) who owns the channel
+      // and currentUserId ->(req.user?.userId) who subscribe the channel
+      query: ({ channelId }) => ({
+        url: `/subscriptions/c/${channelId}`,
         method: "POST",
         credentials: "include",
-        body: {},
       }),
+      invalidatesTags: ["Subscription"],
     }),
+
+    getUserChannelSubscribers: build.query<Subscription, { channelId: number }>(
+      {
+        // channelId is the video ownerId(userId) of the video and the channel
+        query: ({ channelId }) => `/subscriptions/channel/${channelId}`,
+        providesTags: ["Subscription"],
+      }
+    ),
 
     //dashboard
     getChannelVideos: build.query<Video[], void>({
@@ -399,8 +414,9 @@ export const api = createApi({
             ]
           : [{ type: "Video", id: "LIST" }],
     }),
-    getChannelStats: build.query<Stats[], { userId: number }>({
+    getChannelStats: build.query<Stats, { userId: number }>({
       query: ({ userId }) => `/dashboard/stats/${userId}`,
+      providesTags: ["Video"],
     }),
   }),
 });
@@ -444,6 +460,7 @@ export const {
 
   // subscriptions endpoints
   useToggleSubscriptionMutation,
+  useGetUserChannelSubscribersQuery,
 
   // dashboard endpoints
   useGetChannelStatsQuery,

@@ -9,7 +9,7 @@ import { openAuth } from "../middlewares/openAuth";
 
 const router = Router();
 
-router.get("/c/:channelId", verifyJWT, getUserChannelSubscribers);
+router.get("/channel/:channelId", verifyJWT, getUserChannelSubscribers);
 router.post("/c/:channelId", verifyJWT, toggleSubscription);
 
 router.get("/u/:subscriberId", openAuth, getSubscribedChannels);

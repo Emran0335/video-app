@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import VideoPlayer from "@/components/Video/VideoPlayer";
 import {
   useGetAllVideosQuery,
+  useGetCurrentLoggedInUserQuery,
   useGetVideoByIdQuery,
   useVideoViewCountMutation,
 } from "@/state/api";
@@ -14,7 +15,7 @@ import VideoListCard from "@/components/Video/VideoListCard";
 
 const VideoPage = () => {
   const { videoId } = useParams();
-
+  const { data: currentUser } = useGetCurrentLoggedInUserQuery();
   const { currentData: video } = useGetVideoByIdQuery({
     videoId: Number(videoId),
   });
@@ -22,12 +23,10 @@ const VideoPage = () => {
   const [videoViewCount] = useVideoViewCountMutation();
 
   useEffect(() => {
-    if (video?.owner.userId !== Number(videoId)) {
-      videoViewCount({
-        videoId: Number(videoId),
-      });
+    if (video && currentUser?.userId !== video.owner.userId) {
+      videoViewCount({ videoId: video.id });
     }
-  }, [video, videoViewCount, videoId]);
+  }, [video, currentUser, videoViewCount]);
 
   if (!video) {
     return (

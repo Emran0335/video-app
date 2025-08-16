@@ -75,7 +75,6 @@ const Comments = ({ video }: CommentsProps) => {
       await deleteComment({
         commentId: commentId,
       });
-      await refetch();
       setCommentUpdated((prev) => !prev);
       setPage(1);
       setComments([]);
@@ -88,9 +87,8 @@ const Comments = ({ video }: CommentsProps) => {
     try {
       await updateComment({
         commentId: comment.id,
-        content: content ? comment.content : updateContent,
+        content: updateContent,
       }).unwrap(); // unwrap to catch errors properly
-      await refetch();
       setUpdate(0); //hide form AFTER successful update
       setContent("");
     } catch (error) {
@@ -104,13 +102,10 @@ const Comments = ({ video }: CommentsProps) => {
       } else {
         setComments((prev) => [...prev, ...videoComments]);
       }
-      async function refetchData() {
-        return await refetch();
-      }
       // Check if we still have more comments
       setHasMore(videoComments.length === 10); // If fewer than 10, no more pages
     }
-  }, [videoComments, page, refetch]);
+  }, [videoComments, page]);
 
   const fetchMoreData = () => {
     setPage((prevPage) => prevPage + 1);
@@ -121,7 +116,6 @@ const Comments = ({ video }: CommentsProps) => {
       const response = await toggleCommentLike({
         commentId: commentId,
       });
-      await refetch();
       if (isSuccess && response.data) {
         setComments((prevComment) =>
           prevComment.map((comment) =>
@@ -147,6 +141,10 @@ const Comments = ({ video }: CommentsProps) => {
   };
 
   const handleUpdate = (commentId: number) => {
+    const getUpdateContent = comments?.find(
+      (comment) => comment.id === commentId
+    );
+    setUpdateContent(getUpdateContent?.content ?? "");
     setUpdate(commentId);
     setActiveCommentId(null);
   };

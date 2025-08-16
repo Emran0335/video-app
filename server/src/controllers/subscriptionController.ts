@@ -5,14 +5,19 @@ import { prisma } from "../utils/hashedPassword";
 const toggleSubscription = asyncHandler({
   requestHandler: async (req, res) => {
     try {
+      //channelId-> video.ownerId(Who is the owner of the video and the channel)
       const { channelId } = req.params;
-
       const channelUserId = Number(channelId);
       const currentUserId = Number(req.user?.userId);
 
       if (!channelUserId) throw new ApiError(400, "Invalid channel ID");
       if (channelUserId === currentUserId)
         throw new ApiError(400, "Cannot subscribe to your own channel");
+
+      const channelExists = await prisma.user.findUnique({
+        where: { userId: channelUserId },
+      });
+      if (!channelExists) throw new ApiError(404, "Channel not found");
 
       const existingSubscription = await prisma.subscription.findFirst({
         where: {
@@ -23,24 +28,25 @@ const toggleSubscription = asyncHandler({
 
       if (existingSubscription) {
         await prisma.subscription.delete({
-          where: {
-            id: existingSubscription.id,
-          },
+          where: { id: existingSubscription.id },
+        });
+        res.status(200).json({
+          subscribed: false,
+          message: "Unsubscribed successfully",
         });
       } else {
         await prisma.subscription.create({
-          data: {
-            subscriberId: currentUserId,
-            channelId: channelUserId,
-          },
+          data: { subscriberId: currentUserId, channelId: channelUserId },
+        });
+        res.status(200).json({
+          subscribed: true,
+          message: "Subscribed successfully",
         });
       }
-
-      res.status(200).json({});
     } catch (error: any) {
       throw new ApiError(
-        401,
-        error?.message || "Error while toggle subscription!"
+        error.statusCode || 500,
+        error.message || "Error while toggling subscription!"
       );
     }
   },
@@ -49,6 +55,7 @@ const toggleSubscription = asyncHandler({
 const getUserChannelSubscribers = asyncHandler({
   requestHandler: async (req, res) => {
     try {
+      // channelId-> video.ownerId(Who is the owner of the video and the channel)
       const { channelId } = req.params;
 
       const channelUserId = Number(channelId);
@@ -68,7 +75,7 @@ const getUserChannelSubscribers = asyncHandler({
         },
       });
 
-      const subscribers = subscriptions.map((sub) => sub.subscriber);
+      const subscribers = subscriptions.map((sub) => sub.subscriber.userId);
 
       res.status(200).json({
         subscribers,

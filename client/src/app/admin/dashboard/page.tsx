@@ -13,6 +13,7 @@ const DashboardPage = () => {
   const { data: stats } = useGetChannelStatsQuery({
     userId: Number(user?.userId),
   });
+  console.log("stats", stats);
   const { data: videos } = useGetChannelVideosQuery();
 
   return (
