@@ -1,5 +1,4 @@
 "use client";
-
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsSidebarCollapsed } from "@/state";
 import {
@@ -8,6 +7,7 @@ import {
   LockIcon,
   LogOut,
   LucideIcon,
+  Settings,
   SquarePlay,
   StickyNote,
   UserCog,
@@ -101,6 +101,7 @@ const Sidebar = () => {
             />
             <SidebarLink href="/admin/dashboard" label="Admin" icon={UserCog} />
           </nav>
+          <SidebarLink href="/settings" label="Settings" icon={Settings} />
         </div>
         <button
           className="font-medium text-xl mb-16 py-3 flex justify-start items-center px-8 gap-4 w-full text-gray-800 hover:bg-gray-200 hover:text-red-500"

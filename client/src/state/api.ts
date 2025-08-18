@@ -12,7 +12,8 @@ export interface User {
   refreshToken?: string;
 
   isSubscribed?: boolean;
-  subscriberCount?: number;
+  subscribersCount: number;
+  channelsSubscribedToCount: number;
 }
 
 export interface Video {

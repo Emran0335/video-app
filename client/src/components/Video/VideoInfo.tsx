@@ -22,7 +22,6 @@ type VideoInfoProps = {
 
 const VideoInfo = ({ video }: VideoInfoProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const times = getTimeDistanceToNow(video.createdAt);
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const [toggleSubscribe] = useToggleSubscriptionMutation();
   const [toggleVideoLike] = useToggleVideoLikeMutation();
@@ -30,7 +29,6 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
   const { data: subscription } = useGetUserChannelSubscribersQuery({
     channelId: video.ownerId,
   });
-  console.log("subs", subscription);
   const router = useRouter();
 
   const [isLiked, setIsLiked] = useState(video.isLiked);
@@ -71,7 +69,7 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
           channelId: video.ownerId,
         }).unwrap();
       } catch (error) {
-        toast.error("Failed to subscribe the channel");
+        toast.error("Can't Subscribe Your Own Channel");
       } finally {
         setIsLoading(false);
       }

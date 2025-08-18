@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import StoreProvider, { useAppSelector } from "./redux";
 import AuthProvider from "./authProvider";
 import Sidebar from "@/components/Sidebar";
