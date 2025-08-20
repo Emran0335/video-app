@@ -11,20 +11,17 @@ import React from "react";
 
 const DashboardPage = () => {
   const { data: user } = useGetCurrentLoggedInUserQuery();
-  const { data: stats } = useGetChannelStatsQuery(
-    {
-      userId: Number(user?.userId),
-    },
-    { skip: !user?.userId }
-  );
+  const { data: stats } = useGetChannelStatsQuery({
+    userId: Number(user?.userId),
+  });
   const { data: videos } = useGetChannelVideosQuery();
 
   if (!user) {
     <div>{icons.loading}</div>;
   }
   return (
-    <div className="w-full mx-auto md:w-6xl">
-      <ChannelStats stats={stats} user={user}/>
+    <div className="w-full">
+      <ChannelStats stats={stats} user={user} />
       <VideoPanel videos={videos} />
     </div>
   );

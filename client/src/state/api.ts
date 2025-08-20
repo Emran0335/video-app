@@ -119,6 +119,7 @@ export interface Subscription {
 export interface Stats {
   subscribersCount: number;
   totalLikes: number;
+  totalComments: number;
   totalVideos: number;
   totalViews: number;
   totalTweets: number;

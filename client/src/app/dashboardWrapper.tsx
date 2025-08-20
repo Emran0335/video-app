@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import StoreProvider, { useAppSelector } from "./redux";
 import AuthProvider from "./authProvider";
 import Sidebar from "@/components/Sidebar";
@@ -19,7 +19,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         }`}
       >
         <Navbar />
-        {children}
+        <div className="m-4">{children}</div>
       </main>
       <ToastContainer
         position="top-right"

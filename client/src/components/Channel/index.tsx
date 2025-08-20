@@ -30,14 +30,13 @@ const Channel = ({ username, children }: ChannelProps) => {
   return (
     userProfile && (
       <section className="relative w-6xl mx-auto pb-[70px] sm:ml-[ml-70] text-gray-600">
-        <div className="relative min-h-[150px] w-full xl:ml-4">
+        <div className="relative min-h-[400px] w-full">
           <Image
             src={userProfile.coverImage as string}
             alt={userProfile.username}
-            width={100}
-            height={100}
+            fill
+            priority
             className="object-cover"
-            style={{ width: "auto", height: "auto" }}
           />
         </div>
         <div className="">
@@ -67,7 +66,7 @@ const Channel = ({ username, children }: ChannelProps) => {
                     onClick={() => router.push("/settings")}
                     className="flex items-center font-semibold py-1 px-2 transition-all duration-150 ease-in-out active:translate-x-1 active:translate-y-1 rounded-md hover:bg-pink-600"
                   >
-                    <Edit className="h-4 w-4"/>
+                    <Edit className="h-4 w-4" />
                     <p className="ml-2 font-semibold">Edit</p>
                   </button>
                 ) : (
@@ -107,27 +106,27 @@ const Channel = ({ username, children }: ChannelProps) => {
           </div>
           <ul className="no-scrollbar sticky top-0 left-4 bg-gray-200 z-[2] flex flex-row gap-x-2 overflow-auto border-b-2 border-gray-400 py-2 sm:mr-12">
             <li className="w-full">
-              <Link href={`channel/${username}/videos`}>
+              <Link href={`/channel/${username}/videos`}>
                 <button className="w-full">Videos</button>
               </Link>
             </li>
             <li className="w-full">
-              <Link href={`channel/${username}/playlist`}>
+              <Link href={`/channel/${username}/playlist`}>
                 <button className="w-full">Playlist</button>
               </Link>
             </li>
             <li className="w-full">
-              <Link href={`channel/${username}/tweets`}>
+              <Link href={`/channel/${username}/tweets`}>
                 <button className="w-full">Tweets</button>
               </Link>
             </li>
             <li className="w-full">
-              <Link href={`channel/${username}/subscribed`}>
+              <Link href={`/${username}/subscribed`}>
                 <button className="w-full">Subscribed</button>
               </Link>
             </li>
             <li className="w-full">
-              <Link href={`channel/${username}/about`}>
+              <Link href={`/channel/${username}/about`}>
                 <button className="w-full">About</button>
               </Link>
             </li>

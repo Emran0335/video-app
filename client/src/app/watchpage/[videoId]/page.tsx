@@ -42,7 +42,7 @@ const VideoPage = () => {
         <span className="flex justify-center mt-20">{icons.bigLoading}</span>
       ) : (
         <div className="flex">
-          <div className="w-full p-4">
+          <div className="w-full">
             <div>
               <VideoPlayer video={video} />
             </div>

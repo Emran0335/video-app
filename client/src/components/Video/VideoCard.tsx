@@ -21,7 +21,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
   };
 
   return (
-    <Link href={`/watchpage/${video.id}`}>
+    <Link href={`/watchpage/${video.id}`} className="w-[400px] h-[350px]">
       <div className="flex flex-col bg-gray-200 text-white hover:bg-gray-300">
         <div className="relative w-full h-[220px] overflow-hidden">
           <Image

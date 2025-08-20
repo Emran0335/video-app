@@ -1,6 +1,6 @@
 import React from "react";
 const ChannelPage = () => {
-  return <div className="w-full h-full">This is the Channel Page</div>;
+  return <div className="w-full h-full"></div>;
 };
 
 export default ChannelPage;

@@ -1,5 +1,5 @@
 import React from "react";
-import Channel from "@/components/UserChannel/Channel";
+import Channel from "@/components/Channel";
 
 export default async function ChannelLayout({
   children,

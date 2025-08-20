@@ -99,7 +99,7 @@ const Sidebar = () => {
               label="My Channel"
               icon={SquarePlay}
             />
-            <SidebarLink href="/admin/dashboard" label="Admin" icon={UserCog} />
+            <SidebarLink href="/user/dashboard" label="Dashboard" icon={UserCog} />
           </nav>
           <SidebarLink href="/settings" label="Settings" icon={Settings} />
         </div>

@@ -7,11 +7,7 @@ import { icons } from "@/assets/Icons";
 
 const VideoContainer = () => {
   const [page, setPage] = useState(1);
-  const {
-    data: videos,
-    isLoading,
-  } = useGetAllVideosQuery();
-
+  const { data: videos, isLoading } = useGetAllVideosQuery();
 
   if (!videos || videos.length === 0) {
     return (
@@ -32,7 +28,7 @@ const VideoContainer = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-4 py-4 px-8 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(400px,_1fr))] gap-4">
         {videos?.map((video) => (
           <VideoCard key={video?.id} video={video} />
         ))}
