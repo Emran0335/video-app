@@ -1,10 +1,14 @@
 import React from 'react'
 
-
-const TweetPage = () => {
+const Tweets = () => {
   return (
-    <div>TweetPage</div>
+    <div className="flex items-center justify-between">
+      <div>All the tweets of the channel</div>
+      <div>
+        <button>Add Tweet</button>
+      </div>
+    </div>
   )
 }
 
-export default TweetPage
+export default Tweets

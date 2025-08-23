@@ -21,19 +21,20 @@ const getChannelStats = asyncHandler({
           _count: {
             select: {
               likes: true,
+              comments: true,
             },
           },
         },
       });
 
-      if (!videos) {
-        throw new ApiError(500, "No video found");
-      }
-
       const totalVideos = videos.length;
       const totalViews = videos.reduce((acc, video) => acc + video.views, 0);
       const totalLikes = videos.reduce(
         (acc, video) => acc + video._count.likes,
+        0
+      );
+      const totalComments = videos.reduce(
+        (acc, video) => acc + video._count.comments,
         0
       );
 
@@ -43,26 +44,19 @@ const getChannelStats = asyncHandler({
         },
       });
 
-      if (!subscribersCount) {
-        throw new ApiError(500, "No subscriber found");
-      }
-
       const totalTweets = await prisma.tweet.count({
         where: {
           ownerId: Number(userId),
         },
       });
 
-      if (!totalTweets) {
-        throw new ApiError(500, "No tweet found");
-      }
-
       const stats = {
-        subscribersCount,
-        totalLikes,
-        totalVideos,
-        totalViews,
-        totalTweets,
+        subscribersCount: subscribersCount || 0,
+        totalLikes: totalLikes || 0,
+        totalComments: totalComments || 0,
+        totalVideos: totalVideos || 0,
+        totalViews: totalViews || 0,
+        totalTweets: totalTweets || 0,
       };
 
       res.status(200).json(stats);

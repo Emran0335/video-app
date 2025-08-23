@@ -53,9 +53,9 @@ const VideoPage = () => {
               <Comments video={video} />
             </div>
           </div>
-          <div className="w-[30%] mt-4 mr-4">
+          <div className="w-[30%] ml-4">
             {videos ? (
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))]">
                 {videos
                   .filter((enlistedVideo) => enlistedVideo.id !== video.id)
                   .map((videoList) => (

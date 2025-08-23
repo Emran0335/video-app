@@ -17,7 +17,6 @@ type ChannelStatsProps = {
 };
 
 const ChannelStats = ({ stats, user }: ChannelStatsProps) => {
-  console.log("Stats", stats);
   return (
     <>
       <div className="flex flex-wrap justify-between">

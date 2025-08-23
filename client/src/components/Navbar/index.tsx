@@ -29,7 +29,7 @@ const Navbar = () => {
           </button>
         ) : null}
       </div>
-      <div className="flex items-center gap-12 justify-between w-[70%]">
+      <div className="flex items-center gap-10 justify-between w-[80%]">
         <div className="relative mr-16 flex w-[600px] h-min border-2 border-gray-300 rounded-full overflow-hidden items-center">
           <Search className="absolute left-2 top-1/2 mr-2 h-5 w-5 -translate-y-1/2 transform cursor-pointer text-gray-900" />
           <input
@@ -41,17 +41,17 @@ const Navbar = () => {
             Search
           </button>
         </div>
-        <div className="flex items-center gap-16">
+        <div className="flex items-center gap-12">
           <Link
             href="/addVideo"
-            className="flex items-center gap-1 w-24 py-5 rounded-2xl h-6 cursor-pointer bg-gray-100 hover:bg-gray-200 hover:text-gray-700"
+            className="flex items-center gap-1 w-24 px-2 py-2 rounded-2xl cursor-pointer bg-gray-100 hover:bg-gray-200 hover:text-gray-700"
           >
-            <Plus className="w-6 h-6 ml-1 font-bold text-lg" />
-            <span className="font-medium mr-1">Create</span>
+            <Plus className="w-6 h-6 font-bold text-lg" />
+            <span className="font-medium">Create</span>
           </Link>
           {user && (
-            <div className="flex w-[200px] items-center justify-between">
-              <h1 className="font-medium hidden md:block">{user.fullName}</h1>
+            <div className="flex gap-1 w-full items-center">
+              <h1 className="font-medium hidden flex-1 md:block">{user.fullName}</h1>
               <div className="w-[40px] h-[40px] rounded-full border-2 border-gray-200 overflow-hidden">
                 <Link href="/admin/dashboard">
                   <Image

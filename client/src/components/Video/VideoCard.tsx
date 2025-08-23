@@ -1,7 +1,6 @@
 import { Video } from "@/state/api";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { formatDuration, getTimeDistanceToNow } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -21,42 +20,46 @@ const VideoCard = ({ video }: VideoCardProps) => {
   };
 
   return (
-    <Link href={`/watchpage/${video.id}`} className="w-[400px] h-[350px]">
-      <div className="flex flex-col bg-gray-200 text-white hover:bg-gray-300">
-        <div className="relative w-full h-[220px] overflow-hidden">
+    <Link href={`/watchpage/${video.id}`} className="block group">
+      <div className="flex flex-col hover:cursor-pointer">
+        {/* Thumbnail */}
+        <div className="relative w-full aspect-video overflow-hidden bg-gray-200">
           <Image
-            className="shadow-2xl w-full shadow-gray-200 object-cover"
+            className="object-cover cursor-pointer"
             src={video.thumbnail}
             alt={video.title}
-            width={450}
-            height={300}
-            style={{ width: "auto", height: "auto" }}
+            fill
+            sizes="(max-width: 768px) 100vw, (min-width: 1280px) 50vw, 33vw"
           />
-          <p className="absolute bottom-6 bg-gray-200 rounded-2xl w-12 h-6 right-3 text-center text-gray-600">
+          <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded-md">
             {duration}
-          </p>
+          </span>
         </div>
-        <div className="flex items-center gap-4 px-2 py-2">
-          <button className="mt-1 cursor-pointer" onClick={moveToChannelUser}>
-            <div className="w-[48px] h-[48px] rounded-full border-2 border-gray-200 overflow-hidden">
+
+        {/* Video info */}
+        <div className="flex items-start gap-3 mt-3">
+          {/* Avatar */}
+          <button className="shrink-0" onClick={moveToChannelUser}>
+            <div className="w-10 h-10 rounded-full overflow-hidden">
               <Image
                 src={video.owner.avatar as string}
                 alt={video.owner.fullName as string}
                 width={40}
                 height={40}
-                className="object-cover"
-                style={{ width: "auto", height: "auto" }}
+                className="object-cover cursor-pointer"
               />
             </div>
           </button>
-          <div className="ml-2">
-            <h2 className="text-lg font-semibold text-gray-800">
+
+          {/* Text info */}
+          <div className="flex flex-col">
+            <h2 className="text-sm font-semibold text-gray-600 line-clamp-2">
               {video.title}
             </h2>
-            {video.owner && (
-              <h2 className="text-gray-600">{video.owner.fullName}</h2>
-            )}
-            <p className="text-gray-400 pb-2 text-[0.95rem]">{`${video.views} views * ${timeDistance}`}</p>
+            <p className="text-xs text-gray-600">{video.owner.fullName}</p>
+            <p className="text-xs text-gray-500">
+              {video.views} views • {timeDistance}
+            </p>
           </div>
         </div>
       </div>

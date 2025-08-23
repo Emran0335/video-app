@@ -28,6 +28,7 @@ const uploadOnCloudinary = (localFilePath) => __awaiter(void 0, void 0, void 0, 
         const response = yield cloudinary_1.v2.uploader.upload(localFilePath, {
             resource_type: "auto",
         });
+        console.log("cloudinary response", response.url);
         fs_1.default.unlinkSync(localFilePath);
         return response;
     }
