@@ -100,14 +100,15 @@ model Like {
   videoId   Int? // relation with Video
   commentId Int? // relation with comment
   tweetId   Int? // relation with Tweet
-  likedById Int? // relation with User
+  likedById Int // relation with User
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   video     Video?   @relation(fields: [videoId], references: [id], onDelete: Cascade)
   comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   tweet     Tweet?   @relation(fields: [tweetId], references: [id], onDelete: Cascade)
-  likedBy   User?    @relation(fields: [likedById], references: [userId], onDelete: Cascade)
+  likedBy   User     @relation(fields: [likedById], references: [userId], onDelete: Cascade)
 
+  @@unique([videoId, likedById])
   @@map("likes")
 }
 

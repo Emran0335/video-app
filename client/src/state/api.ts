@@ -141,7 +141,15 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["NewUser", "User", "Video", "Comment", "Like", "Subscription"],
+  tagTypes: [
+    "NewUser",
+    "User",
+    "Video",
+    "Comment",
+    "Like",
+    "Subscription",
+    "Stats",
+  ],
   endpoints: (build) => ({
     getCurrentLoggedInUser: build.query<User, void>({
       query: () => "/users/user/current-user",
@@ -233,7 +241,7 @@ export const api = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Video", id } as const)),
+              ...result.map(({ id }) => ({ type: "Video", id }) as const),
               { type: "Video", id: "LIST" },
             ]
           : [{ type: "Video", id: "LIST" }],
@@ -247,7 +255,7 @@ export const api = createApi({
         url: `/videos/video/${videoId}`,
         credentials: "include",
       }),
-      providesTags: ["Video"],
+      providesTags: [{ type: "Video", id: "VIDEOLIKE" }],
     }),
     publishAVideo: build.mutation<Video[], FormData>({
       query: (videoData: FormData) => ({
@@ -296,6 +304,7 @@ export const api = createApi({
       }),
       invalidatesTags: [
         { type: "Video", id: "LIST" }, // this matches the list query above
+        { type: "Stats", id: "CHANNEL" },
       ],
     }),
     videoViewCount: build.mutation<Video, { videoId: number }>({
@@ -324,6 +333,7 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, { videoId }) => [
         { type: "Like", id: videoId },
+        { type: "Video", id: "VIDEOLIKE" },
       ],
     }),
     toggleCommentLike: build.mutation<Like[], { commentId: number }>({
@@ -411,14 +421,17 @@ export const api = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Video", id } as const)),
+              ...result.map(({ id }) => ({ type: "Video", id }) as const),
               { type: "Video", id: "LIST" },
             ]
           : [{ type: "Video", id: "LIST" }],
     }),
     getChannelStats: build.query<Stats, { userId: number }>({
       query: ({ userId }) => `/dashboard/stats/${userId}`,
-      providesTags: ["Video"],
+      providesTags: [
+        { type: "Stats", id: "CHANNEL" },
+        { type: "Video", id: "VIDEOLIKE" },
+      ],
     }),
   }),
 });

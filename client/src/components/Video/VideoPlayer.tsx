@@ -120,11 +120,11 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
           onChange={handleSeek}
           className="flex-1 accent-red-500"
         />
-        <span className="">
+        <span className="text-gray-400">
           {formatTime(videoElRef.current?.currentTime || 0)} /{" "}
           {formatTime(duration)}
         </span>
-        <button onClick={toggleMute}>
+        <button onClick={toggleMute} className="text-gray-400">
           {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
         </button>
         <input
@@ -136,10 +136,10 @@ const VideoPlayer = ({ video }: VideoPlayerProps) => {
           onChange={handleVolumeChange}
           className="w-20 accent-red-500"
         />
-        <a href={video.videoFile} download className="cursor-pointer">
+        <a href={video.videoFile} download className="cursor-pointer text-gray-400">
           <Download size={20} />
         </a>
-        <Maximize size={20} className="cursor-pointer" />
+        <Maximize size={20} className="cursor-pointer text-gray-400" />
       </div>
     </div>
   );

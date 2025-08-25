@@ -19,6 +19,7 @@ const VideoPage = () => {
   const { currentData: video } = useGetVideoByIdQuery({
     videoId: Number(videoId),
   });
+  console.log("currentVideo", video)
   const { currentData: videos, isLoading } = useGetAllVideosQuery();
   const [videoViewCount] = useVideoViewCountMutation();
 
@@ -55,7 +56,7 @@ const VideoPage = () => {
           </div>
           <div className="w-[30%] ml-4">
             {videos ? (
-              <div className="grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))]">
+              <div className="grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] gap-2">
                 {videos
                   .filter((enlistedVideo) => enlistedVideo.id !== video.id)
                   .map((videoList) => (

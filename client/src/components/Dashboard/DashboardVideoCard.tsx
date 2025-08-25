@@ -46,10 +46,10 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
 
   const handleDeleteVideo = async () => {
     try {
-      await deleteVideo({
+      const result = await deleteVideo({
         videoId: Number(video.id),
       }).unwrap();
-      toast.loading("Video deleted successfully");
+      toast.success("Video deleted successfully");
     } catch (error) {
       toast.error("Error while deleting video");
       console.log(error);

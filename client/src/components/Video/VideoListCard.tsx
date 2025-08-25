@@ -50,12 +50,12 @@ const VideoListCard = ({ showVideoDescription, video }: VideoListCardProps) => {
             />
           </button>
           <div className="flex flex-col">
-            <h2 className="text-sm font-semibold text-gray-800">
+            <h2 className="text-[12px] font-semibold text-gray-600">
               {video.title}
             </h2>
             {showVideoDescription && (
               <div className="text-gray-600">
-                <p className="text-sm">{video?.description}</p>
+                <p className="text-[12px]">{video?.description}</p>
               </div>
             )}
             {video.owner && (

@@ -1,8 +1,6 @@
 "use client";
-import { getTimeDistanceToNow } from "@/lib/utils";
 import {
   useGetCurrentLoggedInUserQuery,
-  useGetSubscribedVideosQuery,
   useGetUserChannelSubscribersQuery,
   useToggleSubscriptionMutation,
   useToggleVideoLikeMutation,
@@ -31,8 +29,7 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
   });
   const router = useRouter();
 
-  const [isLiked, setIsLiked] = useState(video.isLiked);
-  const [likesCount, setLikesCount] = useState(video.likesCount);
+  const [userVideo, setUserVideo] = useState(video);
 
   const toggleVideoLikeHandler = async () => {
     if (!user) {
@@ -45,9 +42,14 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
           videoId: video.ownerId,
         }).unwrap();
         if (result) {
-          setIsLiked((prev) => {
-            setLikesCount((count) => (prev ? count - 1 : count + 1));
-            return !prev;
+          setUserVideo((prev) => {
+            return {
+              ...prev,
+              isLiked: !prev.isLiked,
+              likesCount: prev.isLiked
+                ? prev.likesCount - 1
+                : prev.likesCount + 1,
+            };
           });
         }
       } catch (error) {
@@ -57,7 +59,6 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
       }
     }
   };
-
   const toggleSubscribeHandler = async () => {
     if (!user) {
       setIsModalNewTaskOpen(true);
@@ -88,12 +89,12 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
     subscription?.subscribersCount === 0
       ? "subscriber"
       : subscription?.subscribersCount === 1
-      ? "subscriber"
-      : "subscribers";
+        ? "subscriber"
+        : "subscribers";
 
   return (
     <div className="border border-gray-300 rounded-xl px-3 mt-2">
-      <h1 className="text-[1.3rem] font-semibold">{video.title}</h1>
+      <h1 className="text-[16px] text-gray-600 font-semibold">{video.title}</h1>
       <div className="flex py-2 justify-between items-center">
         <div className="flex gap-4 items-start justify-between">
           <button className="cursor-pointer" onClick={moveToChannelUser}>
@@ -108,7 +109,9 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
             </div>
           </button>
           <div className="flex flex-col">
-            <p>{video.owner.fullName}</p>
+            <p className="text-[14px] font-bold text-gray-600">
+              {video.owner.fullName}
+            </p>
             <p className="text-[0.9rem] text-gray-800">
               {subscription?.subscribersCount} {subscribers}
             </p>
@@ -140,8 +143,12 @@ const VideoInfo = ({ video }: VideoInfoProps) => {
             onClick={toggleVideoLikeHandler}
             className={`px-3 border rounded-lg border-gray-400 flex items-center hover:bg-gray-400 hover:text-white`}
           >
-            <p className="mr-1">{likesCount}</p>
-            {isLiked ? <ThumbsUp className="w-5 h-5" /> : <ThumbsDown />}
+            <p className="mr-1">{userVideo.likesCount}</p>
+            {userVideo.isLiked ? (
+              <ThumbsUp className="w-5 h-5" />
+            ) : (
+              <ThumbsDown />
+            )}
           </button>
         </div>
       </div>

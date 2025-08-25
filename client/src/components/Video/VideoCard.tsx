@@ -22,7 +22,6 @@ const VideoCard = ({ video }: VideoCardProps) => {
   return (
     <Link href={`/watchpage/${video.id}`} className="block group">
       <div className="flex flex-col hover:cursor-pointer">
-        {/* Thumbnail */}
         <div className="relative w-full aspect-video overflow-hidden bg-gray-200">
           <Image
             className="object-cover cursor-pointer"
@@ -35,10 +34,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
             {duration}
           </span>
         </div>
-
-        {/* Video info */}
         <div className="flex items-start gap-3 mt-3">
-          {/* Avatar */}
           <button className="shrink-0" onClick={moveToChannelUser}>
             <div className="w-10 h-10 rounded-full overflow-hidden">
               <Image
@@ -50,10 +46,8 @@ const VideoCard = ({ video }: VideoCardProps) => {
               />
             </div>
           </button>
-
-          {/* Text info */}
           <div className="flex flex-col">
-            <h2 className="text-sm font-semibold text-gray-600 line-clamp-2">
+            <h2 className="text-sm font-medium text-gray-600 line-clamp-2">
               {video.title}
             </h2>
             <p className="text-xs text-gray-600">{video.owner.fullName}</p>
